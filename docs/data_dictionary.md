@@ -1,137 +1,69 @@
 # Dictionnaire des données — GROW-Africa
 
-Ce document présente les variables des quatre fichiers Excel utilisés dans le projet **African Crop Yield Intelligence**. Les définitions sont établies à partir des noms des colonnes et de la structure des fichiers.
+**Projet :** African Crop Yield Intelligence  
+**Étape :** Audit des données — Dictionnaire des données
 
-## 1. GROW-Africa_LSMS_cropcut.xlsx
+## 1. Présentation
 
-**Description :** données de récoltes expérimentales (*crop cuts*) issues d'enquêtes agricoles LSMS.
+Ce document décrit les colonnes des quatre fichiers de la base GROW-Africa. Pour chaque colonne, il présente sa signification, son type, son rôle potentiel dans le projet et les éventuels points à vérifier.
 
-| Colonne | Définition |
+Les définitions s'appuient sur l'article scientifique associé à la base et sur sa documentation. Lorsque la signification d'une colonne n'est pas confirmée, cela est précisé. Les statistiques descriptives seront ajoutées après l'analyse des fichiers avec pandas.
+
+### Statut des définitions
+
+| Statut | Signification |
 |---|---|
-| `Country` | Pays auquel appartient l'observation. |
-| `Source` | Identifiant de la source ou de l'enquête d'origine. |
-| `Year` | Année associée à l'observation agricole. |
-| `GPS_lat` | Latitude géographique de l'observation. |
-| `GPS_lon` | Longitude géographique de l'observation. |
-| `L0_GID` | Identifiant géographique du niveau administratif 0, généralement le pays. |
-| `L1_GID` | Identifiant géographique du niveau administratif 1. |
-| `L2_GID` | Identifiant géographique du niveau administratif 2. |
-| `L3_GID` | Identifiant géographique du niveau administratif 3. |
-| `holder_id` | Identifiant du détenteur ou exploitant agricole. |
-| `household_id` | Identifiant du ménage enquêté. |
-| `parcel_id` | Identifiant de la parcelle agricole. |
-| `field_id` | Identifiant du champ ou de la zone cultivée. |
-| `Crop` | Nom harmonisé de la culture agricole. |
-| `crop_origname` | Nom original de la culture dans la source d'origine. |
-| `cropCutDay` | Jour associé à la mesure de récolte expérimentale. |
-| `cropCutMonth` | Mois associé à la mesure de récolte expérimentale. |
-| `freshWeightKg` | Poids frais de la récolte, en kilogrammes d'après le nom de la variable. |
-| `dryWeightKg` | Poids sec de la récolte, en kilogrammes d'après le nom de la variable. |
-| `Yield_ton_ha_` | Rendement agricole, apparemment exprimé en tonnes par hectare. |
+| Documenté | Information confirmée par une source. |
+| Déduit | Interprétation basée sur le nom de la colonne ou le contexte. |
+| À vérifier | Information qui nécessite une analyse complémentaire. |
 
-## 2. GROW-Africa_LSMS_survey.xlsx
+### Rôle des colonnes
 
-**Description :** données de production et de rendement provenant d'enquêtes agricoles auprès des ménages.
-
-| Colonne | Définition |
+| Rôle | Signification |
 |---|---|
-| `Country` | Pays auquel appartient l'observation. |
-| `Source1` | Première composante de l'identification de la source. |
-| `Source2` | Deuxième composante de l'identification de la source, souvent liée à une enquête ou à une année. |
-| `Source` | Identifiant combiné de la source de données. |
-| `GPS_lat` | Latitude géographique de l'observation. |
-| `GPS_lon` | Longitude géographique de l'observation. |
-| `L0_GID` | Identifiant géographique du niveau administratif 0. |
-| `L1_GID` | Identifiant géographique du niveau administratif 1. |
-| `L2_GID` | Identifiant géographique du niveau administratif 2. |
-| `L3_GID` | Identifiant géographique du niveau administratif 3. |
-| `Crop` | Nom harmonisé de la culture agricole. |
-| `prcCrop` | Pourcentage ou proportion associé à la culture sur la parcelle. |
-| `prcLeft` | Variable liée à un pourcentage ou à une proportion. |
-| `Prod_kg_` | Production agricole, apparemment exprimée en kilogrammes. |
-| `ProdEst2_kg_` | Estimation alternative de la production en kilogrammes. |
-| `ReportedArea_ha_` | Surface déclarée, apparemment exprimée en hectares. |
-| `GPSArea_ha_` | Surface estimée à partir de données GPS, apparemment en hectares. |
-| `Yield_ton_ha_` | Rendement agricole, apparemment en tonnes par hectare. |
-| `YieldUsingGPS_ton_ha_` | Rendement calculé en utilisant la surface GPS, d'après le nom de la variable. |
-| `YieldEst2_ton_ha_` | Estimation alternative du rendement. |
-| `YieldEst2UsingGPS_ton_ha_` | Estimation alternative du rendement utilisant la surface GPS, d'après le nom. |
-| `AgYearStart` | Année de début de la période agricole. |
-| `AgYearEnd` | Année de fin de la période agricole. |
-| `hhid` | Identifiant du ménage enquêté (*household ID*). |
-| `parcel_id` | Identifiant de la parcelle agricole. |
-| `plotid` | Identifiant du champ ou de la portion de terre agricole. |
-| `SpatialPrecision_km_` | Indicateur de précision spatiale, apparemment exprimé en kilomètres. |
+| Cible | Variable que le modèle devra prédire. |
+| Clé de regroupement | Identifiant utilisé pour organiser les données et éviter certaines fuites entre les ensembles d'entraînement et de test. |
+| Candidate | Variable pouvant servir de variable explicative. |
+| Exclue | Variable qui ne sera pas utilisée comme entrée du modèle, notamment en cas de fuite de données ou de métadonnée. |
+| À investiguer | Rôle à déterminer après analyse. |
 
-## 3. GROW-Africa_Point.xlsx
+Les rôles proposés reposent sur l'hypothèse que la cible est le rendement agricole en tonnes par hectare (t/ha). Ils seront confirmés au cours de l'audit.
 
-**Description :** observations agricoles associées à des sites ou à des localisations ponctuelles.
+## 2. Présentation générale de la base
 
-| Colonne | Définition |
+| Information | Description |
 |---|---|
-| `Source` | Source, étude ou référence à l'origine de l'observation. |
-| `Crop` | Culture agricole observée. |
-| `HarvestYear` | Année de récolte. |
-| `Latitude` | Latitude géographique du site. |
-| `Longitude` | Longitude géographique du site. |
-| `SpatialPrecision_km_` | Indicateur de précision spatiale, apparemment exprimé en kilomètres. |
-| `L0_GID` | Identifiant géographique du niveau administratif 0. |
-| `L1_GID` | Identifiant géographique du niveau administratif 1. |
-| `L2_GID` | Identifiant géographique du niveau administratif 2. |
-| `L3_GID` | Identifiant géographique du niveau administratif 3. |
-| `Country` | Pays associé à l'observation. |
-| `SiteName` | Nom ou description du site d'observation. |
-| `Area_ha_` | Surface associée à l'observation, apparemment en hectares. |
-| `Yield_ton_ha_` | Rendement agricole, apparemment en tonnes par hectare. |
-| `PlantDate` | Date de plantation ou de semis. |
-| `HarvestDate` | Date de récolte. |
-| `Notes` | Notes ou informations complémentaires relatives à l'observation. |
+| Nombre d'observations | 535 844 selon l'article scientifique |
+| Nombre de cultures | 25 |
+| Fichiers | `GROW-Africa_Regional`, `GROW-Africa_LSMS_survey`, `GROW-Africa_LSMS_cropcut` et `GROW-Africa_Point` |
+| Unité du rendement | Tonnes par hectare (t/ha) |
+| Références géographiques | Identifiants administratifs GADM, niveaux 0 à 3 |
+| Principales opérations de nettoyage | Harmonisation des noms de cultures et des références géographiques, suppression des doublons |
+| Traitement des rendements aberrants | Filtrage appliqué aux données ponctuelles selon les critères décrits dans l'article |
+| Version utilisée | À confirmer |
+| Licence des données | À vérifier sur Zenodo |
 
-## 4. GROW-Africa_Regional.xlsx
+Les effectifs de chaque fichier devront être comparés aux chiffres de l'article afin de vérifier la version téléchargée et la cohérence des données.
 
-**Description :** statistiques agricoles regroupées par pays ou par zone administrative.
+## 3. GROW-Africa_LSMS_cropcut
 
-### Identification et localisation
+Ce fichier contient des mesures de récolte (*crop cuts*) associées aux enquêtes LSMS. Selon l'article, les observations concernent l'Éthiopie.
 
-| Colonne | Définition |
-|---|---|
-| `GDAM_ID` | Identifiant géographique. |
-| `country` | Nom du pays. |
-| `country_code` | Code associé au pays. |
-| `admin_1` | Nom de la division administrative de niveau 1. |
-| `admin_2` | Nom de la division administrative de niveau 2. |
-| `level` | Niveau géographique auquel correspond l'observation. |
-| `L0_GID` | Identifiant géographique du niveau administratif 0. |
-| `L1_GID` | Identifiant géographique du niveau administratif 1. |
-| `L2_GID` | Identifiant géographique du niveau administratif 2. |
-| `L3_GID` | Identifiant géographique du niveau administratif 3. |
-
-### Culture et calendrier agricole
-
-| Colonne | Définition |
-|---|---|
-| `crop` | Nom harmonisé de la culture agricole. |
-| `season_name` | Nom ou catégorie de la saison agricole. |
-| `planting_year` | Année de plantation ou de semis. |
-| `planting_month` | Mois de plantation ou de semis. |
-| `harvest_year` | Année de récolte. |
-| `harvest_month` | Mois de récolte. |
-| `crop_production_system` | Catégorie du système de production agricole. |
-
-### Surface, production et rendement
-
-| Colonne | Définition |
-|---|---|
-| `areaHa` | Surface agricole, apparemment exprimée en hectares. |
-| `productionTon` | Production agricole, apparemment exprimée en tonnes. |
-| `yieldTonHa` | Rendement agricole, apparemment exprimé en tonnes par hectare. |
-
-### Contrôle qualité et provenance
-
-| Colonne | Définition |
-|---|---|
-| `QC_flag_A` | Indicateur de contrôle qualité associé à la surface. |
-| `QC_flag_P` | Indicateur de contrôle qualité associé à la production. |
-| `QC_flag_Y` | Indicateur de contrôle qualité associé au rendement. |
-| `Source` | Source des statistiques agricoles. |
-| `originalname` | Nom original de la culture tel qu'il apparaît dans la source avant harmonisation. |
+| Colonne | Définition | Type | Rôle | Remarque |
+|---|---|---|---|---|
+| `Country` | Pays de l'observation | Texte | Regroupement | Pays à confirmer dans les données |
+| `Source` | Source de l'enquête | Texte | Métadonnée | Peut renseigner sur la méthode de collecte |
+| `Year` | Année de l'observation | Entier | Candidate | Vérifier la définition exacte |
+| `GPS_lat` | Latitude | Décimal | À investiguer | Coordonnée géographique |
+| `GPS_lon` | Longitude | Décimal | À investiguer | Coordonnée géographique |
+| `L0_GID` | Identifiant administratif de niveau 0 | Texte | Regroupement | Niveau national |
+| `L1_GID` | Identifiant administratif de niveau 1 | Texte | Regroupement | Division administrative |
+| `L2_GID` | Identifiant administratif de niveau 2 | Texte | Regroupement | Division administrative |
+| `L3_GID` | Identifiant administratif de niveau 3 | Texte | Regroupement | Peut contenir des valeurs manquantes |
+| `holder_id` | Identifiant de l'exploitant | Texte | Regroupement | Définition à confirmer |
+| `household_id` | Identifiant du ménage | Texte | Regroupement | Vérifier les répétitions entre années |
+| `parcel_id` | Identifiant de la parcelle | Texte | Regroupement | |
+| `field_id` | Identifiant du champ | Texte | Regroupement | |
+| `Crop` | Nom harmonisé de la culture | Texte | Candidate | |
+| `crop_origname` | Nom original de la culture | Texte | Métadonnée | |
+| `cropCutDay` | Jour de la mesure de récolte | Entier | Excl
