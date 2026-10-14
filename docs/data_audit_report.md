@@ -33,3 +33,13 @@ L'examen préliminaire du fichier `GROW-Africa_LSMS_cropcut` a permis d'identifi
 | Plusieurs colonnes contiennent des identifiants ou des codes. | Risque d'utilisation de variables non pertinentes, de redondance ou de fuite indirecte. Risque également de perdre des informations utiles au regroupement des observations. | Examiner la signification et l'utilisation de chaque colonne. Distinguer les variables à exclure du modèle des identifiants à conserver pour l'audit et les partitions de données. | À investiguer |
 
 Ces constats sont préliminaires. Ils devront être confirmés par des contrôles reproductibles sur le fichier complet. Aucune suppression définitive de colonne ni transformation irréversible ne sera effectuée à ce stade.
+
+### Dataset 2 — LSMS Survey : constats préliminaires
+
+Le fichier `GROW-Africa_LSMS_survey.csv` contient des informations associées aux enquêtes agricoles, notamment sur les cultures, la production, les superficies, les rendements, la localisation et les campagnes agricoles.
+
+Plusieurs variantes de production, de superficie et de rendement sont présentes. Leur définition et leurs relations doivent être établies avant de sélectionner la variable cible et les variables explicatives.
+
+Une attention particulière sera portée aux risques de fuite de données, notamment lorsque les variables candidates peuvent servir à calculer directement ou indirectement le rendement à prédire.
+
+Les identifiants, les champs de provenance et les informations géographiques seront conservés pendant l'audit. Aucune suppression ou transformation définitive ne sera décidée avant la vérification de leur rôle, de la qualité des données et de leur utilité pour le projet.
