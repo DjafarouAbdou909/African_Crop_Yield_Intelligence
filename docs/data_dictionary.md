@@ -248,4 +248,3 @@ Les quatre fichiers recensés ne contiennent pas directement de variables climat
 | La source peut servir de proxy pour l'année, le pays ou la méthode de collecte. | Tester son apport par ablation et vérifier qu'elle ne crée pas de fuite. |
 | Les indicateurs `QC_flag` peuvent dépendre de la cible. | Ne pas les utiliser avant d'avoir documenté leur définition. |
 
----
