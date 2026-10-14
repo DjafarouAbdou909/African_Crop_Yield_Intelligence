@@ -43,3 +43,27 @@ Plusieurs variantes de production, de superficie et de rendement sont présentes
 Une attention particulière sera portée aux risques de fuite de données, notamment lorsque les variables candidates peuvent servir à calculer directement ou indirectement le rendement à prédire.
 
 Les identifiants, les champs de provenance et les informations géographiques seront conservés pendant l'audit. Aucune suppression ou transformation définitive ne sera décidée avant la vérification de leur rôle, de la qualité des données et de leur utilité pour le projet.
+
+### Dataset 3 — GROW-Africa Point : constats préliminaires
+
+**Inventaire**
+
+Le fichier `GROW-Africa_Point.xlsx` contient 131 812 lignes et 17 colonnes. Il rassemble des observations associées à 24 cultures, 21 pays et 6 sources distinctes.
+
+**Structure des données**
+
+Les variables couvrent les cultures, les années de récolte, les rendements, les superficies, les dates agricoles, les informations géographiques et la provenance des observations.
+
+**Constats de qualité**
+
+- Absence de coordonnées géographiques pour environ 41 % des observations.
+- Absence de `L3_GID` pour environ 36,7 % des observations.
+- Absence de `Area_ha_` pour environ 28,4 % des observations.
+- Absence de `HarvestYear` pour 20 933 observations, associée dans le fichier à la source `CEEPA_time_avg`.
+- Présence de 1 282 lignes identiques sur l'ensemble des colonnes.
+- Présence de rendements élevés, avec un maximum observé de 150 tonnes par hectare.
+- Présence de superficies égales à zéro et de dates dont le format ou la plausibilité doit être vérifié.
+
+**Risques méthodologiques**
+
+La comparabilité des observations provenant de différentes sources doit être examinée. Les valeurs extrêmes, les doublons et les données manquantes nécessitent une investigation avant toute transformation. Si `Yield_ton_ha_` est retenue comme variable cible, elle devra être exclue des variables d'entrée.
