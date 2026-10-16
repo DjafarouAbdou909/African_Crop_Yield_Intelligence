@@ -1,157 +1,33 @@
-## Audit des données — Data Understanding
-
-### Objectif
-
-Cette étape vise à comprendre la structure, la signification, la provenance et la qualité des données du projet **African Crop Yield Intelligence**, conformément à la phase *Data Understanding* de la méthodologie CRISP-DM.
-
-L’objectif est d’évaluer si les données sont suffisamment documentées, cohérentes et adaptées à l’objectif de prédiction du rendement agricole avant d’engager leur préparation pour la modélisation.
-
-### Datasets étudiés
-
-L’étude porte sur les quatre fichiers suivants issus de GROW-Africa :
-
-- `GROW-Africa_LSMS_cropcut.csv`
-- `GROW-Africa_LSMS_survey.csv`
-- `GROW-Africa_Point.xlsx`
-- `GROW-Africa_Regional.xlsx`
-
-Source principale : [GROW-Africa — Zenodo](https://zenodo.org/records/14961637).
-
-Article scientifique de référence : [GROW-Africa — Scientific Data](https://www.nature.com/articles/s41597-025-05257-5).
-
-### Méthodologie commune d'audit
-
-Chaque dataset est étudié selon une structure commune afin de faciliter la comparaison des résultats et de garantir la cohérence de la démarche.
-
-#### 1. Inventaire et provenance
-
-- Identifier le fichier, son format, son nombre de lignes et de colonnes.
-- Examiner les sources de données, les pays, les cultures et les périodes représentés, selon les informations disponibles.
-- Vérifier la version du fichier analysé et conserver les références nécessaires à sa traçabilité.
-
-#### 2. Compréhension des colonnes
-
-- Documenter la signification de chaque colonne.
-- Identifier son type, son unité, ses modalités et son rôle potentiel.
-- Distinguer les variables explicatives candidates, la variable cible, les identifiants, les métadonnées et les variables dont le rôle reste incertain.
-- Consigner les définitions inconnues ou insuffisamment documentées dans le dictionnaire des données.
-
-Les définitions ne sont pas considérées comme confirmées lorsqu'elles reposent uniquement sur le nom d'une colonne ou sur une interprétation plausible.
-
-#### 3. Qualité et intégrité des données
-
-Les contrôles portent notamment sur :
-
-- les valeurs manquantes ;
-- les doublons exacts et les doublons potentiels ;
-- les types de données et les formats incohérents ;
-- les valeurs négatives, nulles ou extrêmes ;
-- la cohérence des dates, des unités et des identifiants ;
-- la cohérence des relations entre les variables.
-
-Les anomalies détectées sont documentées avant toute décision de correction ou de suppression.
-
-#### 4. Analyse descriptive et structurelle
-
-Lorsque les colonnes le permettent, l'étude examine la répartition des observations par source, pays, culture, année et niveau géographique.
-
-Cette analyse permet de comprendre la composition du dataset, d'identifier les déséquilibres éventuels et de repérer les différences de couverture entre les sources.
-
-#### 5. Relations entre variables et risques méthodologiques
-
-Une attention particulière est accordée aux relations entre les variables de production agricole, notamment :
-
-- la superficie cultivée ;
-- la production récoltée ;
-- le rendement agricole ;
-- les variables pouvant être calculées à partir de la cible ;
-- les identifiants et indicateurs susceptibles d'introduire une fuite de données ou une information indirecte sur la cible.
-
-Le rôle de chaque variable doit être évalué en fonction de sa définition et du scénario de prédiction envisagé. Une variable liée mathématiquement au rendement n'est pas automatiquement retenue comme variable explicative.
-
-#### 6. Traitements préalablement appliqués
-
-La documentation de GROW-Africa mentionne notamment l'harmonisation des noms de cultures et des références géographiques, la suppression de doublons et le filtrage de certains rendements aberrants dans les données ponctuelles.
-
-Ces traitements sont considérés comme des informations documentées par les auteurs. Leur effet sur les fichiers étudiés n'est considéré comme confirmé que lorsque les éléments disponibles permettent de le vérifier.
-
-Le nettoyage préalable effectué par les auteurs ne dispense donc pas d'un audit complémentaire.
-
-#### 7. Actions de suivi
-
-Pour chaque dataset, les vérifications restantes sont consignées et priorisées.
-
-Elles peuvent concerner :
-
-- la recherche de documentation complémentaire ;
-- la confirmation de la signification des colonnes ;
-- l'investigation des valeurs suspectes ;
-- l'analyse des valeurs manquantes selon leur source et leur contexte ;
-- la vérification des relations entre les variables ;
-- la définition de règles de validation reproductibles.
-
-Les contrôles automatisés et les transformations définitives sont définis après clarification des règles applicables.
-
-#### 8. Conclusion et décision provisoire
-
-Chaque audit se termine par une synthèse des constats, des risques, des incertitudes et des actions nécessaires.
-
-La décision provisoire est exprimée selon trois niveaux :
-
-- **Go :** les éléments nécessaires à la poursuite de l'étape considérée sont suffisamment établis.
-- **Go restreint :** l'étude peut continuer, mais certaines incertitudes ou certains risques doivent être résolus avant les étapes suivantes.
-- **No-go :** un problème bloquant empêche de poursuivre l'étape concernée dans les conditions actuelles.
-
-Ces décisions sont justifiées par les résultats de l'audit et ne signifient pas qu'un dataset est automatiquement prêt pour la modélisation.
-
-### Principes de rigueur
-
-L'audit repose sur les principes suivants :
-
-- **Traçabilité :** conserver la provenance des données et la justification des décisions.
-- **Reproductibilité :** privilégier des contrôles dont les résultats peuvent être vérifiés et reproduits.
-- **Prudence :** ne pas supprimer, corriger ou imputer une valeur sans justification.
-- **Documentation explicite :** distinguer les faits documentés, les constats observés, les hypothèses et les informations inconnues.
-- **Prévention de la fuite de données :** ne pas sélectionner de variables explicatives avant d'avoir compris leur relation avec la cible et leur disponibilité au moment de la prédiction.
-- **Séparation des responsabilités :** utiliser l'audit pour évaluer les données, le dictionnaire pour documenter les colonnes et l'étape de préparation pour appliquer les transformations justifiées.
-
-### Synthèse globale
-
-Les quatre datasets sont examinés selon le même cadre méthodologique, mais leurs résultats ne sont pas nécessairement comparables directement. Ils peuvent différer par leur source, leur niveau géographique, leur période, leurs méthodes de collecte et leurs variables disponibles.
-
-Une synthèse globale sera établie après l'examen des quatre fichiers. Elle servira à évaluer leur compatibilité, les éventuelles redondances, les différences de couverture et les conditions nécessaires avant une éventuelle fusion.
-
-**Décision générale :** aucune préparation définitive destinée à la modélisation ne sera engagée tant que les risques importants, les définitions essentielles et les conditions de validation n'auront pas été suffisamment clarifiés.
-
-
 # Rapport d’audit des données — GROW-Africa
 
 **Projet :** African Crop Yield Intelligence  
 **Méthodologie :** CRISP-DM — Data Understanding  
 **Statut :** Audit préliminaire des quatre datasets
 
-## 1. Objectif de l’audit
+## 1. Objectif et sources
 
 L’objectif est de comprendre la structure, la provenance, la qualité et les limites des données GROW-Africa avant toute préparation destinée à la modélisation.
 
-L’audit cherche notamment à :
-
+L’audit vise à :
 - comprendre la signification des colonnes et leur rôle potentiel ;
 - examiner les valeurs manquantes, les doublons et les incohérences ;
-- vérifier les relations entre les variables ;
 - identifier les risques de fuite de données (*data leakage*) ;
-- distinguer les traitements documentés par les auteurs des constats observés dans les fichiers ;
+- distinguer les traitements documentés par les auteurs des constats observés ;
 - déterminer les vérifications nécessaires avant la préparation des données.
 
 **Sources de référence :**
-
 - Dataset : https://zenodo.org/records/14961637
 - Article scientifique : https://www.nature.com/articles/s41597-025-05257-5
 
-## 2. Traitements préalablement appliqués aux données
+Les quatre fichiers étudiés sont :
+- `GROW-Africa_LSMS_cropcut.csv`
+- `GROW-Africa_LSMS_survey.csv`
+- `GROW-Africa_Point.xlsx`
+- `GROW-Africa_Regional.xlsx`
+
+## 2. Traitements préalablement appliqués par les auteurs
 
 D’après la documentation de GROW-Africa, plusieurs traitements ont été appliqués avant la diffusion des données :
-
 - harmonisation des noms de cultures ;
 - suppression des doublons identifiés ;
 - harmonisation des références géographiques et attribution d’identifiants administratifs ;
@@ -164,21 +40,21 @@ Ces informations décrivent les traitements rapportés par les auteurs. Leur eff
 
 **Fichier :** `GROW-Africa_LSMS_cropcut.csv`
 
-### 3.1. Présentation
+### Présentation
 
 Ce fichier contient des observations de mesures directes de récolte (*crop cuts*) associées aux enquêtes LSMS. La documentation indique une couverture concernant l’Éthiopie et 12 cultures.
 
-L’effectif de référence mentionné dans notre dictionnaire est de 11 345 observations. Cet effectif doit être confirmé sur la version exacte du fichier utilisée.
+L’effectif de référence mentionné dans le dictionnaire est de 11 345 observations. Cet effectif doit être confirmé sur la version exacte du fichier utilisée.
 
-### 3.2. Constats préliminaires
+### Constats préliminaires
 
-| Observation | Risque ou question | Action prévue | Statut |
-|---|---|---|---|
-| `Yield_ton_ha_` semble dépendre de `dryWeightKg`. | Fuite de données potentielle si le poids sec intervient dans le calcul de la cible. | Vérifier la relation mathématique, son coefficient et ses exceptions. | À confirmer |
-| L’année 2012 apparaît sous la forme `2,012`. | Incohérence de représentation et risque de conversion incorrecte. | Vérifier la valeur d’origine et documenter la normalisation sur une copie de travail. | À vérifier |
-| Plusieurs colonnes contiennent des identifiants ou des codes. | Risque de redondance, de fuite indirecte ou de perte d’informations utiles au regroupement. | Examiner leur rôle avant toute exclusion du modèle. | À investiguer |
+| Observation | Risque ou question | Action prévue |
+|---|---|---|
+| `Yield_ton_ha_` semble dépendre de `dryWeightKg`. | Fuite de données potentielle si le poids sec intervient dans le calcul de la cible. | Vérifier la relation mathématique, son coefficient et ses exceptions. |
+| L’année 2012 apparaît sous la forme `2,012`. | Incohérence de représentation et risque de conversion incorrecte. | Vérifier la valeur d’origine et documenter la normalisation sur une copie de travail. |
+| Plusieurs colonnes contiennent des identifiants ou des codes. | Risque de redondance, de fuite indirecte ou de perte d’informations utiles au regroupement. | Examiner leur rôle avant toute exclusion du modèle. |
 
-### 3.3. Risque de fuite de données
+### Risque de fuite de données
 
 Une relation approximative a été relevée entre le rendement et le poids sec :
 
@@ -190,7 +66,7 @@ Si `dryWeightKg` intervient directement dans le calcul de la cible, son utilisat
 
 Les identifiants doivent également être étudiés pour déterminer s’ils sont utiles à la traçabilité ou à la constitution des groupes d’entraînement et de test.
 
-### 3.4. Actions de suivi
+### Actions de suivi
 
 1. Confirmer les dimensions réelles du fichier et sa version.
 2. Vérifier la relation entre le poids sec et le rendement.
@@ -204,13 +80,13 @@ Les identifiants doivent également être étudiés pour déterminer s’ils son
 
 **Fichier :** `GROW-Africa_LSMS_survey.csv`
 
-### 4.1. Présentation
+### Présentation
 
 Les notes de travail indiquent un effectif de référence d’environ 195 152 observations, 27 colonnes, 13 pays et 25 cultures. Ces dimensions doivent être comparées à celles de la version effectivement utilisée.
 
 Le fichier contient notamment des informations sur les cultures, la production, les superficies, les rendements, les coordonnées géographiques, les campagnes agricoles et les identifiants d’enquête.
 
-### 4.2. Variables importantes à examiner
+### Variables importantes à examiner
 
 | Groupe | Colonnes concernées | Vérification nécessaire |
 |---|---|---|
@@ -225,7 +101,7 @@ Le fichier contient notamment des informations sur les cultures, la production, 
 | Précision spatiale | `SpatialPrecision_km_` | Interprétation et prise en compte de l’incertitude géographique |
 | Autres variables | `prcCrop`, `prcLeft` | Définition et modalités à confirmer |
 
-### 4.3. Risque de fuite de données
+### Risque de fuite de données
 
 Le fichier contient plusieurs variantes de production, de superficie et de rendement. Il est nécessaire d’établir comment chacune est calculée et dans quelles conditions elle est disponible.
 
@@ -235,7 +111,7 @@ Les quatre colonnes de rendement ne doivent pas être considérées comme interc
 
 Les identifiants de ménage, de parcelle et de terrain doivent rester disponibles pour l’audit et les contrôles de partition, même s’ils sont finalement exclus des variables explicatives.
 
-### 4.4. Actions de suivi
+### Actions de suivi
 
 1. Confirmer les dimensions et les statistiques descriptives du fichier.
 2. Documenter les variantes de production, de superficie et de rendement.
@@ -250,7 +126,7 @@ Les identifiants de ménage, de parcelle et de terrain doivent rester disponible
 
 **Fichier :** `GROW-Africa_Point.xlsx`
 
-### 5.1. Inventaire du fichier examiné
+### Inventaire du fichier examiné
 
 | Contrôle | Résultat observé |
 |---|---:|
@@ -263,7 +139,7 @@ Les identifiants de ménage, de parcelle et de terrain doivent rester disponible
 
 L’effectif observé de 131 812 lignes diffère de l’effectif de référence de 143 157 observations indiqué dans le dictionnaire. La version du fichier, la feuille examinée et les éventuels filtres doivent être vérifiés avant d’expliquer cet écart.
 
-### 5.2. Répartition des observations par source
+### Répartition des observations par source
 
 | Source | Nombre de lignes |
 |---|---:|
@@ -278,7 +154,7 @@ La source `OneAcre_survey` représente la majorité des observations du fichier 
 
 Les périodes couvertes, les méthodes de collecte et les règles de calcul doivent être documentées séparément avant de comparer les observations entre sources.
 
-### 5.3. Constats de qualité
+### Constats de qualité
 
 | Observation | Résultat observé | Action prévue |
 |---|---:|---|
@@ -293,13 +169,13 @@ Les périodes couvertes, les méthodes de collecte et les règles de calcul doiv
 
 Les contrôles préliminaires n’ont pas relevé de rendements manquants ni de rendements nuls ou négatifs dans le fichier examiné. Cette observation devra être conservée avec la référence à la version et à la méthode de contrôle utilisées.
 
-### 5.4. Risques méthodologiques
+### Risques méthodologiques
 
 Les différences de provenance et de méthodes de collecte peuvent limiter la comparabilité des observations. Les valeurs manquantes en localisation peuvent aussi affecter les analyses géographiques.
 
 Les colonnes `Area_ha_` et `Yield_ton_ha_` doivent être étudiées pour comprendre leurs relations avec les autres mesures. Une superficie ne doit pas être automatiquement utilisée comme prédicteur sans vérifier sa disponibilité et son rôle dans le calcul de la cible.
 
-### 5.5. Actions de suivi
+### Actions de suivi
 
 1. Confirmer la version du fichier et expliquer l’écart avec l’effectif de référence.
 2. Documenter les six sources, leurs périodes et leurs méthodes.
@@ -314,7 +190,7 @@ Les colonnes `Area_ha_` et `Yield_ton_ha_` doivent être étudiées pour compren
 
 **Fichier :** `GROW-Africa_Regional.xlsx`
 
-### 6.1. Inventaire du fichier examiné
+### Inventaire du fichier examiné
 
 | Contrôle | Résultat observé |
 |---|---:|
@@ -328,7 +204,7 @@ Les colonnes `Area_ha_` et `Yield_ton_ha_` doivent être étudiées pour compren
 
 L’effectif observé correspond à l’effectif de travail attendu pour le fichier Regional. Cela ne suffit toutefois pas à confirmer la version exacte du fichier.
 
-### 6.2. Répartition par source
+### Répartition par source
 
 | Source | Nombre de lignes | Part approximative |
 |---|---:|---:|
@@ -344,7 +220,7 @@ L’effectif observé correspond à l’effectif de travail attendu pour le fich
 
 Les périodes, méthodes de collecte, niveaux géographiques et méthodes de calcul doivent être vérifiés séparément.
 
-### 6.3. Valeurs manquantes
+### Valeurs manquantes
 
 | Colonne | Valeurs manquantes | Part du fichier |
 |---|---:|---:|
@@ -368,7 +244,7 @@ L’absence fréquente de `L3_GID` peut être liée au niveau d’agrégation de
 
 Les valeurs manquantes ne doivent pas être supprimées ou imputées avant d’avoir compris leur répartition et leur origine.
 
-### 6.4. Contrôles numériques préliminaires
+### Contrôles numériques préliminaires
 
 | Variable | Valeurs négatives | Valeurs égales à zéro | Minimum observé | Maximum observé |
 |---|---:|---:|---:|---:|
@@ -382,7 +258,7 @@ Les valeurs `-99` et `-999` peuvent correspondre à des codes spéciaux ou à de
 
 Aucune suppression automatique n’est décidée à ce stade.
 
-### 6.5. Répartition par niveau géographique
+### Répartition par niveau géographique
 
 | Valeur de `level` | Nombre de lignes |
 |---:|---:|
@@ -394,7 +270,7 @@ Aucune suppression automatique n’est décidée à ce stade.
 
 Cette répartition est compatible avec la présence de données nationales et infranationales. La signification officielle de chaque valeur de `level` doit néanmoins être confirmée.
 
-### 6.6. Colonnes à documenter
+### Colonnes à documenter
 
 | Colonnes | Vérification nécessaire |
 |---|---|
@@ -407,7 +283,7 @@ Cette répartition est compatible avec la présence de données nationales et in
 | `areaHa`, `productionTon`, `yieldTonHa` | Relation entre surface, production et rendement |
 | `planting_year`, `planting_month`, `harvest_year`, `harvest_month` | Construction des dates et gestion des campagnes agricoles |
 
-### 6.7. Risque de fuite de données
+### Risque de fuite de données
 
 Si le rendement est calculé à partir de la production et de la superficie, utiliser `areaHa` et `productionTon` pour prédire `yieldTonHa` peut entraîner une fuite de données lorsque ces informations ne sont pas disponibles au moment de la prédiction.
 
@@ -415,7 +291,7 @@ Ces variables doivent être conservées pour l’audit et les contrôles de coh�
 
 Les indicateurs `QC_flag_*` ne doivent pas non plus être utilisés comme prédicteurs avant que leur signification et leur mode de calcul soient documentés.
 
-### 6.8. Actions de suivi
+### Actions de suivi
 
 1. Documenter les six sources et leurs périodes.
 2. Examiner les valeurs manquantes par source, niveau géographique, pays et culture.
@@ -440,7 +316,6 @@ Les indicateurs `QC_flag_*` ne doivent pas non plus être utilisés comme prédi
 ### Risques communs
 
 Les quatre fichiers nécessitent une attention particulière sur les points suivants :
-
 - la comparabilité entre sources et méthodes de collecte ;
 - la signification des colonnes insuffisamment documentées ;
 - la disponibilité des variables au moment de la prédiction ;
@@ -456,6 +331,6 @@ L’examen des quatre datasets permet d’identifier les principales questions d
 
 Les résultats disponibles restent préliminaires et leur niveau de détail varie selon le fichier. Les statistiques doivent être confirmées sur les versions exactes utilisées et les contrôles doivent devenir reproductibles avant toute décision définitive.
 
-La prochaine étape consiste à harmoniser les quatre audits, compléter les contrôles manquants, mettre à jour le dictionnaire des données et établir une synthèse de compatibilité entre les fichiers.
+La prochaine étape consiste à compléter les vérifications nécessaires, mettre à jour le dictionnaire des données et établir une synthèse de compatibilité entre les fichiers. Toute éventuelle fusion devra être justifiée par la compatibilité des unités, des périodes, des niveaux géographiques, des méthodes de collecte et des définitions des variables.
 
-**Décision générale : poursuivre le Data Understanding. Aucune préparation définitive pour la modélisation ni fusion des quatre datasets ne doit être engagée avant la clarification des risques importants, des définitions essentielles et des conditions de validation.**
+**Décision générale : poursuivre le Data Understanding.** Aucune préparation définitive pour la modélisation ni fusion des quatre datasets ne doit être engagée avant la clarification des risques importants, des définitions essentielles et des conditions de validation.
