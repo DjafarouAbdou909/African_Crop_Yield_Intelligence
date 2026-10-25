@@ -1,41 +1,41 @@
 # African Crop Yield Intelligence
 
-## Vue d'ensemble et objectifs
+## Overview and Objectives
 
-**African Crop Yield Intelligence** est un projet de Machine Learning consacré à la prédiction des rendements agricoles en Afrique.
+**African Crop Yield Intelligence** is a Machine Learning project focused on predicting agricultural crop yields across Africa.
 
-Le projet vise à étudier la capacité des modèles d'apprentissage automatique à généraliser à des régions et à des périodes qui n'ont pas été observées pendant l'entraînement. Il s'intéresse également à l'explicabilité des prédictions et à la quantification de leur incertitude.
+The project aims to investigate the ability of machine learning models to generalize to regions and time periods not observed during training. It also focuses on model explainability and the quantification of prediction uncertainty.
 
-## Données et pipeline
+## Data and Pipeline
 
-### Source des données
+### Data Source
 
-Le projet utilise la base de données **GROW-Africa** (*Groundtruthing Remote-sensing for Optimizing Yield in Africa*).
+The project uses the **GROW-Africa** dataset (*Groundtruthing Remote-sensing for Optimizing Yield in Africa*).
 
-- **Dépôt des données :** [GROW-Africa sur Zenodo](https://zenodo.org/records/14961637)
-- **Documentation scientifique :** [Article publié dans Scientific Data](https://www.nature.com/articles/s41597-025-05257-5)
-- **Documentation locale :** disponible dans le dossier `docs/`.
+- **Dataset repository:** [GROW-Africa on Zenodo](https://zenodo.org/records/14961637)
+- **Scientific documentation:** [Article published in Scientific Data](https://www.nature.com/articles/s41597-025-05257-5)
+- **Local documentation:** Available in the `docs/` directory.
 
-La base de données comprend quatre fichiers principaux :
+The dataset consists of four main files:
 
-- `GROW-Africa_LSMS_cropcut.csv` : données de mesures directes des récoltes.
-- `GROW-Africa_LSMS_survey.csv` : données d'enquêtes auprès des agriculteurs.
-- `GROW-Africa_Point.csv` : données de rendement ponctuelles provenant d'autres sources.
-- `GROW-Africa_Regional.csv` : données de rendement à l'échelle régionale.
+- `GROW-Africa_LSMS_cropcut.csv`: Direct crop yield measurements.
+- `GROW-Africa_LSMS_survey.csv`: Farmer survey data.
+- `GROW-Africa_Point.csv`: Point-level crop yield data from additional sources.
+- `GROW-Africa_Regional.csv`: Regional-level crop yield data.
 
-### Pipeline de traitement
+### Data Processing Pipeline
 
-## Performances du modèle
+## Model Performance
 
-## Installation et configuration
+## Installation and Setup
 
-## Utilisation
+## Usage
 
-## Structure du projet
+## Project Structure
 
-## Références
+## References
 
-Geyman, E. C., Ferris, A., Sahajpal, R., Anderson, W., Lee, D. et Hausmann, N. (2025). *An Africa-wide agricultural production database to support policy and satellite-based measurement systems*. Scientific Data.
+Geyman, E. C., Ferris, A., Sahajpal, R., Anderson, W., Lee, D., & Hausmann, N. (2025). *An Africa-wide agricultural production database to support policy and satellite-based measurement systems*. Scientific Data.
 
-- [Article scientifique](https://www.nature.com/articles/s41597-025-05257-5)
-- [Base de données GROW-Africa](https://doi.org/10.5281/zenodo.14961637)
+- [Scientific Article](https://www.nature.com/articles/s41597-025-05257-5)
+- [GROW-Africa Dataset](https://doi.org/10.5281/zenodo.14961637)
