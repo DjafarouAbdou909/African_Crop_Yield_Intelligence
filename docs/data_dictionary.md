@@ -196,45 +196,45 @@ Les rendements aberrants ont été conservés dans ces données. L'article rappo
 
 | Colonne | Définition | Type / unité | Statut | Rôle | Remarque |
 |---|---|---|---|---|---|
-| `GDAM_ID` | Identifiant géographique | Texte | Déduit | Clé de regroupement | Nom exact à vérifier ; faute possible dans l'intitulé. |
-| `country` | Pays | Texte | Déduit | Clé de regroupement | |
-| `country_code` | Code du pays | Texte | Déduit | Clé de regroupement | |
-| `admin_1` | Division administrative de niveau 1 | Texte | Déduit | Clé de regroupement | |
-| `admin_2` | Division administrative de niveau 2 | Texte | Déduit | Clé de regroupement | |
-| `level` | Niveau d'agrégation de la ligne | Texte | Déduit | À investiguer | À examiner pour distinguer les lignes nationales et régionales. |
-| `L0_GID` | Identifiant GADM de niveau 0 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau national. |
-| `L1_GID` | Identifiant GADM de niveau 1 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau administratif 1. |
-| `L2_GID` | Identifiant GADM de niveau 2 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau administratif 2. |
-| `L3_GID` | Identifiant GADM de niveau 3 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau administratif 3. |
+| `GDAM_ID` | Identifiant GADM le plus fin de la ligne | Texte | Vérifié | Clé de regroupement | Égal à l'identifiant GID le plus fin pour 99,91 % des lignes renseignées. Absent sur 491 lignes `HarvestStat`, les mêmes que `level`. |
+| `country` | Pays | Texte | Vérifié | Exclue (métadonnée) | 49 libellés pour 47 pays. `DRC` et `Tanzania, United Republic of` doublonnent d'autres libellés. Utiliser `L0_GID` comme clé pays. |
+| `country_code` | Code du pays | Texte | Vérifié | Exclue (métadonnée) | Mélange de codes ISO à deux et à trois lettres, soit 82 codes pour 49 libellés. |
+| `admin_1` | Division administrative de niveau 1 | Texte | Vérifié | Exclue (métadonnée) | Texte `none` utilisé comme valeur manquante sur les 11 884 lignes nationales. |
+| `admin_2` | Division administrative de niveau 2 | Texte | Vérifié | Exclue (métadonnée) | Texte `none` utilisé comme valeur manquante sur 75 389 lignes. Deux unités distinctes peuvent être rattachées au même `L2_GID`. |
+| `level` | Niveau administratif de la ligne | Entier stocké en décimal | Vérifié | À investiguer | Valeurs 0 à 3, parfaitement cohérentes avec le dernier GID renseigné. Déductible des GID pour 485 des 491 valeurs manquantes. |
+| `L0_GID` | Identifiant GADM de niveau 0 | Texte | Vérifié | Clé de regroupement | Le Ghana possède 25 codes distincts, de `L0GHA086` à `L0GHA110`, dont les suffixes entrent en collision avec d'autres pays. Les autres fichiers n'utilisent que `L0GHA086`. |
+| `L1_GID` | Identifiant GADM de niveau 1 | Texte | Vérifié | Clé de regroupement | 318 valeurs du Lesotho débutent par un caractère invisible BOM. 13 identifiants ghanéens sont rattachés à plusieurs `L0_GID`. |
+| `L2_GID` | Identifiant GADM de niveau 2 | Texte | Vérifié | Clé de regroupement | 36 valeurs manquantes déguisées sous la forme `[]` à Madagascar. 22 identifiants ghanéens sont rattachés à plusieurs `L1_GID`. |
+| `L3_GID` | Identifiant GADM de niveau 3 | Texte | Vérifié | Clé de regroupement | Absent pour 98,47 % des lignes, de manière structurelle puisque seules les lignes de `level` 3 en disposent. |
 
 ### Culture et calendrier
 
 | Colonne | Définition | Type / unité | Statut | Rôle | Remarque |
 |---|---|---|---|---|---|
 | `crop` | Nom harmonisé de la culture | Texte | Documenté, article p. 4 | Candidate | |
-| `season_name` | Nom de la saison agricole | Inconnu | Inconnu | À investiguer | Définition à confirmer. |
+| `season_name` | Nom de la saison agricole | Texte | Déduit | À investiguer | 34 modalités hétérogènes telles que `Main`, `Annual`, `Total`, `Meher` ou `Gu`. À harmoniser entre saison principale, saison secondaire et total annuel. |
 | `planting_year` | Année de plantation | Entier | Déduit | À investiguer | Définition de l'année à harmoniser entre les fichiers. |
 | `planting_month` | Mois de plantation | Entier | Déduit | À investiguer | |
 | `harvest_year` | Année de récolte | Entier | Documenté dans l'article | Candidate | |
 | `harvest_month` | Mois de récolte | Entier | Déduit | Exclue (fuite) | À exclure si la prédiction est réalisée avant la récolte. |
-| `crop_production_system` | Système de production agricole | Inconnu | Inconnu | À investiguer | Vérifier si la variable distingue, par exemple, les systèmes irrigués et pluviaux. |
+| `crop_production_system` | Système de production agricole | Texte | Déduit | À investiguer | 16 modalités, dont `none` sur 57 325 lignes et une modalité agrégeant tous les systèmes qui coexiste avec un système détaillé dans 118 cellules. |
 
 ### Surface, production et rendement
 
 | Colonne | Définition | Type / unité | Statut | Rôle | Remarque |
 |---|---|---|---|---|---|
-| `areaHa` | Surface agricole | Décimal, ha | Déduit | Exclue (fuite) | Entre dans le calcul du rendement. |
-| `productionTon` | Production agricole | Décimal, t | Déduit | Exclue (fuite) | Entre dans le calcul du rendement. |
-| `yieldTonHa` | Rendement agricole | Décimal, t/ha | Unité documentée | Cible candidate | Vérifier le calcul à partir de la production et de la surface. |
+| `areaHa` | Surface récoltée | Décimal, ha | Vérifié | Exclue (fuite) | Permutée avec `productionTon` sur 33 740 lignes. Code -999 sur 112 lignes `AgroMAPS`. |
+| `productionTon` | Production agricole | Décimal, t | Vérifié | Exclue (fuite) | Permutée avec `areaHa` sur 33 740 lignes. Code -999 sur 117 lignes `AgroMAPS` et code -99 sur 21 lignes `RCeA`. |
+| `yieldTonHa` | Rendement agricole | Décimal, t/ha | Vérifié | Cible recommandée | Égal à la production divisée par la surface pour 126 696 lignes et au rapport inverse pour 33 740 lignes où les colonnes sont permutées. Le rendement reste plausible dans les deux cas. 30 valeurs négatives issues du code -999 et 36 valeurs -99. |
 
 ### Contrôle qualité et provenance
 
 | Colonne | Définition | Type / unité | Statut | Rôle | Remarque |
 |---|---|---|---|---|---|
-| `QC_flag_A` | Indicateur de contrôle qualité associé à la surface | Code | Inconnu | À investiguer | Peut dépendre de l'examen de la valeur ; risque de fuite à vérifier. |
-| `QC_flag_P` | Indicateur de contrôle qualité associé à la production | Code | Inconnu | À investiguer | Signification et mode de calcul à documenter. |
-| `QC_flag_Y` | Indicateur de contrôle qualité associé au rendement | Code | Inconnu | À investiguer | Peut être lié à la valeur cible ; ne pas utiliser sans documentation. |
-| `Source` | Source des statistiques | Texte | Documenté, article, tableau 1 | À investiguer | Peut renseigner sur la méthode de collecte. |
+| `QC_flag_A` | Indicateur de contrôle qualité associé à la surface | Code | Déduit | Exclue (métadonnée) | Codes `A`, `E`, `I`, `M` et `X` compatibles avec la nomenclature FAOSTAT. Absent pour toute la source `AgroMAPS`. |
+| `QC_flag_P` | Indicateur de contrôle qualité associé à la production | Code | Déduit | Exclue (métadonnée) | Même nomenclature que `QC_flag_A`. |
+| `QC_flag_Y` | Indicateur de contrôle qualité associé au rendement | Code | Vérifié | Exclue (métadonnée) | Informatif uniquement pour `FAOSTAT`. Toujours `A` pour les autres sources. 706 valeurs manquantes déguisées sous la forme `[]`. |
+| `Source` | Source des statistiques | Texte | Vérifié | À investiguer | Six sources aux périodes distinctes. `FAO_subnational` et `HarvestStat` divergent de 17,5 % en médiane sur les cellules communes. |
 | `originalname` | Nom original de la culture avant harmonisation | Texte | Déduit | Exclue (métadonnée) | Conservé pour la traçabilité. |
 
 ---
