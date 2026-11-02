@@ -20,8 +20,8 @@ L’audit vise à :
 - Article scientifique : https://www.nature.com/articles/s41597-025-05257-5
 
 Les quatre fichiers étudiés sont :
-- `GROW-Africa_LSMS_cropcut.csv`
-- `GROW-Africa_LSMS_survey.csv`
+- `GROW-Africa_LSMS_cropcut.xlsx`
+- `GROW-Africa_LSMS_survey.xlsx`
 - `GROW-Africa_Point.xlsx`
 - `GROW-Africa_Regional.xlsx`
 
@@ -38,7 +38,7 @@ Ces informations décrivent les traitements rapportés par les auteurs. Leur eff
 
 ## 3. Dataset 1 — LSMS Crop Cut
 
-**Fichier :** `GROW-Africa_LSMS_cropcut.csv`
+**Fichier :** `GROW-Africa_LSMS_cropcut.xlsx`
 
 ### Présentation
 
@@ -78,7 +78,7 @@ Les identifiants doivent également être étudiés pour déterminer s’ils son
 
 ## 4. Dataset 2 — LSMS Survey
 
-**Fichier :** `GROW-Africa_LSMS_survey.csv`
+**Fichier :** `GROW-Africa_LSMS_survey.xlsx`
 
 ### Présentation
 
