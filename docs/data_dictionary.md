@@ -5,7 +5,7 @@
 
 **Étape :** Audit des données — Dictionnaire des données
 
-**Statut :** Version de travail
+**Statut :** Version mise à jour après la phase de Data Understanding
 
 ---
 
@@ -23,6 +23,7 @@ Les définitions s'appuient sur l'article scientifique associé à la base et su
 | Déduit | Interprétation basée sur le nom de la colonne ou le contexte. |
 | Inconnu | Signification non confirmée. La colonne ne sera pas utilisée avant clarification. |
 | À vérifier | Information qui nécessite une vérification complémentaire. |
+| Vérifié | Information confirmée par un calcul reproductible sur les fichiers, documenté dans `notebooks/02_data_understanding.ipynb`. |
 
 ### Rôle des colonnes
 
