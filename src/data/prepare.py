@@ -10,11 +10,18 @@ from .regional import jeu_modelisation_regional, preparer_regional
 from .survey import jeu_modelisation_survey, preparer_survey
 
 
-def preparer_tout():
-    """Prépare les trois fichiers et retourne les tableaux produits par nom."""
-    regional, bornes = preparer_regional(charger_brut("regional"))
-    survey = preparer_survey(charger_brut("survey"), bornes)
-    cropcut = preparer_cropcut(charger_brut("cropcut"), bornes)
+def preparer_tout(bruts=None):
+    """Prépare les trois fichiers et retourne les tableaux produits par nom.
+
+    Les tableaux bruts peuvent être fournis, sinon ils sont chargés. Ils ne sont
+    jamais modifiés, chaque fonction travaillant sur une copie.
+    """
+    if bruts is None:
+        bruts = {nom: charger_brut(nom) for nom in ["regional", "survey", "cropcut"]}
+
+    regional, bornes = preparer_regional(bruts["regional"])
+    survey = preparer_survey(bruts["survey"], bornes)
+    cropcut = preparer_cropcut(bruts["cropcut"], bornes)
 
     return {
         "bornes_plausibilite": bornes,
