@@ -114,7 +114,7 @@ Ces données peuvent servir de référence pour examiner la qualité des rendeme
 | `crop_origname` | Nom original de la culture | Texte | Déduit | Exclue (métadonnée) | Conservé pour la traçabilité. |
 | `cropCutDay` | Jour de la mesure de récolte | Entier | Déduit | Exclue (fuite) | Aucun jour 31 sur 11 341 dates. Calendrier éthiopien probable, à confirmer dans la documentation ESS. |
 | `cropCutMonth` | Mois de la mesure de récolte | Entier | Déduit | Exclue (fuite) | Absent pour toute la vague `ETH2013b`. 132 dates impossibles en lecture grégorienne, dont 116 au 30 février. Valeurs 0 et 20 à 83 invalides. |
-| `freshWeightKg` | Poids frais de l'échantillon récolté | Décimal, kg | Vérifié | Exclue (fuite) | Mesure du même échantillon que la cible. 80 lignes ont un poids sec supérieur au poids frais et 4 un poids frais nul. |
+| `freshWeightKg` | Poids frais de l'échantillon récolté | Décimal, kg | Vérifié | Exclue (fuite) | Mesure du même échantillon que la cible. 80 lignes ont un poids sec supérieur au poids frais, dont 4 avec un poids frais nul. |
 | `dryWeightKg` | Poids sec de l'échantillon récolté sur 16 m² | Décimal, kg | Vérifié | Exclue (fuite) | Fuite certaine. La cible est égale à 0,625 fois cette valeur sur 100 % des lignes. |
 | `Yield_ton_ha_` | Rendement agricole | Décimal, t/ha | Vérifié | Cible de validation | Égal à `0,625 × dryWeightKg`, soit 1 kg récolté sur un carré de 4 m sur 4 m converti en t/ha. |
 

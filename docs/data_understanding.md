@@ -120,7 +120,7 @@ Le code -999 apparaît uniquement dans `AgroMAPS` et le code -99 uniquement dans
 | Coordonnées | Point situé hors d'Afrique | 1 ligne de `OneAcre_survey` | Invalider la coordonnée |
 | Dates | Calendrier éthiopien probable, aucun jour 31 et 116 dates au 30 février | 11 341 dates de `LSMS_cropcut` | Aucune conversion grégorienne directe |
 | Dates | Récolte antérieure à la plantation | 684 couples sur 58 744 dans `Point` | Signaler ces lignes |
-| Mesures | Poids sec supérieur au poids frais ou poids frais nul | 84 lignes de `LSMS_cropcut` | Signaler et tester l'exclusion |
+| Mesures | Poids sec supérieur au poids frais, dont 4 poids frais nuls | 80 lignes de `LSMS_cropcut` | Signaler et tester l'exclusion |
 | Mesures | Surface déclarée de 5,99 milliards d'hectares | 1 ligne de `LSMS_GNB2021` | Invalider la valeur |
 | Mesures | `prcCrop` supérieur à 100 | 80 lignes de `LSMS_MWI2019` | Invalider la valeur |
 | Doublons | Copies exactes | 448 lignes de `LSMS_survey` et 1 282 de `Point`, dont 19,3 % de `Corbeels2020` | Supprimer ou regrouper selon une règle documentée |
