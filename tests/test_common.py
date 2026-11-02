@@ -3,7 +3,13 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from src.data.common import bornes_filtre_auteurs, hors_bornes, identifiant_grappe, normaliser_textes
+from src.data.common import (
+    bornes_filtre_auteurs,
+    hors_bornes,
+    identifiant_grappe,
+    normaliser_textes,
+    signaler_hierarchie_incoherente,
+)
 
 
 class TestNormaliserTextes(unittest.TestCase):
@@ -53,6 +59,19 @@ class TestIdentifiantGrappe(unittest.TestCase):
 
         self.assertEqual(grappes.iloc[0], grappes.iloc[1])
         self.assertTrue(pd.isna(grappes.iloc[2]))
+
+
+class TestHierarchieGid(unittest.TestCase):
+    def test_signale_un_enfant_a_plusieurs_parents(self):
+        df = pd.DataFrame({
+            "L0_GID": ["L0A", "L0A", "L0A", "L0B"],
+            "L1_GID": ["L1A1", "L1A2", "L1A1", "L1B1"],
+            "L2_GID": ["L2X", "L2X", "L2Y", np.nan],
+            "L3_GID": [np.nan, np.nan, np.nan, np.nan],
+        })
+        resultat = signaler_hierarchie_incoherente(df)
+
+        self.assertEqual(resultat["flag_hierarchie_gid_incoherente"].tolist(), [True, True, False, False])
 
 
 if __name__ == "__main__":

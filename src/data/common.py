@@ -65,3 +65,18 @@ def identifiant_grappe(latitudes, longitudes):
     presentes = latitudes.notna() & longitudes.notna()
     identifiant = latitudes.astype(str) + "_" + longitudes.astype(str)
     return identifiant.where(presentes)
+
+
+def signaler_hierarchie_incoherente(df):
+    """Signale les lignes dont un identifiant GADM est rattaché à plusieurs parents.
+
+    Un identifiant de niveau 2 doit appartenir à un seul niveau 1, et ainsi de suite.
+    Le contrôle s'applique après normalisation des textes.
+    """
+    resultat = df.copy()
+    incoherente = pd.Series(False, index=resultat.index)
+    for enfant, parent in [("L1_GID", "L0_GID"), ("L2_GID", "L1_GID"), ("L3_GID", "L2_GID")]:
+        nb_parents = resultat.groupby(enfant)[parent].transform("nunique")
+        incoherente |= nb_parents.gt(1)
+    resultat["flag_hierarchie_gid_incoherente"] = incoherente
+    return resultat
