@@ -101,3 +101,97 @@ Pour 33 740 lignes, soit 17,1 % du fichier, `yieldTonHa` est égal à `areaHa` d
 ### 4.4 Codes spéciaux dans `Regional`
 
 Le code -999 apparaît uniquement dans `AgroMAPS` et le code -99 uniquement dans `RCeA`. Ces codes ont été intégrés au calcul du rendement et ont produit 30 rendements négatifs, tels que -0,01001 qui correspond à -10 divisé par 999. La préparation devra convertir les codes en valeurs manquantes et invalider tout rendement négatif.
+
+## 5. Qualité des données
+
+| Domaine | Anomalie | Ampleur | Traitement prévu |
+|---|---|---|---|
+| Identifiants | `holder_id` de 16 chiffres tronqués par la limite de 15 chiffres significatifs d'Excel | 415 lignes de `LSMS_cropcut` | Reconstruire le ménage par `holder_id // 100` |
+| Identifiants | `household_id` remplacé par deux valeurs de substitution | 82 lignes de `ETH2011` | Ignorer `household_id` au profit de la reconstruction |
+| Identifiants | `hhid` stocké en notation scientifique et tronqué | 3 417 lignes de `LSMS_ETH2018`, 251 valeurs distinctes | Regroupement géographique de repli |
+| Identifiants | Aucune clé unique dans `LSMS_survey` | 14 434 doublons sur la clé la plus complète | Créer un identifiant technique de ligne |
+| Valeurs manquantes déguisées | Texte `[]` dans les identifiants GADM et `QC_flag_Y` | 142 lignes de `LSMS_survey`, 108 de `Point`, 36 et 706 de `Regional` | Convertir en valeurs manquantes |
+| Valeurs manquantes déguisées | Texte `none` dans `admin_1`, `admin_2` et `crop_production_system` | 11 884, 75 389 et 57 325 lignes de `Regional` | Convertir en valeurs manquantes |
+| Encodage | Caractère invisible BOM en tête de `L1_GID` | 318 lignes du Lesotho | Nettoyer avant toute jointure |
+| Référentiel géographique | 25 `L0_GID` pour le Ghana et hiérarchie L1 et L2 incohérente | 3 890 et 488 lignes concernées | Reconstruire les identifiants du Ghana depuis GADM |
+| Référentiel géographique | `country_code` mêlant ISO2 et ISO3, libellés de pays doublonnés | 82 codes pour 49 libellés et 47 pays | Utiliser `L0_GID` corrigé comme clé pays |
+| Coordonnées | Latitude et longitude inversées | 215 lignes de `Niche_trial` | Permuter les deux valeurs |
+| Coordonnées | Latitude de signe erroné | 30 lignes de `Corbeels2020` | Corriger le signe |
+| Coordonnées | Point situé hors d'Afrique | 1 ligne de `OneAcre_survey` | Invalider la coordonnée |
+| Dates | Calendrier éthiopien probable, aucun jour 31 et 116 dates au 30 février | 11 341 dates de `LSMS_cropcut` | Aucune conversion grégorienne directe |
+| Dates | Récolte antérieure à la plantation | 684 couples sur 58 744 dans `Point` | Signaler ces lignes |
+| Mesures | Poids sec supérieur au poids frais ou poids frais nul | 84 lignes de `LSMS_cropcut` | Signaler et tester l'exclusion |
+| Mesures | Surface déclarée de 5,99 milliards d'hectares | 1 ligne de `LSMS_GNB2021` | Invalider la valeur |
+| Mesures | `prcCrop` supérieur à 100 | 80 lignes de `LSMS_MWI2019` | Invalider la valeur |
+| Doublons | Copies exactes | 448 lignes de `LSMS_survey` et 1 282 de `Point`, dont 19,3 % de `Corbeels2020` | Supprimer ou regrouper selon une règle documentée |
+| Doublons | Deux unités `admin_2` rattachées au même `L2_GID` | 65 lignes de `HarvestStat` | Retenir une ligne par cellule |
+| Valeurs impossibles | Rendements atteignant 6 996 t/ha | 3 475 rendements supérieurs à 20 t/ha dans `Regional` | Bornes de plausibilité par culture |
+
+## 6. Distribution des rendements
+
+| Fichier | Rendements positifs | Médiane t/ha | Moyenne t/ha | 99e percentile | Maximum | Asymétrie | Asymétrie du logarithme |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `LSMS_cropcut` | 11 345 | 0,86 | 1,13 | 4,47 | 10,75 | 2,14 | -0,27 |
+| `LSMS_survey` | 158 478 | 0,74 | 1,50 | 11,50 | 155,68 | 9,97 | 0,20 |
+| `Point` | 131 812 | 1,73 | 2,55 | 11,46 | 150,00 | 13,83 | -0,27 |
+| `Regional` | 162 439 | 1,00 | 3,29 | 28,28 | 6 996,21 | 192,23 | 0,29 |
+
+- Les distributions sont fortement asymétriques à droite et deviennent approximativement log-normales après transformation logarithmique.
+- L'échelle dépend fortement de la culture. Les tubercules et la banane présentent des rendements médians de 2 à 9 t/ha selon le fichier, contre 0,2 à 2,9 t/ha pour les céréales et les légumineuses.
+- Les comparaisons globales entre fichiers sont trompeuses. `LSMS_survey` est globalement inférieur à `LSMS_cropcut`, alors qu'il lui est supérieur à zone, culture et année identiques en Éthiopie. La composition en pays, en cultures et en périodes explique cette inversion.
+
+## 7. Structure temporelle et spatiale
+
+### 7.1 Définition de l'année
+
+| Fichier | Colonne de référence | Signification vérifiée |
+|---|---|---|
+| `LSMS_cropcut` | `Year` | Année de fin de campagne, égale à `AgYearEnd` de la vague `LSMS_survey` correspondante |
+| `LSMS_survey` | `AgYearStart` et `AgYearEnd` | Début et fin de campagne, toujours séparés d'un an |
+| `Point` | `HarvestYear` | Année de récolte, absente pour toute la source `CEEPA_time_avg` |
+| `Regional` | `harvest_year` | Année de récolte |
+
+Une variable unique `annee_recolte` sera construite à partir de `AgYearEnd` pour `LSMS_survey` et de `Year` pour `LSMS_cropcut`. Le libellé des vagues d'enquête ne constitue pas une source fiable de l'année.
+
+### 7.2 Liens entre année et source
+
+Dans `Point` et `Regional`, les sources se succèdent dans le temps. `AgroMAPS` s'arrête en 2002, `RCeA` couvre 2001 à 2019, `Corbeels2020` couvre 1974 à 2017 et `OneAcre_survey` 2015 à 2020. Un effet temporel appris par un modèle pourrait donc refléter un changement de source et de méthode de mesure.
+
+### 7.3 Dépendances entre observations
+
+- Les observations sont regroupées en grappes spatiales. La médiane est de 19 lignes par coordonnée dans `LSMS_cropcut` et de 11 dans `LSMS_survey`, avec un maximum de 519.
+- `LSMS_cropcut` est un panel. 914 exploitants sont observés sur deux vagues et 527 sur trois.
+- Dans `LSMS_survey`, une part importante des identifiants de ménage réapparaît d'une vague à l'autre en Éthiopie, en Ouganda, au Niger, au Togo et au Bénin.
+- Les coordonnées LSMS sont volontairement déplacées de 0 à 5 km en zone rurale selon l'article.
+
+## 8. Biais de mesure et représentativité
+
+### 8.1 Surface déclarée et surface mesurée par GPS
+
+59,8 % des surfaces déclarées tombent sur un multiple d'un quart d'acre, contre 4,3 % des surfaces GPS. L'écart entre les deux mesures dépend de la taille de la parcelle.
+
+| Surface GPS | Parcelles | Rapport médian entre surface déclarée et surface GPS | Rendement médian fondé sur la surface GPS |
+|---|---:|---:|---:|
+| Jusqu'à 0,1 ha | 21 009 | 1,67 | 1,73 t/ha |
+| De 0,1 à 0,4 ha | 53 769 | 1,16 | 0,92 t/ha |
+| De 0,4 à 2 ha | 49 310 | 0,93 | 0,56 t/ha |
+| Au-delà de 2 ha | 8 985 | 0,81 | 0,34 t/ha |
+
+Les agriculteurs surestiment les petites parcelles et sous-estiment les grandes, ce qui concorde avec l'article. La relation inverse entre surface et rendement combine un effet agronomique possible et une erreur de mesure placée au dénominateur. Les données ne permettent pas de séparer ces deux effets.
+
+### 8.2 Écart entre sources en Éthiopie
+
+À zone `L2_GID`, culture et année identiques, avec au moins 10 observations de part et d'autre, les rendements de `LSMS_survey` dépassent ceux de `LSMS_cropcut` dans 69,8 % des cellules, pour un rapport médian de 1,46. Les statistiques officielles de `Regional` les dépassent dans 88,7 à 90,1 % des cellules, pour un rapport médian de 1,78 à 1,88.
+
+Le sens de l'écart concorde avec l'article. Son ampleur est supérieure aux biais publiés de 20 % et de 32 %, car la comparaison ne pondère pas les cellules et mélange saisons et sources. Ces chiffres établissent le sens de l'écart sans en constituer une estimation.
+
+### 8.3 Désaccord entre sources officielles
+
+Sur les 105 cellules communes à `FAO_subnational` et `HarvestStat`, l'écart relatif médian atteint 17,5 %. Cet ordre de grandeur représente le bruit irréductible de la cible `Regional`. Un modèle dont l'erreur relative serait nettement inférieure devrait faire l'objet d'une recherche de fuite.
+
+### 8.4 Représentativité
+
+- Le Malawi représente 26,9 % de `LSMS_survey`. Le Rwanda, le Kenya et le Burundi représentent ensemble 66 % de `Point`.
+- `OneAcre_survey` représente 59 % de `Point` et `HarvestStat` 67 % de `Regional`.
+- Le maïs représente 51,7 % de `Point` et 33 % de `LSMS_survey`.
+- `LSMS_cropcut`, seule source de mesures directes, ne couvre que l'Éthiopie.
