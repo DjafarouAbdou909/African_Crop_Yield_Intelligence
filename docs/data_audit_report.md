@@ -149,7 +149,7 @@ Les identifiants de ménage, de parcelle et de terrain doivent rester disponible
 | Sources distinctes | 6 |
 | Doublons exacts de lignes | 1 282 |
 
-L’effectif observé de 131 812 lignes diffère de l’effectif de référence de 143 157 observations indiqué dans le dictionnaire. La version du fichier, la feuille examinée et les éventuels filtres doivent être vérifiés avant d’expliquer cet écart.
+L’effectif observé de 131 812 lignes diffère de l’effectif de référence de 143 157 observations indiqué dans le dictionnaire. L’écart est expliqué. Les 143 157 autres données locales de l’article correspondent exactement à la somme de `Point` et des 11 345 lignes de `LSMS_cropcut`.
 
 ### Répartition des observations par source
 
@@ -197,6 +197,15 @@ Les colonnes `Area_ha_` et `Yield_ton_ha_` doivent être étudiées pour compren
 6. Clarifier la signification des colonnes encore inconnues.
 
 **Décision provisoire :** poursuivre le Data Understanding. Les doublons, les différences entre sources et les incohérences potentielles doivent être étudiés avant toute préparation définitive.
+
+**Mise à jour après le Data Understanding.** Les vérifications complémentaires apportent les résultats suivants.
+
+- `HarvestYear` manque uniquement pour `CEEPA_time_avg`, qui regroupe des moyennes temporelles sans année ni coordonnées ni surface. Cette source partage 4 965 sites avec `CEEPA_annual`.
+- `Corbeels2020` concentre la plus forte proportion de doublons exacts, avec 19,3 % de ses lignes.
+- 215 coordonnées de `Niche_trial` ont la latitude et la longitude inversées, 30 coordonnées de `Corbeels2020` ont une latitude de signe erroné et un point se situe hors d’Afrique.
+- `PlantDate` et `HarvestDate` sont des numéros de série Excel. 684 couples présentent une récolte antérieure à la plantation.
+- Seulement 0,24 % des rendements sortent des bornes reconstruites du filtre des auteurs, ce qui confirme que ce fichier a été filtré.
+- L’année et la source sont fortement liées, `Corbeels2020` couvrant 1974 à 2017 et `OneAcre_survey` 2015 à 2020.
 
 ## 6. Dataset 4 — Regional
 
