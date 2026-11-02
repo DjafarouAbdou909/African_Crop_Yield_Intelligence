@@ -82,10 +82,10 @@ Ces effectifs serviront à vérifier la cohérence des fichiers téléchargés.
 
 | Fichier | Effectif attendu | Remarque |
 |---|---:|---|
-| Regional | Environ 197 535 | Somme des données régionales (185 651) et nationales FAO (11 884). Vérifier la répartition avec `level`. |
-| LSMS_survey | Environ 195 152 | À comparer à l'effectif réel. |
-| Point | Environ 143 157 | À comparer à l'effectif réel. |
-| LSMS_cropcut | 11 345 | Données concernant l'Éthiopie et 12 cultures. Vérifier si ces observations sont comprises dans le total de 535 844. |
+| Regional | 197 535 | Vérifié. Somme exacte des 185 651 lignes régionales et des 11 884 lignes nationales. Les 11 884 lignes de `level` 0 coïncident avec les lignes `FAOSTAT`. |
+| LSMS_survey | 195 152 | Vérifié. Effectif identique à celui de l'article. |
+| Point | 131 812 | Vérifié. Les 143 157 autres données locales de l'article correspondent à la somme de `Point` et de `LSMS_cropcut`. |
+| LSMS_cropcut | 11 345 | Vérifié. Éthiopie uniquement et 12 cultures. Ces observations sont comprises dans le total de 535 844, que les quatre fichiers atteignent exactement. |
 
 ---
 
