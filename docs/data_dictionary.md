@@ -97,26 +97,26 @@ Ces données peuvent servir de référence pour examiner la qualité des rendeme
 
 | Colonne | Définition | Type / unité | Statut | Rôle | Remarque |
 |---|---|---|---|---|---|
-| `Country` | Pays de l'observation | Texte | Déduit | Clé de regroupement | Éthiopie attendue ; à confirmer. |
-| `Source` | Source de l'enquête | Texte | Déduit | Exclue (métadonnée) | Peut renseigner sur l'année ou la méthode de collecte. |
-| `Year` | Année de l'observation | Entier | À vérifier | Candidate | Vérifier s'il s'agit de l'année de récolte. |
+| `Country` | Pays de l'observation | Texte | Vérifié | Clé de regroupement | Valeur unique `Ethiopia` sur les 11 345 lignes. |
+| `Source` | Vague de l'enquête éthiopienne | Texte | Vérifié | Exclue (métadonnée) | Quatre vagues `ETH2011`, `ETH2013b`, `ETH2015` et `ETH2018`. Les valeurs manquantes de plusieurs colonnes dépendent de la vague. |
+| `Year` | Année de fin de campagne agricole | Entier | Vérifié | Candidate | Valeurs 2012, 2014, 2016 et 2019. Égale à `AgYearEnd` de la vague `survey` correspondante. La forme `2,012` relevée dans l'audit est un artefact d'affichage. |
 | `GPS_lat` | Latitude | Décimal | Documenté pour les coordonnées | À investiguer | Vérifier si les coordonnées sont décalées selon le protocole LSMS. |
 | `GPS_lon` | Longitude | Décimal | Documenté pour les coordonnées | À investiguer | Même vérification que pour la latitude. |
 | `L0_GID` | Identifiant GADM de niveau 0 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau national. |
 | `L1_GID` | Identifiant GADM de niveau 1 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau administratif 1. |
 | `L2_GID` | Identifiant GADM de niveau 2 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau administratif 2. |
 | `L3_GID` | Identifiant GADM de niveau 3 | Texte | Documenté, article p. 4 | Clé de regroupement | Des valeurs manquantes sont possibles. |
-| `holder_id` | Identifiant de l'exploitant | Texte | Déduit | Clé de regroupement | Définition à confirmer. |
-| `household_id` | Identifiant du ménage | Texte | Déduit | Clé de regroupement | Vérifier les ménages présents sur plusieurs années. |
+| `holder_id` | Identifiant de l'exploitant | Entier stocké en décimal | Vérifié | Clé de regroupement | Identifiant du ménage suivi d'un rang à deux chiffres. Absent pour toute la vague `ETH2018`. Les 415 valeurs de 16 chiffres finissent toutes par 0, signe d'une troncature à 15 chiffres significatifs. |
+| `household_id` | Identifiant du ménage | Entier stocké en décimal | Vérifié | Clé de regroupement | Égal à `holder_id // 100` pour 99,03 % des lignes. 82 lignes de `ETH2011` portent deux valeurs de substitution. 914 exploitants sont observés sur deux vagues et 527 sur trois. |
 | `parcel_id` | Identifiant de la parcelle | Texte | Déduit | Clé de regroupement | Vérifier les répétitions éventuelles. |
 | `field_id` | Identifiant du champ | Texte | Déduit | Clé de regroupement | Définition à confirmer. |
 | `Crop` | Nom harmonisé de la culture | Texte | Documenté, article p. 4 | Candidate | La base comprend 25 cultures. |
 | `crop_origname` | Nom original de la culture | Texte | Déduit | Exclue (métadonnée) | Conservé pour la traçabilité. |
-| `cropCutDay` | Jour de la mesure de récolte | Entier | Déduit | Exclue (fuite) | Information liée à la mesure. |
-| `cropCutMonth` | Mois de la mesure de récolte | Entier | Déduit | Exclue (fuite) | Information liée à la mesure. |
-| `freshWeightKg` | Poids frais récolté | Décimal, kg | Déduit | Exclue (fuite) | Peut intervenir dans le calcul du rendement. |
-| `dryWeightKg` | Poids sec récolté | Décimal, kg | Déduit | Exclue (fuite) | Peut intervenir dans le calcul du rendement. |
-| `Yield_ton_ha_` | Rendement agricole | Décimal, t/ha | Unité documentée ; formule à vérifier | Cible candidate | Vérifier si le rendement repose sur le poids frais ou sec. |
+| `cropCutDay` | Jour de la mesure de récolte | Entier | Déduit | Exclue (fuite) | Aucun jour 31 sur 11 341 dates. Calendrier éthiopien probable, à confirmer dans la documentation ESS. |
+| `cropCutMonth` | Mois de la mesure de récolte | Entier | Déduit | Exclue (fuite) | Absent pour toute la vague `ETH2013b`. 132 dates impossibles en lecture grégorienne, dont 116 au 30 février. Valeurs 0 et 20 à 83 invalides. |
+| `freshWeightKg` | Poids frais de l'échantillon récolté | Décimal, kg | Vérifié | Exclue (fuite) | Mesure du même échantillon que la cible. 80 lignes ont un poids sec supérieur au poids frais et 4 un poids frais nul. |
+| `dryWeightKg` | Poids sec de l'échantillon récolté sur 16 m² | Décimal, kg | Vérifié | Exclue (fuite) | Fuite certaine. La cible est égale à 0,625 fois cette valeur sur 100 % des lignes. |
+| `Yield_ton_ha_` | Rendement agricole | Décimal, t/ha | Vérifié | Cible candidate | Égal à `0,625 × dryWeightKg`, soit 1 kg récolté sur un carré de 4 m sur 4 m converti en t/ha. |
 
 ---
 
