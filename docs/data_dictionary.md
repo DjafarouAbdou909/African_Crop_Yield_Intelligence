@@ -116,7 +116,7 @@ Ces données peuvent servir de référence pour examiner la qualité des rendeme
 | `cropCutMonth` | Mois de la mesure de récolte | Entier | Déduit | Exclue (fuite) | Absent pour toute la vague `ETH2013b`. 132 dates impossibles en lecture grégorienne, dont 116 au 30 février. Valeurs 0 et 20 à 83 invalides. |
 | `freshWeightKg` | Poids frais de l'échantillon récolté | Décimal, kg | Vérifié | Exclue (fuite) | Mesure du même échantillon que la cible. 80 lignes ont un poids sec supérieur au poids frais et 4 un poids frais nul. |
 | `dryWeightKg` | Poids sec de l'échantillon récolté sur 16 m² | Décimal, kg | Vérifié | Exclue (fuite) | Fuite certaine. La cible est égale à 0,625 fois cette valeur sur 100 % des lignes. |
-| `Yield_ton_ha_` | Rendement agricole | Décimal, t/ha | Vérifié | Cible candidate | Égal à `0,625 × dryWeightKg`, soit 1 kg récolté sur un carré de 4 m sur 4 m converti en t/ha. |
+| `Yield_ton_ha_` | Rendement agricole | Décimal, t/ha | Vérifié | Cible de validation | Égal à `0,625 × dryWeightKg`, soit 1 kg récolté sur un carré de 4 m sur 4 m converti en t/ha. |
 
 ---
 
@@ -146,7 +146,7 @@ Les productions peuvent être déclarées par les agriculteurs et les surfaces p
 | `ReportedArea_ha_` | Surface déclarée par l'agriculteur | Décimal, ha | Vérifié | Exclue (fuite) | Dénominateur de `Yield_ton_ha_`. 59,8 % des valeurs tombent sur un multiple d'un quart d'acre. Une valeur aberrante de 5,99 milliards d'hectares dans `LSMS_GNB2021`. |
 | `GPSArea_ha_` | Surface mesurée par GPS | Décimal, ha | Vérifié | Exclue (fuite) | Dénominateur de `YieldUsingGPS_ton_ha_`. Le rapport entre surface déclarée et surface GPS varie de 1,67 sous 0,1 ha à 0,81 au-delà de 2 ha. |
 | `Yield_ton_ha_` | Rendement fondé sur la surface déclarée | Décimal, t/ha | Vérifié | Cible candidate | Égal à `Prod_kg_` divisé par `ReportedArea_ha_` et par la part `prcCrop`, converti en tonnes, pour 99,10 % des lignes. Les valeurs manquantes correspondent pour l'essentiel au filtrage des valeurs aberrantes par les auteurs. |
-| `YieldUsingGPS_ton_ha_` | Rendement fondé sur la surface GPS | Décimal, t/ha | Vérifié | Cible recommandée pour `survey` | Même construction avec `GPSArea_ha_` pour 99,37 % des lignes. Mesure de surface objective, au prix d'une couverture réduite à 152 205 lignes. |
+| `YieldUsingGPS_ton_ha_` | Rendement fondé sur la surface GPS | Décimal, t/ha | Vérifié | Cible retenue pour `survey` | Même construction avec `GPSArea_ha_` pour 99,37 % des lignes. Mesure de surface objective, au prix d'une couverture réduite à 152 205 lignes. |
 | `YieldEst2_ton_ha_` | Estimation alternative du rendement | Décimal, t/ha | Déduit | Exclue (fuite) | Reproduite avec `ProdEst2_kg_` pour 99,72 % des lignes comparables, mais renseignée sans `ProdEst2_kg_` sur 24 066 lignes tanzaniennes. Définition non homogène. |
 | `YieldEst2UsingGPS_ton_ha_` | Rendement alternatif fondé sur la surface GPS | Décimal, t/ha | Vérifié | Exclue (fuite) | Reproduit avec `ProdEst2_kg_` et `GPSArea_ha_` pour 99,66 % des lignes. |
 | `AgYearStart` | Année de début de la campagne agricole | Entier | Vérifié | Candidate | Toujours inférieure d'un an à `AgYearEnd`. |
@@ -225,7 +225,7 @@ Les rendements aberrants ont été conservés dans ces données. L'article rappo
 |---|---|---|---|---|---|
 | `areaHa` | Surface récoltée | Décimal, ha | Vérifié | Exclue (fuite) | Permutée avec `productionTon` sur 33 740 lignes. Code -999 sur 112 lignes `AgroMAPS`. |
 | `productionTon` | Production agricole | Décimal, t | Vérifié | Exclue (fuite) | Permutée avec `areaHa` sur 33 740 lignes. Code -999 sur 117 lignes `AgroMAPS` et code -99 sur 21 lignes `RCeA`. |
-| `yieldTonHa` | Rendement agricole | Décimal, t/ha | Vérifié | Cible recommandée | Égal à la production divisée par la surface pour 126 696 lignes et au rapport inverse pour 33 740 lignes où les colonnes sont permutées. Le rendement reste plausible dans les deux cas. 30 valeurs négatives issues du code -999 et 36 valeurs -99. |
+| `yieldTonHa` | Rendement agricole | Décimal, t/ha | Vérifié | Cible retenue | Égal à la production divisée par la surface pour 126 696 lignes et au rapport inverse pour 33 740 lignes où les colonnes sont permutées. Le rendement reste plausible dans les deux cas. 30 valeurs négatives issues du code -999 et 36 valeurs -99. |
 
 ### Contrôle qualité et provenance
 
@@ -243,7 +243,7 @@ Les rendements aberrants ont été conservés dans ces données. L'article rappo
 
 | Rôle | Colonnes concernées |
 |---|---|
-| Cibles candidates | `yieldTonHa` de `regional` aux niveaux 1 et 2 pour la généralisation spatiale et temporelle. `YieldUsingGPS_ton_ha_` de `survey` à l'échelle de la parcelle. `Yield_ton_ha_` de `cropcut` comme référence de validation en Éthiopie. Recommandation à valider par le porteur du projet. |
+| Cibles retenues | `yieldTonHa` de `regional` aux niveaux 1 et 2 pour la généralisation spatiale et temporelle. `YieldUsingGPS_ton_ha_` de `survey` à l'échelle de la parcelle. `Yield_ton_ha_` de `cropcut` comme référence de validation en Éthiopie. Choix validé par le porteur du projet le 2 novembre 2026. |
 | Clés de regroupement | `L0_GID`, `L1_GID`, `L2_GID`, `L3_GID`, pays, `admin_1`, `admin_2`, identifiants de ménage, parcelle, champ, exploitant et site. |
 | Variables explicatives possibles | Culture, année (`harvest_year`, `HarvestYear`, `AgYearStart`, `AgYearEnd`) et éventuellement système de production ou source, sous réserve des tests d'ablation. |
 | Variables exclues pour risque de fuite | Production, surfaces et poids de récolte lorsqu'ils entrent dans le calcul de la cible ; dates et mois de récolte non disponibles au moment de la prédiction ; variantes de rendement non retenues. |
