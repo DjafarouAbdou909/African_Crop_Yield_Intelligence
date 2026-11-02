@@ -166,23 +166,23 @@ Les méthodes de collecte sont hétérogènes et certaines observations provienn
 
 | Colonne | Définition | Type / unité | Statut | Rôle | Remarque |
 |---|---|---|---|---|---|
-| `Source` | Étude ou référence d'origine | Texte | Documenté, article, tableau 1 | À investiguer | Peut renseigner sur la méthode de mesure. |
+| `Source` | Étude ou référence d'origine | Texte | Vérifié | À investiguer | Six sources. Fortement liée à la période et à la méthode de mesure. `OneAcre_survey` représente 59 % des lignes. |
 | `Crop` | Nom de la culture | Texte | Documenté, article p. 4 | Candidate | |
-| `HarvestYear` | Année de récolte | Entier | Documenté dans l'article | Candidate | |
-| `Latitude` | Latitude du site | Décimal | Documenté pour les coordonnées | À investiguer | |
-| `Longitude` | Longitude du site | Décimal | Documenté pour les coordonnées | À investiguer | |
-| `SpatialPrecision_km_` | Précision spatiale | Décimal, km | Déduit | À investiguer | Définition exacte à confirmer. |
+| `HarvestYear` | Année de récolte | Entier | Vérifié | Candidate | Absente pour les 20 933 lignes de `CEEPA_time_avg`, qui sont des moyennes temporelles. Couverture de 1974 à 2021. |
+| `Latitude` | Latitude du site | Décimal | Vérifié | À investiguer | 215 coordonnées de `Niche_trial` inversées avec la longitude et 30 latitudes de signe erroné dans `Corbeels2020`. |
+| `Longitude` | Longitude du site | Décimal | Vérifié | À investiguer | Une valeur de 76,1 hors d'Afrique dans `OneAcre_survey`. |
+| `SpatialPrecision_km_` | Précision spatiale | Décimal, km | Déduit | À investiguer | Valeurs 0,03, 1,85 et 5. Absente exactement lorsque les deux coordonnées sont absentes. |
 | `L0_GID` | Identifiant GADM de niveau 0 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau national. |
-| `L1_GID` | Identifiant GADM de niveau 1 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau administratif 1. |
-| `L2_GID` | Identifiant GADM de niveau 2 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau administratif 2. |
-| `L3_GID` | Identifiant GADM de niveau 3 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau administratif 3. |
-| `Country` | Pays de l'observation | Texte | Déduit | Clé de regroupement | |
-| `SiteName` | Nom du site | Texte | Déduit | Clé de regroupement | Texte libre ; vérifier les noms similaires. |
+| `L1_GID` | Identifiant GADM de niveau 1 | Texte | Documenté, article p. 4 | Clé de regroupement | 108 valeurs manquantes déguisées sous la forme du texte `[]`. Une ligne associe un `L0_GID` burundais à un `L1_GID` rwandais. |
+| `L2_GID` | Identifiant GADM de niveau 2 | Texte | Documenté, article p. 4 | Clé de regroupement | Mêmes 108 valeurs `[]` que `L1_GID`. |
+| `L3_GID` | Identifiant GADM de niveau 3 | Texte | Documenté, article p. 4 | Clé de regroupement | Mêmes 108 valeurs `[]` que `L1_GID`. |
+| `Country` | Pays de l'observation | Texte | Vérifié | Clé de regroupement | 21 pays. Rwanda, Kenya et Burundi représentent 66 % des lignes. |
+| `SiteName` | Nom du site ou identifiant d'exploitation | Texte | Vérifié | Clé de regroupement | Identifiant numérique pour les sources CEEPA. `CEEPA_annual` et `CEEPA_time_avg` partagent 4 965 sites. |
 | `Area_ha_` | Surface associée à l'observation | Décimal, ha | Déduit | À investiguer | Peut intervenir dans le calcul du rendement. |
-| `Yield_ton_ha_` | Rendement agricole | Décimal, t/ha | Unité documentée | Cible candidate | Filtrage des rendements aberrants effectué par les auteurs. |
-| `PlantDate` | Date de plantation | Date | Déduit | À investiguer | Peut être utile si elle est connue au moment de la prédiction. |
-| `HarvestDate` | Date de récolte | Date | Déduit | Exclue (fuite) | Information postérieure à la prédiction. |
-| `Notes` | Commentaires sur l'observation | Texte | Déduit | Exclue (métadonnée) | À examiner pour repérer des cas particuliers. |
+| `Yield_ton_ha_` | Rendement agricole | Décimal, t/ha | Vérifié | Cible candidate | Aucune valeur manquante. 0,24 % des valeurs seulement sortent des bornes reconstruites du filtre des auteurs. Maximum de 150 t/ha. |
+| `PlantDate` | Date de plantation | Numéro de série Excel | Vérifié | À investiguer | Origine 1899-12-30. 684 récoltes antérieures à la plantation sur 58 744 couples de dates. |
+| `HarvestDate` | Date de récolte | Numéro de série Excel | Vérifié | Exclue (fuite) | Information postérieure à la prédiction. Son année diffère de `HarvestYear` sur 3 208 lignes, dont 3 054 avec un an d'écart. |
+| `Notes` | Commentaires sur l'observation | Texte | Vérifié | Exclue (métadonnée) | Mode de travail du sol dans `Corbeels2020` et saison A ou B dans `Niche_trial`. |
 
 ---
 
