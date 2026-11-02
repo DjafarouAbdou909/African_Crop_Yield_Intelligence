@@ -87,7 +87,7 @@ Les identifiants doivent également être étudiés pour déterminer s’ils son
 
 ### Présentation
 
-Les notes de travail indiquent un effectif de référence d’environ 195 152 observations, 27 colonnes, 13 pays et 25 cultures. Ces dimensions doivent être comparées à celles de la version effectivement utilisée.
+Le fichier analysé compte 195 152 observations, 27 colonnes, 13 pays, 25 cultures et 45 vagues d’enquête, conformément à l’article.
 
 Le fichier contient notamment des informations sur les cultures, la production, les superficies, les rendements, les coordonnées géographiques, les campagnes agricoles et les identifiants d’enquête.
 
@@ -126,6 +126,13 @@ Les identifiants de ménage, de parcelle et de terrain doivent rester disponible
 6. Définir la cible et le scénario de prédiction avant de sélectionner les variables explicatives.
 
 **Décision provisoire :** poursuivre le Data Understanding. La sélection de la cible et des prédicteurs reste conditionnée à la clarification des relations entre variables.
+
+**Mise à jour après le Data Understanding.** Les relations entre variables sont établies.
+
+- `Yield_ton_ha_` est égal à `Prod_kg_` divisé par `ReportedArea_ha_` et par la part `prcCrop`, converti en tonnes, pour 99,10 % des lignes. La même construction reproduit les trois autres variantes de rendement à plus de 99 %. Production, surfaces et `prcCrop` sont donc des fuites certaines.
+- Environ 96 % des rendements absents mais calculables sortent des bornes du filtre des auteurs. Ces valeurs manquantes ne sont pas aléatoires et ne doivent pas être imputées.
+- La surface déclarée est arrondie à des fractions d’acre dans 59,8 % des cas et son écart avec la surface GPS dépend de la taille de la parcelle. `YieldUsingGPS_ton_ha_` est la cible recommandée pour ce fichier.
+- Aucune combinaison d’identifiants n’est unique. `hhid` est tronqué dans `LSMS_ETH2018` et absent dans `LSMS_ETH2021`. Les observations sont regroupées en grappes spatiales de 11 lignes en médiane.
 
 ## 5. Dataset 3 — Point
 
