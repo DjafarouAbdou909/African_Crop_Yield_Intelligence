@@ -128,9 +128,9 @@ Les productions peuvent être déclarées par les agriculteurs et les surfaces p
 
 | Colonne | Définition | Type / unité | Statut | Rôle | Remarque |
 |---|---|---|---|---|---|
-| `Country` | Pays de l'observation | Texte | Déduit | Clé de regroupement | |
+| `Country` | Pays de l'observation | Texte | Vérifié | Clé de regroupement | 13 pays. Le libellé `Cote dIvoire` diffère de `Côte dIvoire` utilisé dans `regional`. |
 | `Source1` | Première partie de l'identifiant de source | Texte | Déduit | Exclue (métadonnée) | Signification exacte à confirmer. |
-| `Source2` | Seconde partie de l'identifiant de source | Texte | Déduit | Exclue (métadonnée) | Peut correspondre à une enquête ou une année. |
+| `Source2` | Code pays et année de la vague | Texte | Vérifié | Exclue (métadonnée) | L'année du libellé vaut `AgYearStart` ou `AgYearStart` plus un selon la vague. Elle ne constitue pas une source fiable de l'année. |
 | `Source` | Identifiant combiné de la source | Texte | Déduit | À investiguer | Peut renseigner sur la méthode de mesure et l'année. |
 | `GPS_lat` | Latitude | Décimal | Documenté pour le décalage des coordonnées | À investiguer | Décalage possible de 0 à 5 km en zone rurale. |
 | `GPS_lon` | Longitude | Décimal | Documenté pour le décalage des coordonnées | À investiguer | Même remarque que pour la latitude. |
@@ -139,22 +139,22 @@ Les productions peuvent être déclarées par les agriculteurs et les surfaces p
 | `L2_GID` | Identifiant GADM de niveau 2 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau administratif 2. |
 | `L3_GID` | Identifiant GADM de niveau 3 | Texte | Documenté, article p. 4 | Clé de regroupement | Le décalage GPS peut affecter le rattachement administratif. |
 | `Crop` | Nom harmonisé de la culture | Texte | Documenté, article p. 4 | Candidate | |
-| `prcCrop` | Part de la parcelle occupée par la culture | Proportion | Déduit, cohérent avec l'article p. 10 | À investiguer | Peut intervenir dans le calcul de la surface par culture. |
-| `prcLeft` | Signification non confirmée | Proportion supposée | Inconnu | Exclue provisoirement | Ne pas utiliser avant documentation. |
-| `Prod_kg_` | Production déclarée | Décimal, kg | Déduit ; méthode de rappel documentée, article p. 10 | Exclue (fuite) | Peut entrer dans le calcul du rendement. |
-| `ProdEst2_kg_` | Estimation alternative de la production | Inconnu | Inconnu | Exclue provisoirement | Définition à confirmer. |
-| `ReportedArea_ha_` | Surface déclarée par l'agriculteur | Décimal, ha | Déduit ; article p. 9 | Exclue (fuite) | Peut entrer dans le calcul du rendement. |
-| `GPSArea_ha_` | Surface mesurée par GPS | Décimal, ha | Déduit ; article p. 9 | Exclue (fuite) | Peut entrer dans le calcul du rendement. |
-| `Yield_ton_ha_` | Rendement agricole | Décimal, t/ha | Unité documentée ; formule à vérifier | Cible candidate | Tester le calcul à partir de `Prod_kg_` et `ReportedArea_ha_`. |
-| `YieldUsingGPS_ton_ha_` | Rendement calculé avec la surface GPS | Décimal, t/ha | Déduit | Cible alternative | Choisir une seule définition de la cible et la justifier. |
-| `YieldEst2_ton_ha_` | Estimation alternative du rendement | Inconnu | Inconnu | Exclue provisoirement | Définition à documenter. |
-| `YieldEst2UsingGPS_ton_ha_` | Rendement alternatif calculé avec la surface GPS | Inconnu | Inconnu | Exclue provisoirement | Définition à documenter. |
-| `AgYearStart` | Année de début de la campagne agricole | Entier | Déduit | Candidate | Définition à harmoniser entre les fichiers. |
-| `AgYearEnd` | Année de fin de la campagne agricole | Entier | Déduit | Candidate | Définition à harmoniser entre les fichiers. |
-| `hhid` | Identifiant du ménage | Texte | Déduit | Clé de regroupement | Les ménages peuvent être suivis sur plusieurs vagues. |
+| `prcCrop` | Part de la parcelle occupée par la culture | Pourcentage | Vérifié | Exclue (fuite) | Entre dans le calcul de toutes les variantes de rendement. 80 valeurs supérieures à 100, toutes dans `LSMS_MWI2019`. |
+| `prcLeft` | Signification non confirmée | Pourcentage supposé | Inconnu | Exclue provisoirement | Nul dans 99 % des cas. Ne pas utiliser avant documentation. |
+| `Prod_kg_` | Production déclarée | Décimal, kg | Vérifié | Exclue (fuite) | Numérateur de `Yield_ton_ha_` et de `YieldUsingGPS_ton_ha_`. |
+| `ProdEst2_kg_` | Estimation alternative de la production | Décimal, kg | Déduit | Exclue (fuite) | Numérateur de `YieldEst2UsingGPS_ton_ha_`. Renseignée sur 6 % des lignes seulement. |
+| `ReportedArea_ha_` | Surface déclarée par l'agriculteur | Décimal, ha | Vérifié | Exclue (fuite) | Dénominateur de `Yield_ton_ha_`. 59,8 % des valeurs tombent sur un multiple d'un quart d'acre. Une valeur aberrante de 5,99 milliards d'hectares dans `LSMS_GNB2021`. |
+| `GPSArea_ha_` | Surface mesurée par GPS | Décimal, ha | Vérifié | Exclue (fuite) | Dénominateur de `YieldUsingGPS_ton_ha_`. Le rapport entre surface déclarée et surface GPS varie de 1,67 sous 0,1 ha à 0,81 au-delà de 2 ha. |
+| `Yield_ton_ha_` | Rendement fondé sur la surface déclarée | Décimal, t/ha | Vérifié | Cible candidate | Égal à `Prod_kg_` divisé par `ReportedArea_ha_` et par la part `prcCrop`, converti en tonnes, pour 99,10 % des lignes. Les valeurs manquantes correspondent pour l'essentiel au filtrage des valeurs aberrantes par les auteurs. |
+| `YieldUsingGPS_ton_ha_` | Rendement fondé sur la surface GPS | Décimal, t/ha | Vérifié | Cible recommandée pour `survey` | Même construction avec `GPSArea_ha_` pour 99,37 % des lignes. Mesure de surface objective, au prix d'une couverture réduite à 152 205 lignes. |
+| `YieldEst2_ton_ha_` | Estimation alternative du rendement | Décimal, t/ha | Déduit | Exclue (fuite) | Reproduite avec `ProdEst2_kg_` pour 99,72 % des lignes comparables, mais renseignée sans `ProdEst2_kg_` sur 24 066 lignes tanzaniennes. Définition non homogène. |
+| `YieldEst2UsingGPS_ton_ha_` | Rendement alternatif fondé sur la surface GPS | Décimal, t/ha | Vérifié | Exclue (fuite) | Reproduit avec `ProdEst2_kg_` et `GPSArea_ha_` pour 99,66 % des lignes. |
+| `AgYearStart` | Année de début de la campagne agricole | Entier | Vérifié | Candidate | Toujours inférieure d'un an à `AgYearEnd`. |
+| `AgYearEnd` | Année de fin de la campagne agricole | Entier | Vérifié | Candidate | Année de référence retenue pour l'harmonisation avec `cropcut`. Absente pour les 218 lignes de `LSMS_BFA2021`, déductible de `AgYearStart`. |
+| `hhid` | Identifiant du ménage | Texte | Vérifié | Clé de regroupement | Format variable selon les vagues. Tronqué en notation scientifique dans `LSMS_ETH2018`, avec 251 valeurs pour 3 417 lignes, et absent dans `LSMS_ETH2021`. |
 | `parcel_id` | Identifiant de la parcelle | Texte | Déduit | Clé de regroupement | Vérifier les répétitions. |
-| `plotid` | Identifiant du champ | Texte | Déduit | Clé de regroupement | Définition à confirmer. |
-| `SpatialPrecision_km_` | Précision spatiale | Décimal, km | Déduit | À investiguer | Définition exacte à confirmer. |
+| `plotid` | Identifiant du champ | Texte | Déduit | Clé de regroupement | Aucune combinaison d'identifiants n'est unique. La clé la plus complète conserve 14 434 doublons. |
+| `SpatialPrecision_km_` | Précision spatiale | Décimal, km | Vérifié | Exclue (métadonnée) | Constante égale à 5 sur toutes les lignes, sans information. |
 
 ---
 
