@@ -195,3 +195,84 @@ Sur les 105 cellules communes à `FAO_subnational` et `HarvestStat`, l'écart re
 - `OneAcre_survey` représente 59 % de `Point` et `HarvestStat` 67 % de `Regional`.
 - Le maïs représente 51,7 % de `Point` et 33 % de `LSMS_survey`.
 - `LSMS_cropcut`, seule source de mesures directes, ne couvre que l'Éthiopie.
+
+## 9. Implications pour les phases suivantes
+
+### 9.1 Data Preparation
+
+1. Normaliser les chaînes de caractères en convertissant `[]`, `none` et le BOM avant tout calcul.
+2. Remplacer les codes -999 et -99 par des valeurs manquantes et invalider les rendements négatifs.
+3. Permuter `areaHa` et `productionTon` sur les 33 740 lignes identifiées dans `Regional`.
+4. Corriger les identifiants du Ghana, utiliser `L0_GID` comme clé pays et reconstruire `level` lorsque les GID le permettent.
+5. Corriger les coordonnées inversées ou de signe erroné et invalider le point hors d'Afrique.
+6. Reconstruire l'identifiant de ménage de `LSMS_cropcut` par `holder_id // 100` et créer un identifiant technique de ligne pour `LSMS_survey`.
+7. Harmoniser l'année de référence entre les fichiers.
+8. Appliquer des bornes de plausibilité par culture fondées sur le filtre des auteurs.
+9. Traiter les doublons exacts et retenir une ligne par cellule dans `Regional` selon une règle de priorité documentée.
+10. Signaler les lignes incohérentes plutôt que de les corriger par imputation.
+
+Ces traitements seront implémentés sous forme de fonctions testées dans `src/` et appliqués à une copie des données brutes.
+
+### 9.2 Feature Engineering
+
+- Exclure toutes les variables qui entrent dans le calcul de la cible, à savoir les poids, productions, surfaces et `prcCrop`, ainsi que les variantes de rendement non retenues.
+- Exclure les dates de récolte, connues seulement après la récolte.
+- Ne pas utiliser les indicateurs `QC_flag_*` comme prédicteurs.
+- Les fichiers ne contiennent aucune variable climatique, pédologique ou relative aux pratiques culturales. Les prédicteurs admissibles se limitent à la culture, au lieu, à l'année et à la source. Des covariables externes, climatiques et issues de la télédétection, seront nécessaires pour obtenir une performance utile.
+
+### 9.3 Modélisation
+
+- Modéliser le logarithme du rendement ou utiliser une fonction de perte robuste.
+- Intégrer la culture comme prédicteur indispensable et regrouper les cultures de moins de 100 lignes.
+- Ne pas fusionner les fichiers sans variable de type de source ni correction de biais.
+
+### 9.4 Évaluation
+
+- Construire les partitions par ménage, par grappe ou région et par période, jamais par tirage aléatoire des lignes.
+- Vérifier que les sources du jeu de test sont représentées dans le jeu d'entraînement.
+- Ventiler les métriques par culture, par type de source et par classe de surface.
+- Utiliser l'écart de 17,5 % entre sources officielles comme repère de l'erreur atteignable sur `Regional`.
+
+## 10. Limites de l'analyse
+
+- **Bornes du filtre des auteurs.** Les seuils exacts ne sont pas publiés et ont été reconstruits. La correspondance de 96,48 % constitue une forte présomption et non une preuve formelle.
+- **Absence des polygones GADM.** La cohérence spatiale a été évaluée au moyen de signatures d'erreur et d'un cadre géographique approximatif. Une jointure spatiale reste nécessaire pour valider chaque point.
+- **Calendrier éthiopien.** L'hypothèse repose sur des régularités statistiques et sur une connaissance externe du calendrier agricole. Elle doit être confirmée dans la documentation de l'enquête ESS.
+- **Comparaisons entre sources.** Les rapports présentés reposent sur des cellules d'au moins 10 observations, sans pondération. Ils établissent le sens des écarts sans en estimer l'ampleur.
+- **Variables non documentées.** `prcLeft`, `season_name` et `crop_production_system` ne disposent d'aucune définition officielle.
+
+## 11. Décision
+
+**Go pour la phase de Data Preparation**, sous trois conditions.
+
+1. Les fichiers sont traités séparément. Aucune fusion n'intervient tant que la question des biais entre sources n'est pas tranchée.
+2. Les traitements de la section 9.1 sont implémentés sous forme de fonctions testées et appliqués à une copie des données brutes.
+3. Le protocole d'évaluation de la section 9.4 est arrêté avant l'entraînement du premier modèle.
+
+**Recommandation relative à la cible, soumise à la validation du porteur du projet**
+
+| Usage | Cible recommandée | Justification |
+|---|---|---|
+| Généralisation spatiale et temporelle | `yieldTonHa` de `Regional`, niveaux 1 et 2 | Couverture de 47 pays sur la période 1960 à 2023 |
+| Prédiction à l'échelle de la parcelle | `YieldUsingGPS_ton_ha_` de `LSMS_survey` | Surface mesurée de manière objective |
+| Validation | `Yield_ton_ha_` de `LSMS_cropcut` | Mesure directe de référence, limitée à l'Éthiopie |
+
+## 12. Reproductibilité
+
+- Environnement d'exécution Python 3.12.13, pandas 3.0.6, numpy 2.5.3 et matplotlib 3.11.2.
+- Le notebook s'exécute de bout en bout à partir des fichiers bruts de `data/raw/`, sans état préalable, avec la commande `jupyter nbconvert --to notebook --execute notebooks/02_data_understanding.ipynb`.
+- La lecture des quatre fichiers Excel dure environ onze minutes. Les analyses suivantes s'exécutent en quelques secondes.
+- Les empreintes SHA-256 de la section 3.1 permettent de vérifier que les fichiers utilisés sont identiques à ceux de l'analyse.
+
+## 13. Questions ouvertes
+
+| Question | Source de vérification envisagée |
+|---|---|
+| Définition de `prcLeft`, `season_name` et `crop_production_system` | Documentation GROW-Africa et sources primaires |
+| Nomenclature des indicateurs `QC_flag_*` | Documentation FAOSTAT |
+| Calendrier utilisé pour `cropCutDay` et `cropCutMonth` | Questionnaires de l'enquête éthiopienne ESS |
+| Conversions d'unités des vagues LSMS 2021 non conformes à la formule du rendement | Documentation LSMS-ISA |
+| Définition de `YieldEst2_ton_ha_` en Tanzanie | Documentation LSMS-ISA |
+| Relation entre `CEEPA_time_avg` et `CEEPA_annual` | Documentation CEEPA |
+| Origine des 1 710 lignes de `Regional` qui ne vérifient aucune relation entre production, surface et rendement | Sources `RCeA` et `FAOSTAT` |
+| Version de GADM utilisée pour les identifiants géographiques | Auteurs de GROW-Africa |
