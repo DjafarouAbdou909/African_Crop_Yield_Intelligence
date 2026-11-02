@@ -249,9 +249,9 @@ Ces traitements seront implémentés sous forme de fonctions testées dans `src/
 2. Les traitements de la section 9.1 sont implémentés sous forme de fonctions testées et appliqués à une copie des données brutes.
 3. Le protocole d'évaluation de la section 9.4 est arrêté avant l'entraînement du premier modèle.
 
-**Recommandation relative à la cible, soumise à la validation du porteur du projet**
+**Choix de la cible, validé par le porteur du projet le 2 novembre 2026**
 
-| Usage | Cible recommandée | Justification |
+| Usage | Cible retenue | Justification |
 |---|---|---|
 | Généralisation spatiale et temporelle | `yieldTonHa` de `Regional`, niveaux 1 et 2 | Couverture de 47 pays sur la période 1960 à 2023 |
 | Prédiction à l'échelle de la parcelle | `YieldUsingGPS_ton_ha_` de `LSMS_survey` | Surface mesurée de manière objective |
