@@ -2,7 +2,7 @@
 
 **Projet :** African Crop Yield Intelligence  
 **Méthodologie :** CRISP-DM — Data Understanding  
-**Statut :** Audit préliminaire des quatre datasets
+**Statut :** Audit préliminaire complété par la phase de Data Understanding
 
 ## 1. Objectif et sources
 
@@ -336,12 +336,12 @@ Les indicateurs `QC_flag_*` ne doivent pas non plus être utilisés comme prédi
 
 ## 7. Synthèse transversale des quatre datasets
 
-| Dataset | Principaux points à résoudre | Décision provisoire |
-|---|---|---|
-| LSMS Crop Cut | Relation poids sec–rendement, année mal représentée, rôle des identifiants | Poursuivre l’audit |
-| LSMS Survey | Définitions des variantes de production, superficie et rendement ; risque de fuite | Poursuivre l’audit |
-| Point | Écart d’effectif à expliquer, doublons exacts, valeurs manquantes et différences entre sources | Poursuivre l’audit |
-| Regional | Valeurs manquantes, codes numériques suspects, niveaux géographiques et relation production–surface–rendement | Go restreint pour le Data Understanding |
+| Dataset | Principaux points à résoudre | Décision provisoire | Résultat après Data Understanding |
+|---|---|---|---|
+| LSMS Crop Cut | Relation poids sec–rendement, année mal représentée, rôle des identifiants | Poursuivre l’audit | Relation exacte de coefficient 0,625. Année correcte. Identifiants partiellement tronqués. Référence de validation pour l’Éthiopie |
+| LSMS Survey | Définitions des variantes de production, superficie et rendement ; risque de fuite | Poursuivre l’audit | Formules des quatre rendements établies. Cible manquante non aléatoire. `YieldUsingGPS_ton_ha_` recommandée |
+| Point | Écart d’effectif à expliquer, doublons exacts, valeurs manquantes et différences entre sources | Poursuivre l’audit | Écart d’effectif expliqué. Coordonnées erronées identifiées. Année liée à la source |
+| Regional | Valeurs manquantes, codes numériques suspects, niveaux géographiques et relation production–surface–rendement | Go restreint pour le Data Understanding | Colonnes permutées sur 17,1 % des lignes. Codes spéciaux expliqués. `yieldTonHa` recommandée aux niveaux 1 et 2 |
 
 ### Risques communs
 
@@ -364,3 +364,9 @@ Les résultats disponibles restent préliminaires et leur niveau de détail vari
 La prochaine étape consiste à compléter les vérifications nécessaires, mettre à jour le dictionnaire des données et établir une synthèse de compatibilité entre les fichiers. Toute éventuelle fusion devra être justifiée par la compatibilité des unités, des périodes, des niveaux géographiques, des méthodes de collecte et des définitions des variables.
 
 **Décision générale : poursuivre le Data Understanding.** Aucune préparation définitive pour la modélisation ni fusion des quatre datasets ne doit être engagée avant la clarification des risques importants, des définitions essentielles et des conditions de validation.
+
+## 9. Clôture de l’audit
+
+Les vérifications prévues dans ce rapport ont été réalisées dans `notebooks/02_data_understanding.ipynb`. Leurs résultats, les implications pour la suite du pipeline et les limites de l’analyse sont présentés dans `docs/data_understanding.md`.
+
+**Décision finale. Go pour la phase de Data Preparation**, sous trois conditions. Les fichiers sont traités séparément tant que la question des biais entre sources n’est pas tranchée. Les corrections identifiées sont implémentées sous forme de fonctions testées appliquées à une copie des données brutes. Le protocole d’évaluation par groupe et par période est arrêté avant l’entraînement du premier modèle.
