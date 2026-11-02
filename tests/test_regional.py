@@ -7,6 +7,7 @@ from src.data.regional import (
     corriger_identifiants_ghana,
     corriger_inversion_surface_production,
     harmoniser_pays,
+    harmoniser_saisons,
     jeu_modelisation_regional,
     reconstruire_niveau,
     remplacer_codes_speciaux,
@@ -18,7 +19,7 @@ def ligne(**valeurs):
     base = {
         "GDAM_ID": "L2ETH1", "L0_GID": "L0ETH075", "L1_GID": "L1ETH1", "L2_GID": "L2ETH1", "L3_GID": np.nan,
         "level": 2.0, "country": "Ethiopia", "crop": "Maize", "season_name": "Main",
-        "crop_production_system": "All (PS)", "harvest_year": 2015, "Source": "HarvestStat",
+        "saison": "Main", "crop_production_system": "All (PS)", "harvest_year": 2015, "Source": "HarvestStat",
         "areaHa": 100.0, "productionTon": 150.0, "yieldTonHa": 1.5,
     }
     base.update(valeurs)
@@ -84,6 +85,12 @@ class TestReferentielGeographique(unittest.TestCase):
         self.assertEqual(resultat["flag_gid_incomplet"].tolist(), [False, False, True])
 
 
+class TestHarmonisationSaisons(unittest.TestCase):
+    def test_meher_equivaut_a_main(self):
+        df = pd.DataFrame([ligne(season_name="Meher"), ligne(season_name="Belg"), ligne()])
+        self.assertEqual(harmoniser_saisons(df)["saison"].tolist(), ["Main", "Belg", "Main"])
+
+
 class TestSelectionLigneParCellule(unittest.TestCase):
     def test_priorite_au_systeme_global_puis_a_harveststat(self):
         df = pd.DataFrame([
@@ -91,10 +98,11 @@ class TestSelectionLigneParCellule(unittest.TestCase):
             ligne(Source="FAO_subnational", yieldTonHa=1.4),
             ligne(yieldTonHa=1.5),
             ligne(crop="Rice", Source="RCeA", crop_production_system=np.nan),
+            ligne(saison="Belg", Source="RCeA"),
         ])
         resultat = selectionner_ligne_par_cellule(df)
 
-        self.assertEqual(resultat["flag_doublon_cellule"].tolist(), [True, True, False, False])
+        self.assertEqual(resultat["flag_doublon_cellule"].tolist(), [True, True, False, False, False])
 
     def test_ligne_avec_rendement_prioritaire(self):
         df = pd.DataFrame([ligne(yieldTonHa=np.nan), ligne(Source="RCeA", crop_production_system="irrigated")])

@@ -24,6 +24,7 @@ LIBELLES_PAYS = {
 }
 SYSTEMES_GLOBAUX = {"All (PS)"}
 SOURCE_PRIORITAIRE = "HarvestStat"
+SAISONS_EQUIVALENTES = {"Meher": "Main"}
 NIVEAUX_MODELISATION = [1, 2]
 
 
@@ -99,6 +100,18 @@ def reconstruire_niveau(df):
     return resultat
 
 
+def harmoniser_saisons(df):
+    """Ajoute une colonne saison qui unifie les libellés désignant la même saison.
+
+    En Éthiopie, HarvestStat nomme Meher la saison principale que FAO_subnational et
+    RCeA nomment Main pour les mêmes zones et les mêmes années. Les autres libellés
+    sont conservés tels quels, faute de preuve de leur équivalence.
+    """
+    resultat = df.copy()
+    resultat["saison"] = resultat["season_name"].replace(SAISONS_EQUIVALENTES)
+    return resultat
+
+
 def zone_geographique(df):
     """Retourne l'identifiant GADM le plus fin disponible pour chaque ligne."""
     return (
@@ -111,7 +124,7 @@ def zone_geographique(df):
 
 
 def selectionner_ligne_par_cellule(df):
-    """Retient une seule ligne par zone, culture, saison et année de récolte.
+    """Retient une seule ligne par zone, culture, saison harmonisée et année de récolte.
 
     L'ordre de priorité est le suivant. Une ligne dotée d'un rendement passe avant
     une ligne sans rendement. Le système de production global, ou non précisé, passe
@@ -124,7 +137,7 @@ def selectionner_ligne_par_cellule(df):
     tri = pd.DataFrame({
         "zone": zone_geographique(resultat),
         "culture": resultat["crop"],
-        "saison": resultat["season_name"],
+        "saison": resultat["saison"],
         "annee": resultat["harvest_year"],
         "rang_rendement": resultat["yieldTonHa"].isna().astype(int),
         "rang_systeme": (~(systeme.isna() | systeme.isin(SYSTEMES_GLOBAUX))).astype(int),
@@ -154,6 +167,7 @@ def preparer_regional(brut):
     df = corriger_inversion_surface_production(df)
     df = corriger_identifiants_ghana(df)
     df = harmoniser_pays(df)
+    df = harmoniser_saisons(df)
     df = reconstruire_niveau(df)
     df = signaler_hierarchie_incoherente(df)
 
