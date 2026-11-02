@@ -243,11 +243,11 @@ Les rendements aberrants ont été conservés dans ces données. L'article rappo
 
 | Rôle | Colonnes concernées |
 |---|---|
-| Cibles candidates | `Yield_ton_ha_` dans les fichiers cropcut, survey et point ; `yieldTonHa` dans le fichier regional ; variantes `YieldUsingGPS_ton_ha_` et autres estimations de rendement à examiner. |
+| Cibles candidates | `yieldTonHa` de `regional` aux niveaux 1 et 2 pour la généralisation spatiale et temporelle. `YieldUsingGPS_ton_ha_` de `survey` à l'échelle de la parcelle. `Yield_ton_ha_` de `cropcut` comme référence de validation en Éthiopie. Recommandation à valider par le porteur du projet. |
 | Clés de regroupement | `L0_GID`, `L1_GID`, `L2_GID`, `L3_GID`, pays, `admin_1`, `admin_2`, identifiants de ménage, parcelle, champ, exploitant et site. |
 | Variables explicatives possibles | Culture, année (`harvest_year`, `HarvestYear`, `AgYearStart`, `AgYearEnd`) et éventuellement système de production ou source, sous réserve des tests d'ablation. |
 | Variables exclues pour risque de fuite | Production, surfaces et poids de récolte lorsqu'ils entrent dans le calcul de la cible ; dates et mois de récolte non disponibles au moment de la prédiction ; variantes de rendement non retenues. |
-| Variables à documenter | `prcLeft`, `ProdEst2_kg_`, `YieldEst2_ton_ha_`, `YieldEst2UsingGPS_ton_ha_`, `season_name`, `crop_production_system` et les indicateurs `QC_flag`. |
+| Variables à documenter | `prcLeft`, `season_name` et `crop_production_system`. La définition de `YieldEst2_ton_ha_` en Tanzanie et la nomenclature des indicateurs `QC_flag` restent à confirmer. |
 
 Les quatre fichiers recensés ne contiennent pas directement de variables climatiques, pédologiques ou agronomiques détaillées dans les colonnes présentées ici. Les variables explicatives disponibles semblent principalement concerner la culture, la localisation, le calendrier agricole et la source des données.
 
@@ -267,3 +267,12 @@ Les quatre fichiers recensés ne contiennent pas directement de variables climat
 | Le fichier Regional contient des niveaux d'agrégation différents. | Examiner `level` et traiter séparément les observations nationales si nécessaire. |
 | La source peut servir de proxy pour l'année, le pays ou la méthode de collecte. | Tester son apport par ablation et vérifier qu'elle ne crée pas de fuite. |
 | Les indicateurs `QC_flag` peuvent dépendre de la cible. | Ne pas les utiliser avant d'avoir documenté leur définition. |
+| Les rendements manquants de `survey` résultent surtout du filtrage des valeurs aberrantes par les auteurs. | Ne pas les imputer ni les recalculer et documenter la troncature de la distribution. |
+| Surface et production sont permutées sur 33 740 lignes de `regional`. | Permuter les deux colonnes sur ces lignes avant toute pondération ou agrégation. |
+| Les codes -999 et -99 se propagent jusqu'au rendement. | Convertir les codes en valeurs manquantes et invalider les rendements négatifs. |
+| Des valeurs manquantes sont déguisées sous la forme `[]`, `none` ou d'un caractère BOM. | Normaliser les chaînes avant tout calcul, toute jointure et tout regroupement. |
+| Certains identifiants sont tronqués par la limite de 15 chiffres d'Excel ou par la notation scientifique. | Reconstruire le ménage par `holder_id // 100` et prévoir un regroupement géographique de repli. |
+| Les observations sont regroupées en grappes spatiales et en panels de ménages. | Construire les partitions par groupe spatial, par ménage et par période. |
+| Les identifiants pays du Ghana et la hiérarchie GADM associée sont incohérents. | Corriger `L0_GID`, `L1_GID` et `L2_GID` du Ghana avant toute agrégation par pays. |
+| Les dates de `cropcut` relèvent probablement du calendrier éthiopien. | Ne pas les convertir en dates grégoriennes sans conversion de calendrier. |
+| Les sources mesurent le rendement avec des biais différents. | Ne pas fusionner les fichiers sans variable de type de source ni correction de biais. |
