@@ -44,25 +44,28 @@ Ces informations décrivent les traitements rapportés par les auteurs. Leur eff
 
 Ce fichier contient des observations de mesures directes de récolte (*crop cuts*) associées aux enquêtes LSMS. La documentation indique une couverture concernant l’Éthiopie et 12 cultures.
 
-L’effectif de référence mentionné dans le dictionnaire est de 11 345 observations. Cet effectif doit être confirmé sur la version exacte du fichier utilisée.
+L’effectif de 11 345 observations est confirmé sur le fichier analysé, qui ne contient que l’Éthiopie, 12 cultures et 4 vagues d’enquête.
 
 ### Constats préliminaires
 
 | Observation | Risque ou question | Action prévue |
 |---|---|---|
-| `Yield_ton_ha_` semble dépendre de `dryWeightKg`. | Fuite de données potentielle si le poids sec intervient dans le calcul de la cible. | Vérifier la relation mathématique, son coefficient et ses exceptions. |
-| L’année 2012 apparaît sous la forme `2,012`. | Incohérence de représentation et risque de conversion incorrecte. | Vérifier la valeur d’origine et documenter la normalisation sur une copie de travail. |
-| Plusieurs colonnes contiennent des identifiants ou des codes. | Risque de redondance, de fuite indirecte ou de perte d’informations utiles au regroupement. | Examiner leur rôle avant toute exclusion du modèle. |
+| `Yield_ton_ha_` est égal à `0,625 × dryWeightKg` sur 100 % des lignes. | Fuite certaine. | Exclure `dryWeightKg` et `freshWeightKg` des prédicteurs. |
+| L’année 2012 apparaissait sous la forme `2,012`. | Aucun. `Year` est un entier qui prend les valeurs 2012, 2014, 2016 et 2019. Il s’agissait d’un artefact d’affichage. | Aucune action. |
+| `household_id` vaut `holder_id // 100` pour 99,03 % des lignes. Les identifiants de 16 chiffres sont tronqués et `holder_id` est absent pour toute la vague `ETH2018`. | Regroupements faussés et fusion possible d’exploitants distincts. | Reconstruire le ménage à partir de `holder_id` et prévoir un regroupement géographique pour `ETH2018`. |
+| 914 exploitants sont observés sur deux vagues et 527 sur trois. | Fuite entre entraînement et test en cas de partition aléatoire. | Partitionner par ménage ou par zone géographique. |
+| Aucun jour 31 et 116 dates au 30 février. | Mauvaise conversion des dates. | Considérer le calendrier éthiopien et réserver ces colonnes aux contrôles. |
+| 80 lignes ont un poids sec supérieur au poids frais. | Erreur de saisie reportée sur la cible. | Signaler ces lignes et mesurer l’effet de leur exclusion. |
 
 ### Risque de fuite de données
 
-Une relation approximative a été relevée entre le rendement et le poids sec :
+La relation entre le rendement et le poids sec est exacte sur les 11 345 lignes, avec un écart maximal nul.
 
-`Yield_ton_ha_ ≈ dryWeightKg × 0,6267`
+`Yield_ton_ha_ = dryWeightKg × 0,625`
 
-Cette relation est un constat préliminaire et non une formule officiellement confirmée. Il reste à établir l’origine du coefficient, les observations concernées et les éventuelles exceptions.
+Le coefficient approché de 0,6267 relevé lors de l’audit préliminaire est remplacé par la valeur exacte de 0,625. Celle-ci correspond à 1 kg récolté sur un carré de 4 m sur 4 m, soit 16 m², converti en tonnes par hectare, ce qui est cohérent avec le protocole de mesure par sous-parcelle cité dans l’article.
 
-Si `dryWeightKg` intervient directement dans le calcul de la cible, son utilisation comme variable explicative pourrait rendre l’évaluation artificiellement favorable lorsque cette mesure n’est pas disponible au moment de la prédiction.
+`dryWeightKg` est donc égal à la cible à une constante près. Son utilisation comme variable explicative constituerait une fuite certaine.
 
 Les identifiants doivent également être étudiés pour déterminer s’ils sont utiles à la traçabilité ou à la constitution des groupes d’entraînement et de test.
 
@@ -75,6 +78,8 @@ Les identifiants doivent également être étudiés pour déterminer s’ils son
 5. Vérifier les dates et les années agricoles.
 
 **Décision provisoire :** poursuivre le Data Understanding. Aucune suppression définitive de colonne ni transformation irréversible n’est justifiée à ce stade.
+
+**Mise à jour après le Data Understanding.** Les actions de suivi sont réalisées dans `notebooks/02_data_understanding.ipynb`. Le fichier est retenu comme référence de validation pour l’Éthiopie.
 
 ## 4. Dataset 2 — LSMS Survey
 
