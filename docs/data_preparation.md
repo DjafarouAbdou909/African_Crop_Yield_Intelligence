@@ -86,3 +86,48 @@ Des identifiants de ligne, de ménage et de grappe spatiale sont créés pour pe
 | Poids sec supérieur au poids frais, signalé | 80 |
 | Date de mesure impossible dans le calendrier éthiopien, signalée | 19 |
 | Cible hors des bornes de plausibilité | 2 |
+
+## 5. Jeux produits
+
+Les jeux sont écrits au format CSV compressé dans `data/processed`. Ce dossier est exclu du dépôt git, car son contenu se reproduit entièrement à partir des données brutes et du code.
+
+| Jeu | Lignes | Contenu |
+|---|---:|---|
+| `regional_prepare` | 197 535 | Fichier corrigé avec l'ensemble de ses indicateurs |
+| `regional_modelisation` | 146 151 | Niveaux 1 et 2, une ligne par cellule, rendement renseigné et plausible. 45 pays, 34 cultures, période 1960 à 2023 |
+| `survey_prepare` | 194 704 | Fichier corrigé avec l'ensemble de ses indicateurs |
+| `survey_modelisation` | 151 138 | Cible GPS renseignée et plausible. 12 pays, 25 cultures, période 2005 à 2022 |
+| `cropcut_prepare` | 11 345 | Fichier corrigé avec l'ensemble de ses indicateurs |
+| `cropcut_validation` | 11 263 | Mesures cohérentes et plausibles |
+| `bornes_plausibilite` | 34 | Bornes basse et haute par culture |
+
+`HarvestStat` représente 81 % de `regional_modelisation`. Djibouti et la Guinée équatoriale en sont absents, car ils ne disposent que de données nationales.
+
+## 6. Contrôles
+
+Le notebook de référence vérifie les propriétés suivantes et s'interrompt si l'une d'elles n'est pas satisfaite.
+
+- Aucun rendement négatif ne subsiste dans `regional`.
+- Chaque code pays ne porte qu'un seul nom.
+- Le jeu de modélisation de `regional` ne contient qu'une ligne par cellule.
+- L'identifiant de ligne de `survey` est unique et aucune copie exacte ne subsiste.
+- Les cibles sont renseignées dans les trois jeux finaux.
+- Les tableaux bruts ne sont pas modifiés par la préparation.
+
+## 7. Limites et points ouverts
+
+- **Couverture de la cible GPS.** `YieldUsingGPS_ton_ha_` est absente pour l'ensemble du Burkina Faso et quasi absente pour le Bénin, avec 69 lignes contre 3 834 pour la cible fondée sur la surface déclarée. Elle est réduite de moitié pour la Côte d'Ivoire. Le maintien de cette cible, ou le recours à `Yield_ton_ha_` lorsque la surface GPS manque avec un indicateur de méthode de mesure, doit être confirmé par le porteur du projet.
+- **Hiérarchie du Ghana.** 488 lignes conservent un identifiant de niveau 2 rattaché à plusieurs régions. Leur correction nécessite les polygones GADM.
+- **Lignes inexpliquées.** 1 710 lignes de `regional` ne vérifient aucune relation entre production, surface et rendement. Elles restent dans le jeu de modélisation lorsque leur rendement est plausible.
+- **Saisons.** Seule l'équivalence entre Meher et Main est établie. Les autres libellés de saison sont conservés tels quels, faute de preuve de leur équivalence.
+- **Identifiants de ménage.** L'identifiant est manquant pour la vague `ETH2018` de `cropcut` et pour 6 106 lignes du jeu de modélisation de `survey`. La grappe spatiale sert alors de groupe de repli.
+
+## 8. Reproductibilité
+
+- Les tests s'exécutent depuis la racine du projet avec la commande `python -m unittest discover -s tests -t .`.
+- La préparation complète s'exécute avec la commande `python -m src.data.prepare`, ou par le notebook de référence.
+- La première exécution lit les fichiers Excel en une dizaine de minutes et alimente le cache. Les exécutions suivantes durent environ deux minutes, l'essentiel étant consacré à l'écriture des fichiers compressés.
+
+## 9. Suite du pipeline
+
+La troisième condition de la décision issue du Data Understanding reste à remplir. Le protocole d'évaluation doit être défini avant l'entraînement du premier modèle, avec des partitions par ménage ou par grappe pour `survey`, par zone géographique et par période pour `regional`, et une évaluation ventilée par culture et par source.
