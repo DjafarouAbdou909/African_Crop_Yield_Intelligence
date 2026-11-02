@@ -261,7 +261,7 @@ Les périodes, méthodes de collecte, niveaux géographiques et méthodes de cal
 | `level` | 491 | 0,25 % |
 | `admin_1` | 318 | 0,16 % |
 
-L’absence fréquente de `L3_GID` peut être liée au niveau d’agrégation des observations plutôt qu’à une erreur. Cette hypothèse doit être vérifiée selon la source et le niveau géographique.
+L’absence fréquente de `L3_GID` est structurelle. Seules les lignes de `level` 3 disposent de cet identifiant, ce qui a été vérifié sur l’ensemble du fichier.
 
 Les valeurs manquantes ne doivent pas être supprimées ou imputées avant d’avoir compris leur répartition et leur origine.
 
@@ -289,7 +289,7 @@ Aucune suppression automatique n’est décidée à ce stade.
 | 3 | 3 023 |
 | Valeur manquante | 491 |
 
-Cette répartition est compatible avec la présence de données nationales et infranationales. La signification officielle de chaque valeur de `level` doit néanmoins être confirmée.
+Cette répartition est compatible avec la présence de données nationales et infranationales. Chaque valeur de `level` correspond exactement au dernier identifiant GID renseigné, et les 11 884 lignes de niveau 0 sont les lignes `FAOSTAT`.
 
 ### Colonnes à documenter
 
@@ -324,6 +324,15 @@ Les indicateurs `QC_flag_*` ne doivent pas non plus être utilisés comme prédi
 8. Définir les contrôles automatisés après établissement des règles de validation.
 
 **Décision provisoire : Go restreint pour poursuivre le Data Understanding.** Le fichier n’est pas encore prêt pour une préparation définitive destinée à la modélisation.
+
+**Mise à jour après le Data Understanding.** Les vérifications complémentaires apportent les résultats suivants.
+
+- `yieldTonHa` est égal à la production divisée par la surface pour 126 696 lignes. Pour 33 740 lignes, soit 17,1 % du fichier, il est égal au rapport inverse. Le rendement reste plausible, par exemple 9,98 t/ha pour le manioc, alors que le rapport entre production et surface donnerait 0,10 t/ha. Ce sont donc les colonnes `areaHa` et `productionTon` qui sont permutées.
+- Les codes -999 proviennent uniquement de `AgroMAPS` et les codes -99 de `RCeA`. Les 30 rendements négatifs autres que -99 résultent tous d’un calcul intégrant le code -999.
+- Les indicateurs `QC_flag_*` suivent une nomenclature compatible avec celle de FAOSTAT et ne sont informatifs que pour cette source.
+- Le Ghana possède 25 `L0_GID` distincts et une hiérarchie L1 et L2 incohérente. `country_code` mélange des codes ISO à deux et à trois lettres. Le fichier couvre 47 pays une fois ces doublons corrigés.
+- Des valeurs manquantes sont déguisées sous la forme `[]` ou `none`, et 318 identifiants du Lesotho débutent par un caractère invisible BOM.
+- `season_name` compte 34 modalités et `crop_production_system` 16. Les sources qui se recouvrent divergent de 17,5 % en médiane, ce qui donne un ordre de grandeur du bruit de la cible.
 
 ## 7. Synthèse transversale des quatre datasets
 
