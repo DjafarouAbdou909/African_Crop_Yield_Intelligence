@@ -8,6 +8,7 @@ from src.data.survey import (
     harmoniser_annee,
     harmoniser_pays,
     jeu_modelisation_survey,
+    signaler_surface_gps_recopiee,
     signaler_valeurs_impossibles,
     supprimer_doublons_exacts,
 )
@@ -42,6 +43,16 @@ class TestPreparationSurvey(unittest.TestCase):
 
         self.assertEqual(resultat["flag_prccrop_invalide"].tolist(), [True, False, False])
         self.assertEqual(resultat["flag_surface_aberrante"].tolist(), [False, True, False])
+
+    def test_surface_gps_recopiee(self):
+        df = pd.DataFrame([
+            ligne(GPSArea_ha_=0.5),
+            ligne(),
+            ligne(GPSArea_ha_=np.nan, ReportedArea_ha_=np.nan),
+        ])
+        resultat = signaler_surface_gps_recopiee(df)
+
+        self.assertEqual(resultat["flag_surface_gps_recopiee"].tolist(), [True, False, False])
 
     def test_identifiants(self):
         df = pd.DataFrame([
