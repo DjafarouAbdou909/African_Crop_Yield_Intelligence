@@ -192,7 +192,7 @@ Le 3 novembre 2026, sur délégation du porteur du projet, le climat est acquis 
 |---|---|---|
 | `T2M_MAX` et `T2M_MIN` | Températures maximale et minimale à 2 m | Degrés-jours de croissance et degrés-jours au-delà de 30 et de 35 °C |
 | `T2MDEW` | Point de rosée à 2 m | Déficit de pression de vapeur |
-| `PRECTOTCORR` | Précipitations corrigées par les pluviomètres | Cumul, jours de pluie et plus longue séquence sèche, à titre provisoire |
+| `PRECTOTCORR` | Précipitations corrigées par les pluviomètres | Cumul, jours de pluie et plus longue séquence sèche |
 | `ALLSKY_SFC_SW_DWN` | Rayonnement solaire incident | Rayonnement cumulé |
 | `WS2M` | Vent à 2 m | Évapotranspiration de référence |
 | `GWETROOT` | Humidité du sol dans la zone racinaire | Stress hydrique |
@@ -201,13 +201,13 @@ Le 3 novembre 2026, sur délégation du porteur du projet, le climat est acquis 
 
 **Limites**
 
-- La résolution de 0,5 degré convient à la température, dont le champ varie lentement, mais lisse les précipitations. Les précipitations de MERRA-2 sont moins fiables que celles de CHIRPS en Afrique et restent provisoires.
+- La résolution de 0,5 degré convient à la température, dont le champ varie lentement, mais lisse les précipitations. Les précipitations de MERRA-2 sont moins fiables que celles de CHIRPS en Afrique, notamment pour les épisodes secs localisés.
 - Le rayonnement CERES n'est disponible qu'à partir de 1984. Les variables qui en dépendent seront manquantes pour les saisons antérieures.
 - Les séries commencent le 1er janvier 1981. Une saison récoltée en 1981 mais semée en 1980 n'est couverte qu'en partie.
 
-**Décision attendue du porteur du projet**
+**Décision du porteur du projet**
 
-CHIRPS reste la source de précipitations recommandée. Son acquisition par Google Earth Engine demande un compte gratuit à usage non commercial et un projet Google Cloud, que seul le porteur du projet peut créer. Les précipitations de POWER seront alors comparées à celles de CHIRPS, puis remplacées.
+Le 3 novembre 2026, le porteur du projet a renoncé à Google Earth Engine. Les précipitations de NASA POWER sont donc retenues comme source définitive, et CHIRPS est abandonné. Leur moindre précision constitue une limite du projet, qui devra être rappelée dans l'interprétation des modèles et de l'importance des variables de pluie.
 
 ## 10. Reproductibilité
 
