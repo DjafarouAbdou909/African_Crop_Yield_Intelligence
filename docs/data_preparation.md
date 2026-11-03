@@ -7,7 +7,7 @@
 | Code | `src/data/` et `tests/` |
 | Notebook de référence | `notebooks/03_data_preparation.ipynb` |
 | Documents associés | `docs/data_understanding.md` et `docs/data_dictionary.md` |
-| Statut | Préparation terminée. Choix de la cible de `survey` à confirmer |
+| Statut | Préparation terminée |
 
 ## 1. Objet du document
 
@@ -20,7 +20,7 @@ Ce rapport décrit les corrections appliquées aux données GROW-Africa à la su
 | Fichiers préparés | `regional`, `survey` et `cropcut`, traités séparément | Première condition de la décision issue du Data Understanding |
 | Fichier exclu | `point`, qui ne porte aucune des cibles retenues | Décision du porteur du projet |
 | Cible principale | `yieldTonHa` de `regional` aux niveaux administratifs 1 et 2 | Choix validé le 2 novembre 2026 |
-| Cible à l'échelle de la parcelle | `YieldUsingGPS_ton_ha_` de `survey` | Choix validé le 2 novembre 2026, à reconfirmer au vu de la section 7 |
+| Cible à l'échelle de la parcelle | `YieldUsingGPS_ton_ha_` de `survey`, sans remplacement par le rendement fondé sur la surface déclarée | Choix validé le 2 novembre 2026, maintenu le 3 novembre 2026 au vu de la section 7.1 |
 | Référence de validation | `Yield_ton_ha_` de `cropcut` pour l'Éthiopie | Choix validé le 2 novembre 2026 |
 | Une ligne par cellule dans `regional` | Priorité au système de production global, puis à la source `HarvestStat` | Décision du porteur du projet |
 | Traçabilité | Aucune ligne n'est supprimée des tableaux préparés, sauf les copies exactes de `survey`. Les lignes corrigées ou écartées portent un indicateur préfixé par `flag_` | Principe de la phase |
@@ -36,7 +36,7 @@ Ce rapport décrit les corrections appliquées aux données GROW-Africa à la su
 | `src/data/cropcut.py` | Corrections propres au fichier `cropcut` et extraction du jeu de validation |
 | `src/data/prepare.py` | Orchestration de l'ensemble et export dans `data/processed` |
 
-Chaque fonction travaille sur une copie de son entrée. La suite de 25 tests unitaires de `tests/` vérifie chaque correction sur des cas construits pour l'occasion.
+Chaque fonction travaille sur une copie de son entrée. La suite de 26 tests unitaires de `tests/` vérifie chaque correction sur des cas construits pour l'occasion.
 
 ## 4. Corrections appliquées
 
@@ -72,6 +72,7 @@ Chaque fonction travaille sur une copie de son entrée. La suite de 25 tests uni
 | Année de fin de campagne déduite de l'année de début | 218 |
 | Part de culture supérieure à 100, signalée | 80 |
 | Surface supérieure à 1 000 ha, signalée | 1 |
+| Surface GPS strictement égale à la surface déclarée, signalée | 7 403 |
 | Identifiant de ménage tronqué, signalé et remplacé par une valeur manquante | 3 416 |
 | Hiérarchie GADM incohérente | 10 |
 | Cible hors des bornes de plausibilité | 737 |
@@ -116,7 +117,23 @@ Le notebook de référence vérifie les propriétés suivantes et s'interrompt s
 
 ## 7. Limites et points ouverts
 
-- **Couverture de la cible GPS.** `YieldUsingGPS_ton_ha_` est absente pour l'ensemble du Burkina Faso et quasi absente pour le Bénin, avec 69 lignes contre 3 834 pour la cible fondée sur la surface déclarée. Elle est réduite de moitié pour la Côte d'Ivoire. Le maintien de cette cible, ou le recours à `Yield_ton_ha_` lorsque la surface GPS manque avec un indicateur de méthode de mesure, doit être confirmé par le porteur du projet.
+### 7.1 Choix de la cible de `survey`
+
+**Constat**
+
+`YieldUsingGPS_ton_ha_` est absente pour l'ensemble du Burkina Faso et quasi absente pour le Bénin, avec 69 lignes contre 3 834 pour la cible fondée sur la surface déclarée. Elle est réduite de moitié pour la Côte d'Ivoire. Sur les 117 719 parcelles qui disposent des deux rendements, le rapport médian entre le rendement fondé sur la surface déclarée et le rendement GPS vaut 0,994, mais les deux valeurs diffèrent de plus de 50 % pour 43,8 % des parcelles. Cette part varie de 22,9 % au Togo à 69,1 % en Guinée-Bissau.
+
+**Analyse**
+
+Recourir à `Yield_ton_ha_` lorsque la surface GPS manque introduirait un bruit de mesure considérable dans la cible. Ce bruit serait entièrement confondu avec le pays dans le cas du Burkina Faso, qui ne dispose que de la surface déclarée, si bien qu'un indicateur de méthode ne permettrait pas de séparer l'effet de la méthode de celui du pays. Le Burkina Faso et le Bénin restent par ailleurs couverts par `regional_modelisation`, avec respectivement 15 327 et 19 751 lignes.
+
+**Décision**
+
+La cible `YieldUsingGPS_ton_ha_` est maintenue sans remplacement. Ce choix a été arrêté le 3 novembre 2026 sur délégation du porteur du projet. `Yield_ton_ha_` reste disponible dans `survey_prepare` pour des analyses de sensibilité. Le modèle à l'échelle de la parcelle couvre 12 pays, et son application au Burkina Faso relèverait d'une extrapolation hors du domaine d'entraînement.
+
+### 7.2 Autres limites
+
+- **Surfaces GPS recopiées.** 7 403 surfaces GPS sont strictement égales à la surface déclarée, dont 43,6 % des parcelles de `LSMS_TGO2021` dans le jeu de modélisation. Une telle égalité est improbable entre deux mesures indépendantes et suggère une reprise de la surface déclarée en l'absence de mesure GPS. Ces lignes sont signalées sans être écartées, et leur effet devra être mesuré lors de l'évaluation.
 - **Hiérarchie du Ghana.** 488 lignes conservent un identifiant de niveau 2 rattaché à plusieurs régions. Leur correction nécessite les polygones GADM.
 - **Lignes inexpliquées.** 1 710 lignes de `regional` ne vérifient aucune relation entre production, surface et rendement. Elles restent dans le jeu de modélisation lorsque leur rendement est plausible.
 - **Saisons.** Seule l'équivalence entre Meher et Main est établie. Les autres libellés de saison sont conservés tels quels, faute de preuve de leur équivalence.
@@ -130,4 +147,4 @@ Le notebook de référence vérifie les propriétés suivantes et s'interrompt s
 
 ## 9. Suite du pipeline
 
-La troisième condition de la décision issue du Data Understanding reste à remplir. Le protocole d'évaluation doit être défini avant l'entraînement du premier modèle, avec des partitions par ménage ou par grappe pour `survey`, par zone géographique et par période pour `regional`, et une évaluation ventilée par culture et par source.
+La troisième condition de la décision issue du Data Understanding reste à remplir. Le protocole d'évaluation doit être défini avant l'entraînement du premier modèle, avec des partitions par ménage ou par grappe pour `survey`, par zone géographique et par période pour `regional`, et une évaluation ventilée par culture et par source. Pour `survey`, la performance devra aussi être mesurée avec et sans les surfaces GPS recopiées.
