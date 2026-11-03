@@ -277,4 +277,5 @@ Ces traitements seront implémentés sous forme de fonctions testées dans `src/
 | Définition de `YieldEst2_ton_ha_` en Tanzanie | Documentation LSMS-ISA |
 | Relation entre `CEEPA_time_avg` et `CEEPA_annual` | Documentation CEEPA |
 | Origine des 1 710 lignes de `Regional` qui ne vérifient aucune relation entre production, surface et rendement | Sources `RCeA` et `FAOSTAT` |
-| Version de GADM visée par la table de correspondance de la version 2.0 | Comparaison des identifiants et des noms avec les contours GADM |
+
+La version de GADM visée par la table de correspondance de la version 2.0 a été établie le 3 novembre 2026. Il s'agit de GADM 4.1, dont les codes et les noms coïncident entièrement avec ceux de la table dans les 45 pays de `regional_modelisation`. Le détail figure dans `docs/explanatory_variables.md`.
