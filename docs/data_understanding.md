@@ -46,6 +46,8 @@ Chaque fichier contient une feuille unique nommée `Sheet1`. Les empreintes suiv
 | `GROW-Africa_Point.xlsx` | 131 812 | 17 | `18e226b799fcfa732a11886c9e3b6fbe8cc993fed8dd80ee433466a92271a0c1` |
 | `GROW-Africa_Regional.xlsx` | 197 535 | 25 | `15e92a193e113cf24e52c52dc4f512a55b575e3b75a1c1e134556256784f352f` |
 
+Les fichiers `Regional`, `LSMS_survey` et `Point` sont identiques octet par octet à ceux de l'archive officielle, dont l'empreinte MD5 est commune aux versions 1.0 et 2.0 publiées sur Zenodo. Le fichier `LSMS_cropcut` a été réenregistré localement. Son empreinte diffère de celle du fichier officiel, `6d80f3c0df7c9878a2c2e2ff81122448a8cd1807902db4f2a94e635e6b247bb8`, mais son contenu est identique cellule par cellule. Les identifiants tronqués relevés dans ce rapport figurent donc dans les fichiers publiés par les auteurs.
+
 ### 3.2 Réconciliation avec l'article
 
 - Le total des quatre fichiers atteint exactement les 535 844 observations publiées.
@@ -275,4 +277,4 @@ Ces traitements seront implémentés sous forme de fonctions testées dans `src/
 | Définition de `YieldEst2_ton_ha_` en Tanzanie | Documentation LSMS-ISA |
 | Relation entre `CEEPA_time_avg` et `CEEPA_annual` | Documentation CEEPA |
 | Origine des 1 710 lignes de `Regional` qui ne vérifient aucune relation entre production, surface et rendement | Sources `RCeA` et `FAOSTAT` |
-| Version de GADM utilisée pour les identifiants géographiques | Auteurs de GROW-Africa |
+| Version de GADM visée par la table de correspondance de la version 2.0 | Comparaison des identifiants et des noms avec les contours GADM |
