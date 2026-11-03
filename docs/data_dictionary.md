@@ -57,8 +57,8 @@ Les statistiques descriptives seront générées par un script dans `src/data/`.
 | Nettoyage effectué par les auteurs | Harmonisation des noms de cultures et des références géographiques, suppression des doublons et filtrage de certains rendements aberrants | Article, p. 4 |
 | Filtrage des rendements aberrants | Dans les données ponctuelles, exclusion des rendements inférieurs à 10 % de la médiane ou supérieurs à 200 % du 98e percentile de la distribution régionale de la culture | Article, p. 4 |
 | Données nationales et sous-nationales | Les rendements aberrants n'ont pas été filtrés dans ces données | Article, p. 4 |
-| Version utilisée | À confirmer. Le README mentionne la v1.0 ; une v2.0 existe sur Zenodo. DOI : `10.5281/zenodo.14961637` | À vérifier |
-| Licence des données | À vérifier sur la page Zenodo. La licence de l'article ne permet pas de déduire celle des données. | À vérifier |
+| Version utilisée | Version 1.0, DOI `10.5281/zenodo.14961637`. L'archive de données de la version 2.0, DOI `10.5281/zenodo.16544448`, porte la même empreinte MD5 et contient donc les mêmes fichiers. `regional`, `survey` et `point` sont identiques octet par octet aux fichiers officiels. `cropcut` a été réenregistré localement, avec un contenu identique cellule par cellule | Vérifié le 3 novembre 2026 |
+| Licence des données | Creative Commons Attribution 4.0 pour les versions 1.0 et 2.0, selon les métadonnées Zenodo. Les contours GADM relèvent de leur licence propre | Vérifié le 3 novembre 2026 |
 
 ### Traitements préalablement appliqués aux données par les auteurs
 
