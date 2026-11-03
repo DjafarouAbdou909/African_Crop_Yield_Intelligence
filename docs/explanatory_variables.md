@@ -7,7 +7,7 @@
 | Code | `src/features/` et `tests/test_geographie.py` |
 | Notebook de référence | `notebooks/05_explanatory_variables.ipynb` |
 | Documents associés | `docs/evaluation_protocol.md` et `docs/data_preparation.md` |
-| Statut | Décisions arrêtées, géographie acquise, acquisition du climat bloquée par l'infrastructure |
+| Statut | Décisions arrêtées, géographie acquise, climat en cours d'acquisition auprès de NASA POWER |
 
 ## 1. Objet du document
 
@@ -176,23 +176,42 @@ Les décisions suivantes ont été arrêtées le 3 novembre 2026 sur délégatio
 | CHIRTS-daily | Les températures journalières couvrent 1983 à 2016 seulement | Inutilisable, car la période future du protocole commence en 2017 |
 | AgERA5 | Le téléchargement exige un compte Copernicus Climate Data Store, absent du poste | Bloqué sans action du porteur du projet |
 | CHIRPS | Le serveur du Climate Hazards Center n'a délivré que 110 ko en quinze minutes depuis ce poste. L'archive journalière de l'Afrique à 0,05° représente environ 13 Go | Téléchargement local impossible à ce débit |
+| CHIRPS par l'IRI Data Library | L'extraction côté serveur fonctionne, mais avec un débit de 26 ko par seconde, soit plus de 50 heures pour l'Afrique à 0,25° | Impraticable |
+| NASA POWER | La série journalière 1981 à 2023 de sept variables d'une maille s'obtient en 4 secondes, sans compte | Faisable localement |
 | SoilGrids 2.0 | Une fenêtre de 512 par 512 pixels se lit à distance en environ une seconde | Faisable localement |
 
 **Analyse**
 
 Le traitement local reste adapté aux données statiques, comme la géographie et les sols. Il ne l'est pas pour les séries climatiques journalières, dont le volume est incompatible avec le débit observé. L'agrégation côté serveur de Google Earth Engine supprime ce volume, puisque seules les moyennes par zone sont téléchargées. Son catalogue contient CHIRPS journalier et ERA5-Land journalier, qui fournit les températures sur toute la période.
 
+**Décision**
+
+Le 3 novembre 2026, sur délégation du porteur du projet, le climat est acquis auprès de NASA POWER, seule source sans compte dont le débit permet l'acquisition depuis ce poste. Les séries proviennent de la réanalyse MERRA-2, sur une grille de 0,5 degré de latitude par 0,625 degré de longitude, et du produit CERES pour le rayonnement.
+
+| Variable POWER | Contenu | Usage prévu |
+|---|---|---|
+| `T2M_MAX` et `T2M_MIN` | Températures maximale et minimale à 2 m | Degrés-jours de croissance et degrés-jours au-delà de 30 et de 35 °C |
+| `T2MDEW` | Point de rosée à 2 m | Déficit de pression de vapeur |
+| `PRECTOTCORR` | Précipitations corrigées par les pluviomètres | Cumul, jours de pluie et plus longue séquence sèche, à titre provisoire |
+| `ALLSKY_SFC_SW_DWN` | Rayonnement solaire incident | Rayonnement cumulé |
+| `WS2M` | Vent à 2 m | Évapotranspiration de référence |
+| `GWETROOT` | Humidité du sol dans la zone racinaire | Stress hydrique |
+
+7 363 mailles recoupent une zone de `regional`, une zone de `survey` ou le voisinage de 5 km d'une grappe. La valeur d'une zone sera la moyenne de ses mailles pondérée par la surface de leur intersection avec la zone.
+
+**Limites**
+
+- La résolution de 0,5 degré convient à la température, dont le champ varie lentement, mais lisse les précipitations. Les précipitations de MERRA-2 sont moins fiables que celles de CHIRPS en Afrique et restent provisoires.
+- Le rayonnement CERES n'est disponible qu'à partir de 1984. Les variables qui en dépendent seront manquantes pour les saisons antérieures.
+- Les séries commencent le 1er janvier 1981. Une saison récoltée en 1981 mais semée en 1980 n'est couverte qu'en partie.
+
 **Décision attendue du porteur du projet**
 
-La décision 4 doit être réexaminée pour le climat. Deux options sont possibles.
-
-| Option | Action du porteur du projet | Effet |
-|---|---|---|
-| Google Earth Engine, recommandée | Créer un compte gratuit à usage non commercial et un projet Google Cloud, puis authentifier le poste | CHIRPS et ERA5-Land agrégés par zone côté serveur, sans volume local |
-| Copernicus Climate Data Store | Créer un compte gratuit et déposer sa clé dans le fichier `.cdsapirc` | Températures AgERA5, mais précipitations CHIRPS toujours bloquées par le débit |
+CHIRPS reste la source de précipitations recommandée. Son acquisition par Google Earth Engine demande un compte gratuit à usage non commercial et un projet Google Cloud, que seul le porteur du projet peut créer. Les précipitations de POWER seront alors comparées à celles de CHIRPS, puis remplacées.
 
 ## 10. Reproductibilité
 
 - Les fichiers externes sont téléchargés dans `data/external`, exclu du dépôt git, et consignés dans `data/external/registre.csv` avec leur adresse, leur date, leur taille et leur empreinte SHA-256.
 - La table de correspondance est vérifiée par l'empreinte MD5 publiée par Zenodo.
 - Le notebook de référence télécharge les fichiers manquants, construit les contours et les descripteurs, et s'exécute en moins d'une minute lorsque les fichiers sont présents.
+- Les séries de NASA POWER se téléchargent avec la commande `python -m src.features.climat`. Chaque maille est compressée dans `data/external/power` et consignée dans le registre, avec l'adresse exacte de la requête.
