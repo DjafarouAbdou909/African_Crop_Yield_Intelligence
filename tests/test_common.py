@@ -45,10 +45,10 @@ class TestBornesFiltreAuteurs(unittest.TestCase):
 
     def test_hors_bornes(self):
         bornes = pd.DataFrame({"borne_basse": [0.2], "borne_haute": [6.0]}, index=["Maize"])
-        rendements = pd.Series([0.1, 1.0, 7.0, np.nan, 50.0])
-        cultures = pd.Series(["Maize", "Maize", "Maize", "Maize", "Teff"])
+        rendements = pd.Series([0.1, 1.0, 7.0, np.nan, 50.0, 0.0])
+        cultures = pd.Series(["Maize", "Maize", "Maize", "Maize", "Teff", "Legumes"])
 
-        self.assertEqual(hors_bornes(rendements, cultures, bornes).tolist(), [True, False, True, False, False])
+        self.assertEqual(hors_bornes(rendements, cultures, bornes).tolist(), [True, False, True, False, False, True])
 
 
 class TestIdentifiantGrappe(unittest.TestCase):
