@@ -1,7 +1,7 @@
-# Rapport d’audit des données — GROW-Africa
+# Rapport d’audit des données GROW-Africa
 
 **Projet :** African Crop Yield Intelligence  
-**Méthodologie :** CRISP-DM — Data Understanding  
+**Méthodologie :** CRISP-DM, phase Data Understanding  
 **Statut :** Audit préliminaire complété par la phase de Data Understanding
 
 ## 1. Objectif et sources
@@ -36,7 +36,7 @@ D’après la documentation de GROW-Africa, plusieurs traitements ont été appl
 
 Ces informations décrivent les traitements rapportés par les auteurs. Leur effet sur chaque fichier doit être distingué des contrôles réalisés dans le cadre de notre propre audit.
 
-## 3. Dataset 1 — LSMS Crop Cut
+## 3. Dataset 1, LSMS Crop Cut
 
 **Fichier :** `GROW-Africa_LSMS_cropcut.xlsx`
 
@@ -81,7 +81,7 @@ Les identifiants doivent également être étudiés pour déterminer s’ils son
 
 **Mise à jour après le Data Understanding.** Les actions de suivi sont réalisées dans `notebooks/02_data_understanding.ipynb`. Le fichier est retenu comme référence de validation pour l’Éthiopie.
 
-## 4. Dataset 2 — LSMS Survey
+## 4. Dataset 2, LSMS Survey
 
 **Fichier :** `GROW-Africa_LSMS_survey.xlsx`
 
@@ -134,7 +134,7 @@ Les identifiants de ménage, de parcelle et de terrain doivent rester disponible
 - La surface déclarée est arrondie à des fractions d’acre dans 59,8 % des cas et son écart avec la surface GPS dépend de la taille de la parcelle. `YieldUsingGPS_ton_ha_` est la cible recommandée pour ce fichier.
 - Aucune combinaison d’identifiants n’est unique. `hhid` est tronqué dans `LSMS_ETH2018` et absent dans `LSMS_ETH2021`. Les observations sont regroupées en grappes spatiales de 11 lignes en médiane.
 
-## 5. Dataset 3 — Point
+## 5. Dataset 3, Point
 
 **Fichier :** `GROW-Africa_Point.xlsx`
 
@@ -207,7 +207,7 @@ Les colonnes `Area_ha_` et `Yield_ton_ha_` doivent être étudiées pour compren
 - Seulement 0,24 % des rendements sortent des bornes reconstruites du filtre des auteurs, ce qui confirme que ce fichier a été filtré.
 - L’année et la source sont fortement liées, `Corbeels2020` couvrant 1974 à 2017 et `OneAcre_survey` 2015 à 2020.
 
-## 6. Dataset 4 — Regional
+## 6. Dataset 4, Regional
 
 **Fichier :** `GROW-Africa_Regional.xlsx`
 
@@ -338,10 +338,10 @@ Les indicateurs `QC_flag_*` ne doivent pas non plus être utilisés comme prédi
 
 | Dataset | Principaux points à résoudre | Décision provisoire | Résultat après Data Understanding |
 |---|---|---|---|
-| LSMS Crop Cut | Relation poids sec–rendement, année mal représentée, rôle des identifiants | Poursuivre l’audit | Relation exacte de coefficient 0,625. Année correcte. Identifiants partiellement tronqués. Référence de validation pour l’Éthiopie |
+| LSMS Crop Cut | Relation entre poids sec et rendement, année mal représentée, rôle des identifiants | Poursuivre l’audit | Relation exacte de coefficient 0,625. Année correcte. Identifiants partiellement tronqués. Référence de validation pour l’Éthiopie |
 | LSMS Survey | Définitions des variantes de production, superficie et rendement ; risque de fuite | Poursuivre l’audit | Formules des quatre rendements établies. Cible manquante non aléatoire. `YieldUsingGPS_ton_ha_` recommandée |
 | Point | Écart d’effectif à expliquer, doublons exacts, valeurs manquantes et différences entre sources | Poursuivre l’audit | Écart d’effectif expliqué. Coordonnées erronées identifiées. Année liée à la source |
-| Regional | Valeurs manquantes, codes numériques suspects, niveaux géographiques et relation production–surface–rendement | Go restreint pour le Data Understanding | Colonnes permutées sur 17,1 % des lignes. Codes spéciaux expliqués. `yieldTonHa` recommandée aux niveaux 1 et 2 |
+| Regional | Valeurs manquantes, codes numériques suspects, niveaux géographiques et relation entre production, surface et rendement | Go restreint pour le Data Understanding | Colonnes permutées sur 17,1 % des lignes. Codes spéciaux expliqués. `yieldTonHa` recommandée aux niveaux 1 et 2 |
 
 ### Risques communs
 

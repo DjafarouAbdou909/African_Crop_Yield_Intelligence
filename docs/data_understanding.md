@@ -1,4 +1,4 @@
-# Rapport de Data Understanding — GROW-Africa
+# Rapport de Data Understanding des données GROW-Africa
 
 | Élément | Valeur |
 |---|---|

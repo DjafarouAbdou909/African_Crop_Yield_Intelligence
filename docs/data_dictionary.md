@@ -1,9 +1,9 @@
 
-# Dictionnaire des données — GROW-Africa
+# Dictionnaire des données GROW-Africa
 
 **Projet :** African Crop Yield Intelligence
 
-**Étape :** Audit des données — Dictionnaire des données
+**Étape :** Audit des données, dictionnaire des données
 
 **Statut :** Version mise à jour après la phase de Data Understanding
 
