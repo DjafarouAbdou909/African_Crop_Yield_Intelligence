@@ -4,8 +4,10 @@
 |---|---|
 | Projet | African Crop Yield Intelligence |
 | Méthodologie | CRISP-DM, retour en Data Understanding et Data Preparation pour l'acquisition de données externes |
+| Code | `src/features/` et `tests/test_geographie.py` |
+| Notebook de référence | `notebooks/05_explanatory_variables.ipynb` |
 | Documents associés | `docs/evaluation_protocol.md` et `docs/data_preparation.md` |
-| Statut | Proposition soumise au porteur du projet |
+| Statut | Décisions arrêtées, géographie acquise, acquisition du climat bloquée par l'infrastructure |
 
 ## 1. Objet du document
 
@@ -25,7 +27,7 @@ Les jeux préparés ne contiennent que la cible, la culture, le lieu, la saison 
 
 **Conséquences pour la suite**
 
-- Les contours GADM et la table de correspondance de la version 2.0 doivent être acquis en premier. La version de GADM visée par la table reste à confirmer en comparant les identifiants et les noms.
+- Les contours GADM et la table de correspondance de la version 2.0 doivent être acquis en premier. La section 8 établit que la table vise GADM 4.1.
 - Les variables de `regional` sont agrégées sur le contour de la zone. Les 22 lignes du Lesotho utilisent le contour de leur région de niveau 1.
 - Les variables de `survey` sont agrégées dans un rayon de 5 km autour de la grappe, ce qui couvre l'incertitude du déplacement. Sans coordonnées, le contour de niveau 2 sert de repli.
 
@@ -135,9 +137,62 @@ Deux organisations sont possibles.
 | Google Earth Engine | Agrégation côté serveur, seuls les résultats tabulaires sont téléchargés | Aucun volume local, catalogue comprenant CHIRPS, ERA5-Land et MODIS | Compte requis, contours GADM à importer, AgERA5 et iSDAsoil à vérifier dans le catalogue |
 | Traitement local | Téléchargement des rasters, puis agrégation avec des bibliothèques Python spécialisées | Indépendance totale et reproductibilité complète | Plusieurs dizaines de gigaoctets et nouvelles dépendances à installer |
 
-## 7. Décisions attendues du porteur du projet
+## 7. Décisions
 
-1. Scénario principal d'estimation en fin de saison, recommandé, ou de prévision en cours de saison.
-2. Restriction de `regional` aux années postérieures ou égales à 1981, recommandée.
-3. Composition du premier lot, et report de la végétation au second lot.
-4. Infrastructure d'extraction, Google Earth Engine ou traitement local.
+Les décisions suivantes ont été arrêtées le 3 novembre 2026 sur délégation du porteur du projet, en retenant les options recommandées.
+
+1. Le scénario principal est l'estimation en fin de saison.
+2. La modélisation de `regional` est restreinte aux années de récolte postérieures ou égales à 1981.
+3. Le premier lot est celui de la section 5.1, et la végétation est reportée au second lot. Les sols proviennent de SoilGrids 2.0 dans sa version agrégée à 1 km, plutôt que d'iSDAsoil à 30 m. Cette version se lit à distance par fenêtres, sans téléchargement complet, et son serveur publie les empreintes de ses fichiers.
+4. L'extraction est réalisée localement, aucun compte Google Earth Engine n'étant configuré sur le poste. Les bibliothèques geopandas, pyogrio, shapely, pyproj, rasterio et requests ont été ajoutées à `requiremnts.txt` avec leur version exacte.
+
+## 8. Géographie
+
+**Constat**
+
+- La table de correspondance, dont l'empreinte MD5 coïncide avec celle publiée par Zenodo, et les contours GADM 4.1 des 45 pays de `regional_modelisation` ont été acquis, soit 46 fichiers et 622,9 Mo.
+- Dans ces 45 pays, les 741 codes GADM de niveau 1 et les 6 377 codes GADM de niveau 2 de la table existent dans GADM 4.1 et y portent le même nom. Les 80 codes sans unité GADM appartiennent tous au Lesotho, pour lequel GADM 4.1 ne fournit aucun niveau 2.
+- Les 1 682 zones de `regional_modelisation` reçoivent un contour. 22 lignes du Lesotho reçoivent celui de leur région de niveau 1. 8 zones ghanéennes de `RCeA`, soit 130 lignes, réunissent les deux districts GADM issus de la division d'un même district, et leur contour est l'union des deux.
+- 88 lignes de `regional_modelisation` déclarent une surface récoltée supérieure à la surface de leur zone. À Kigali, d'une superficie de 729 km², `RCeA` attribue à la banane et au manioc des surfaces de 543 000 à 617 000 ha. Au Sénégal, `FAO_subnational` attribue 2,4 millions d'hectares de mil à la région de Kaolack.
+- Les grappes de `survey` tombent toutes à l'intérieur du contour de leur zone, alors qu'une zone tirée au hasard n'en contient que 0,4 %. 950 lignes de `survey` n'ont ni identifiant géographique ni coordonnées.
+
+**Analyse**
+
+- La table vise GADM 4.1, ce qui clôt la question ouverte depuis le Data Understanding.
+- Un dépassement de la surface de la zone est physiquement impossible au cours d'une saison. Les surfaces attribuées à Kigali sont de l'ordre de celles du pays entier et suggèrent des valeurs nationales rattachées à une seule zone. Le filtre de plausibilité ne pouvait pas les détecter, car leur rendement reste plausible.
+- L'accord parfait entre grappes et zones indique que les identifiants de `survey` ont été déduits des coordonnées déjà déplacées. Il confirme la cohérence interne de la base sans garantir l'exactitude des coordonnées.
+
+**Décisions**
+
+- Les 88 lignes sont signalées par la fonction `signaler_surface_superieure_zone` et seront exclues de l'entraînement comme de l'évaluation. Elles restent dans `regional_modelisation`, car le contrôle dépend des contours, acquis après la préparation.
+- La surface de la zone et les coordonnées de son centroïde, calculées dans une projection à surfaces équivalentes, forment les premières variables explicatives statiques. Elles sont écrites dans `data/processed/geographie_regional.csv.gz`, et les contours dans `zones_regional.gpkg` et `zones_survey.gpkg`.
+
+## 9. Obstacles à l'acquisition du climat
+
+**Constat**
+
+| Source | Constat du 3 novembre 2026 | Conséquence |
+|---|---|---|
+| CHIRTS-daily | Les températures journalières couvrent 1983 à 2016 seulement | Inutilisable, car la période future du protocole commence en 2017 |
+| AgERA5 | Le téléchargement exige un compte Copernicus Climate Data Store, absent du poste | Bloqué sans action du porteur du projet |
+| CHIRPS | Le serveur du Climate Hazards Center n'a délivré que 110 ko en quinze minutes depuis ce poste. L'archive journalière de l'Afrique à 0,05° représente environ 13 Go | Téléchargement local impossible à ce débit |
+| SoilGrids 2.0 | Une fenêtre de 512 par 512 pixels se lit à distance en environ une seconde | Faisable localement |
+
+**Analyse**
+
+Le traitement local reste adapté aux données statiques, comme la géographie et les sols. Il ne l'est pas pour les séries climatiques journalières, dont le volume est incompatible avec le débit observé. L'agrégation côté serveur de Google Earth Engine supprime ce volume, puisque seules les moyennes par zone sont téléchargées. Son catalogue contient CHIRPS journalier et ERA5-Land journalier, qui fournit les températures sur toute la période.
+
+**Décision attendue du porteur du projet**
+
+La décision 4 doit être réexaminée pour le climat. Deux options sont possibles.
+
+| Option | Action du porteur du projet | Effet |
+|---|---|---|
+| Google Earth Engine, recommandée | Créer un compte gratuit à usage non commercial et un projet Google Cloud, puis authentifier le poste | CHIRPS et ERA5-Land agrégés par zone côté serveur, sans volume local |
+| Copernicus Climate Data Store | Créer un compte gratuit et déposer sa clé dans le fichier `.cdsapirc` | Températures AgERA5, mais précipitations CHIRPS toujours bloquées par le débit |
+
+## 10. Reproductibilité
+
+- Les fichiers externes sont téléchargés dans `data/external`, exclu du dépôt git, et consignés dans `data/external/registre.csv` avec leur adresse, leur date, leur taille et leur empreinte SHA-256.
+- La table de correspondance est vérifiée par l'empreinte MD5 publiée par Zenodo.
+- Le notebook de référence télécharge les fichiers manquants, construit les contours et les descripteurs, et s'exécute en moins d'une minute lorsque les fichiers sont présents.
