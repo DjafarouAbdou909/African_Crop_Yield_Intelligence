@@ -1,7 +1,12 @@
 """Préparation du fichier GROW-Africa_LSMS_survey.
 
 La cible retenue est YieldUsingGPS_ton_ha_, fondée sur une surface mesurée par GPS.
+Le rendement fondé sur la surface déclarée n'est pas utilisé en remplacement, car
+les deux mesures diffèrent de plus de 50 % pour 44 % des parcelles qui disposent
+des deux.
 """
+
+import numpy as np
 
 from .common import hors_bornes, identifiant_grappe, normaliser_textes, signaler_hierarchie_incoherente
 
@@ -49,6 +54,22 @@ def signaler_valeurs_impossibles(df):
     return resultat
 
 
+def signaler_surface_gps_recopiee(df):
+    """Signale les surfaces GPS strictement égales à la surface déclarée.
+
+    Cette égalité reste rare lorsque les deux mesures sont indépendantes. Sa fréquence
+    élevée dans certaines vagues suggère que la surface déclarée a été reprise en
+    l'absence de mesure GPS. La ligne est signalée sans être écartée.
+    """
+    resultat = df.copy()
+    gps = resultat["GPSArea_ha_"]
+    declaree = resultat["ReportedArea_ha_"]
+    resultat["flag_surface_gps_recopiee"] = (
+        gps.notna() & declaree.notna() & np.isclose(gps, declaree, rtol=1e-6, atol=0)
+    )
+    return resultat
+
+
 def construire_identifiants(df):
     """Crée un identifiant de ligne, de ménage et de grappe spatiale.
 
@@ -77,6 +98,7 @@ def preparer_survey(brut, bornes):
     df = harmoniser_pays(df)
     df = harmoniser_annee(df)
     df = signaler_valeurs_impossibles(df)
+    df = signaler_surface_gps_recopiee(df)
     df = construire_identifiants(df)
     df = signaler_hierarchie_incoherente(df)
     df["flag_rendement_hors_bornes"] = hors_bornes(df[CIBLE], df["Crop"], bornes)
