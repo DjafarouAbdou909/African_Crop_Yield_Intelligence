@@ -46,7 +46,7 @@ Chaque fonction travaille sur une copie de son entrée. La suite de 26 tests uni
 |---|---|
 | Suppression du caractère invisible BOM et des espaces superflus | 318 identifiants `L1_GID` du Lesotho redeviennent exploitables |
 | Conversion des jetons `[]` et `none` en valeurs manquantes | Les valeurs manquantes déguisées sont comptées comme telles |
-| Bornes de plausibilité par culture | Calculées sur `regional` selon le filtre des auteurs, puis appliquées aux trois fichiers |
+| Bornes de plausibilité par culture | Calculées sur `regional` selon le filtre des auteurs, puis appliquées aux trois fichiers. Un rendement nul ou négatif est toujours jugé hors bornes, ce qui couvre la culture `Legumes`, dépourvue de bornes faute de rendement positif |
 
 ### 4.2 Fichier `regional`
 
@@ -60,7 +60,7 @@ Chaque fonction travaille sur une copie de son entrée. La suite de 26 tests uni
 | Saison Meher harmonisée en Main dans une colonne `saison` | Saison principale éthiopienne |
 | Niveau administratif reconstruit à partir des identifiants GADM | 485 lignes, 6 restant ambiguës |
 | Lignes écartées par la règle d'une ligne par cellule | 182, dont 105 `FAO_subnational`, 73 `HarvestStat` et 4 `RCeA` |
-| Rendements hors des bornes de plausibilité | 4 657 |
+| Rendements hors des bornes de plausibilité, rendements nuls compris | 4 658 |
 | Hiérarchie GADM incohérente, non corrigeable sans les polygones | 488 lignes du Ghana |
 
 ### 4.3 Fichier `survey`
@@ -95,7 +95,7 @@ Les jeux sont écrits au format CSV compressé dans `data/processed`. Ce dossier
 | Jeu | Lignes | Contenu |
 |---|---:|---|
 | `regional_prepare` | 197 535 | Fichier corrigé avec l'ensemble de ses indicateurs |
-| `regional_modelisation` | 146 151 | Niveaux 1 et 2, une ligne par cellule, rendement renseigné et plausible. 45 pays, 34 cultures, période 1960 à 2023 |
+| `regional_modelisation` | 146 150 | Niveaux 1 et 2, une ligne par cellule, rendement renseigné et plausible. 45 pays, 33 cultures, période 1960 à 2023 |
 | `survey_prepare` | 194 704 | Fichier corrigé avec l'ensemble de ses indicateurs |
 | `survey_modelisation` | 151 138 | Cible GPS renseignée et plausible. 12 pays, 25 cultures, période 2005 à 2022 |
 | `cropcut_prepare` | 11 345 | Fichier corrigé avec l'ensemble de ses indicateurs |
