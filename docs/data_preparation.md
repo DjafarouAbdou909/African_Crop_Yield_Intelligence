@@ -147,4 +147,4 @@ La cible `YieldUsingGPS_ton_ha_` est maintenue sans remplacement. Ce choix a ét
 
 ## 9. Suite du pipeline
 
-La troisième condition de la décision issue du Data Understanding reste à remplir. Le protocole d'évaluation doit être défini avant l'entraînement du premier modèle, avec des partitions par ménage ou par grappe pour `survey`, par zone géographique et par période pour `regional`, et une évaluation ventilée par culture et par source. Pour `survey`, la performance devra aussi être mesurée avec et sans les surfaces GPS recopiées.
+La troisième condition de la décision issue du Data Understanding est remplie par le protocole d'évaluation décrit dans `docs/evaluation_protocol.md`. Ce protocole fixe des partitions par groupe et par période, une validation externe sur `cropcut` et des scores de référence que tout modèle devra dépasser.
