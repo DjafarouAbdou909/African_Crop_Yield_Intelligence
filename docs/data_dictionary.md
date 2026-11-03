@@ -196,12 +196,12 @@ Les rendements aberrants ont été conservés dans ces données. L'article rappo
 
 | Colonne | Définition | Type / unité | Statut | Rôle | Remarque |
 |---|---|---|---|---|---|
-| `GDAM_ID` | Identifiant GADM le plus fin de la ligne | Texte | Vérifié | Clé de regroupement | Égal à l'identifiant GID le plus fin pour 99,91 % des lignes renseignées. Absent sur 491 lignes `HarvestStat`, les mêmes que `level`. |
+| `GDAM_ID` | Identifiant GADM le plus fin de la ligne | Texte | Vérifié | Clé de regroupement | Égal à l'identifiant GID le plus fin pour 99,91 % des lignes renseignées. Absent sur 491 lignes `HarvestStat`, les mêmes que `level`, qui désignent des unités de niveau 2 absentes de GADM et portent l'identifiant de leur unité mère. |
 | `country` | Pays | Texte | Vérifié | Exclue (métadonnée) | 49 libellés pour 47 pays. `DRC` et `Tanzania, United Republic of` doublonnent d'autres libellés. Utiliser `L0_GID` comme clé pays. |
 | `country_code` | Code du pays | Texte | Vérifié | Exclue (métadonnée) | Mélange de codes ISO à deux et à trois lettres, soit 82 codes pour 49 libellés. |
 | `admin_1` | Division administrative de niveau 1 | Texte | Vérifié | Exclue (métadonnée) | Texte `none` utilisé comme valeur manquante sur les 11 884 lignes nationales. |
 | `admin_2` | Division administrative de niveau 2 | Texte | Vérifié | Exclue (métadonnée) | Texte `none` utilisé comme valeur manquante sur 75 389 lignes. Deux unités distinctes peuvent être rattachées au même `L2_GID`. |
-| `level` | Niveau administratif de la ligne | Entier stocké en décimal | Vérifié | À investiguer | Valeurs 0 à 3, parfaitement cohérentes avec le dernier GID renseigné. Déductible des GID pour 485 des 491 valeurs manquantes. |
+| `level` | Niveau administratif de la ligne | Entier stocké en décimal | Vérifié | À investiguer | Valeurs 0 à 3, parfaitement cohérentes avec le dernier GID renseigné. Les 491 valeurs manquantes désignent des unités de niveau 2 nommées dans `admin_2`. 485 sont rattachées à un GID, et 6 n'ont que `L0_GID`. |
 | `L0_GID` | Identifiant GADM de niveau 0 | Texte | Vérifié | Clé de regroupement | Le Ghana possède 25 codes distincts, de `L0GHA086` à `L0GHA110`, dont les suffixes entrent en collision avec d'autres pays. Les autres fichiers n'utilisent que `L0GHA086`. |
 | `L1_GID` | Identifiant GADM de niveau 1 | Texte | Vérifié | Clé de regroupement | 318 valeurs du Lesotho débutent par un caractère invisible BOM. 13 identifiants ghanéens sont rattachés à plusieurs `L0_GID`. |
 | `L2_GID` | Identifiant GADM de niveau 2 | Texte | Vérifié | Clé de regroupement | 36 valeurs manquantes déguisées sous la forme `[]` à Madagascar. 22 identifiants ghanéens sont rattachés à plusieurs `L1_GID`. |

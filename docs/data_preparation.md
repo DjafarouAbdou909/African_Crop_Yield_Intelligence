@@ -36,7 +36,7 @@ Ce rapport décrit les corrections appliquées aux données GROW-Africa à la su
 | `src/data/cropcut.py` | Corrections propres au fichier `cropcut` et extraction du jeu de validation |
 | `src/data/prepare.py` | Orchestration de l'ensemble et export dans `data/processed` |
 
-Chaque fonction travaille sur une copie de son entrée. La suite de 26 tests unitaires de `tests/` vérifie chaque correction sur des cas construits pour l'occasion.
+Chaque fonction travaille sur une copie de son entrée. La suite de 27 tests unitaires de `tests/` consacrés à la préparation vérifie chaque correction sur des cas construits pour l'occasion.
 
 ## 4. Corrections appliquées
 
@@ -58,8 +58,9 @@ Chaque fonction travaille sur une copie de son entrée. La suite de 26 tests uni
 | Codes pays du Ghana ramenés à `L0GHA086` | 71 codes deviennent 47 |
 | Libellés de pays unifiés | 49 libellés deviennent 47 |
 | Saison Meher harmonisée en Main dans une colonne `saison` | Saison principale éthiopienne |
-| Niveau administratif reconstruit à partir des identifiants GADM | 485 lignes, 6 restant ambiguës |
-| Lignes écartées par la règle d'une ligne par cellule | 182, dont 105 `FAO_subnational`, 73 `HarvestStat` et 4 `RCeA` |
+| Niveau administratif reconstruit à partir des identifiants GADM et du nom de niveau 2 | 485 lignes, toutes de niveau 2, 6 restant ambiguës |
+| Unités de niveau 2 absentes de GADM, signalées et tenues à l'écart de la sélection par cellule | 491 lignes `HarvestStat` |
+| Lignes écartées par la règle d'une ligne par cellule | Aucune |
 | Rendements hors des bornes de plausibilité, rendements nuls compris | 4 658 |
 | Hiérarchie GADM incohérente, non corrigeable sans les polygones | 488 lignes du Ghana |
 
@@ -95,7 +96,7 @@ Les jeux sont écrits au format CSV compressé dans `data/processed`. Ce dossier
 | Jeu | Lignes | Contenu |
 |---|---:|---|
 | `regional_prepare` | 197 535 | Fichier corrigé avec l'ensemble de ses indicateurs |
-| `regional_modelisation` | 146 150 | Niveaux 1 et 2, une ligne par cellule, rendement renseigné et plausible. 45 pays, 33 cultures, période 1960 à 2023 |
+| `regional_modelisation` | 145 877 | Niveaux 1 et 2, une ligne par cellule, rendement renseigné et plausible. 45 pays, 33 cultures, période 1960 à 2023 |
 | `survey_prepare` | 194 704 | Fichier corrigé avec l'ensemble de ses indicateurs |
 | `survey_modelisation` | 151 138 | Cible GPS renseignée et plausible. 12 pays, 25 cultures, période 2005 à 2022 |
 | `cropcut_prepare` | 11 345 | Fichier corrigé avec l'ensemble de ses indicateurs |
@@ -134,6 +135,8 @@ La cible `YieldUsingGPS_ton_ha_` est maintenue sans remplacement. Ce choix a ét
 ### 7.2 Autres limites
 
 - **Surfaces GPS recopiées.** 7 403 surfaces GPS sont strictement égales à la surface déclarée, dont 43,6 % des parcelles de `LSMS_TGO2021` dans le jeu de modélisation. Une telle égalité est improbable entre deux mesures indépendantes et suggère une reprise de la surface déclarée en l'absence de mesure GPS. Ces lignes sont signalées sans être écartées, et leur effet devra être mesuré lors de l'évaluation.
+- **Unités hors GADM.** 491 lignes `HarvestStat` décrivent 18 unités de niveau 2 créées après la carte GADM, comme les départements nigériens de 2011, les zones éthiopiennes Buno Bedele et Southeast Tigray ou trois districts ougandais. Elles portent l'identifiant de l'unité qui les contenait, et les départements de Tibiri, Falmey et Dioudiou, situés dans la région de Dosso, portent celui de la région de Diffa. Ces lignes sont exclues du jeu de modélisation, car elles ne peuvent recevoir ni zone propre ni contour.
+- **Correction du 3 novembre 2026.** Avant l'introduction de `flag_unite_hors_gadm`, ces unités partageaient la zone de leur unité mère et la règle d'une ligne par cellule écartait 182 lignes, dont 105 rendements régionaux `FAO_subnational` d'Oromia et du Tigray remplacés par le rendement d'une seule zone. Leur exclusion retire 383 lignes du jeu de modélisation et y restaure 110 rendements. Aucune autre ligne n'est concernée par la règle d'une ligne par cellule.
 - **Hiérarchie du Ghana.** 488 lignes conservent un identifiant de niveau 2 rattaché à plusieurs régions. Leur correction nécessite les polygones GADM.
 - **Lignes inexpliquées.** 1 710 lignes de `regional` ne vérifient aucune relation entre production, surface et rendement. Elles restent dans le jeu de modélisation lorsque leur rendement est plausible.
 - **Saisons.** Seule l'équivalence entre Meher et Main est établie. Les autres libellés de saison sont conservés tels quels, faute de preuve de leur équivalence.

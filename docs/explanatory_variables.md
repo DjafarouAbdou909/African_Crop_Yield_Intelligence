@@ -35,7 +35,7 @@ Les jeux préparés ne contiennent que la cible, la culture, le lieu, la saison 
 
 | Jeu | Période | Lignes antérieures à 1981 | Lignes antérieures à 2001 |
 |---|---|---:|---:|
-| `regional_modelisation` | 1960 à 2023 | 3 545, soit 2,4 % | 44 734, soit 30,6 % |
+| `regional_modelisation` | 1960 à 2023 | 3 542, soit 2,4 % | 44 654, soit 30,6 % |
 | `survey_modelisation` | 2005 à 2022 | Aucune | Aucune |
 | `cropcut_validation` | 2012 à 2019 | Aucune | Aucune |
 
@@ -47,7 +47,7 @@ Les précipitations satellitaires de référence pour l'Afrique commencent en 19
 
 **Constat**
 
-Les mois de semis et de récolte sont renseignés pour toutes les lignes `HarvestStat` de `regional_modelisation`, soit 81,2 % du jeu, et pour aucune ligne des autres sources.
+Les mois de semis et de récolte sont renseignés pour toutes les lignes `HarvestStat` de `regional_modelisation`, soit 81,1 % du jeu, et pour aucune ligne des autres sources.
 
 **Conséquences pour la suite**
 
@@ -116,7 +116,7 @@ L'estimation en fin de saison est recommandée comme scénario principal. Elle c
 
 ### 5.2 Conséquences sur le périmètre
 
-- La modélisation de `regional` est restreinte aux années de récolte postérieures ou égales à 1981. Cette restriction écarte 3 545 lignes, soit 2,4 % du jeu, et évite de mélanger des lignes avec et sans précipitations satellitaires.
+- La modélisation de `regional` est restreinte aux années de récolte postérieures ou égales à 1981. Cette restriction écarte 3 542 lignes, soit 2,4 % du jeu, et évite de mélanger des lignes avec et sans précipitations satellitaires.
 - La végétation MODIS est réservée à un second lot, évalué comme variante du modèle sur les années postérieures ou égales à 2001.
 
 ### 5.3 Règles de construction

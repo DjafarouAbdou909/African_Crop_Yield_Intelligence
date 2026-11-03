@@ -28,7 +28,7 @@ Ce document fixe la manière dont les modèles de rendement seront évalués, av
 | `src/evaluation/metriques.py` | Métriques globales, ventilées et moyennes non pondérées, score de compétence |
 | `src/evaluation/references.py` | Modèle de référence par moyenne géométrique hiérarchique |
 
-La suite de tests compte désormais 40 tests unitaires.
+La suite de tests compte 40 tests unitaires à la création du protocole.
 
 ## 4. Partitions
 
@@ -59,10 +59,10 @@ Les composantes connexes placent du même côté un agrégat régional et ses co
 
 | Partition | `regional` | Pays | `survey` | Pays |
 |---|---:|---:|---:|---:|
-| `developpement` | 105 759 | 45 | 82 301 | 12 |
-| `test_temporel` | 13 234 | 22 | 39 112 | 9 |
-| `test_spatial` | 24 026 | 39 | 20 495 | 12 |
-| `test_spatio_temporel` | 3 131 | 17 | 9 230 | 9 |
+| `developpement` | 105 724 | 45 | 82 301 | 12 |
+| `test_temporel` | 13 226 | 22 | 39 112 | 9 |
+| `test_spatial` | 23 817 | 39 | 20 495 | 12 |
+| `test_spatio_temporel` | 3 110 | 17 | 9 230 | 9 |
 
 Aucun groupe n'est présent des deux côtés de la partition. 23 pays de `regional` n'ont aucune donnée à partir de 2017, et 6 pays n'ont aucune région tenue à l'écart. Le Bénin, la Côte d'Ivoire et la Guinée-Bissau ne comptent qu'une vague dans `survey` et ne contribuent qu'à l'évaluation spatiale.
 
@@ -82,7 +82,7 @@ Aucun groupe n'est présent des deux côtés de la partition. 23 pays de `region
 | Moyenne non pondérée par pays | Même poids pour chaque pays, quel que soit son nombre de lignes |
 | Score de compétence | Part de l'erreur `mae_log` de la référence supprimée par le modèle |
 
-L'erreur quadratique en tonnes par hectare varie de 3,570 à 15,978 selon l'ensemble de `regional`, alors que `mae_log` reste comprise entre 0,389 et 0,417. Elle est dominée par les cultures à rendement élevé et ne peut servir de métrique principale.
+L'erreur quadratique en tonnes par hectare varie de 3,559 à 16,048 selon l'ensemble de `regional`, alors que `mae_log` reste comprise entre 0,388 et 0,417. Elle est dominée par les cultures à rendement élevé et ne peut servir de métrique principale.
 
 ## 6. Modèles de référence
 
@@ -99,14 +99,14 @@ Une saison manquante forme une modalité, car elle désigne une culture à saiso
 
 | Jeu | Validation croisée | Test temporel | Test spatial | Test spatio-temporel |
 |---|---:|---:|---:|---:|
-| `regional` | 0,417 | 0,399 | 0,389 | 0,406 |
+| `regional` | 0,417 | 0,398 | 0,388 | 0,404 |
 | `survey` | 0,772 | 0,828 | 0,756 | 0,822 |
 | `cropcut`, validation externe | | | 0,676 | |
 
 ## 7. Enseignements des références
 
 - **Variabilité annuelle.** Dans `regional`, la moyenne de la culture dans le pays prédit une région inconnue presque aussi bien que l'historique de la zone ne prédit une année future. Les variations d'une année à l'autre pèsent donc autant que les différences entre régions, ce qui justifie des variables climatiques annuelles.
-- **Tendance.** Le biais logarithmique vaut -0,086 sur le test temporel et -0,116 sur le test spatio-temporel de `regional`, et -0,236 sur le test temporel de `survey`. Les rendements récents sont sous-estimés, et les modèles devront intégrer une tendance temporelle.
+- **Tendance.** Le biais logarithmique vaut -0,086 sur le test temporel et -0,113 sur le test spatio-temporel de `regional`, et -0,236 sur le test temporel de `survey`. Les rendements récents sont sous-estimés, et les modèles devront intégrer une tendance temporelle.
 - **Sources.** En validation croisée, `FAO_subnational` présente un biais logarithmique de -0,249, contre 0,018 pour `HarvestStat`. La source devra figurer parmi les variables ou dans la ventilation des scores.
 - **Échelle de la parcelle.** L'erreur de la référence est près de deux fois plus élevée dans `survey` que dans `regional`, ce qui reflète le bruit de mesure et l'hétérogénéité entre parcelles voisines.
 - **Biais des enquêtes.** Sur `cropcut`, le biais logarithmique de 0,252 indique que les rendements d'enquête dépassent les mesures directes d'environ 29 %. Ce biais sera rapporté pour chaque modèle et ne sera pas corrigé sans validation spécifique.
@@ -124,8 +124,8 @@ Une saison manquante forme une modalité, car elle désigne une culture à saiso
 
 ## 9. Limites
 
-- Les plis de `regional` comptent de 17 347 à 25 679 lignes, car un groupe correspond à une région entière. Cette inégalité est le prix de l'étanchéité.
-- Le test temporel de `regional` ne couvre que 22 pays et provient de `HarvestStat` pour 10 846 de ses 13 234 lignes.
+- Les plis de `regional` comptent de 17 347 à 25 647 lignes, car un groupe correspond à une région entière. Cette inégalité est le prix de l'étanchéité.
+- Le test temporel de `regional` ne couvre que 22 pays et provient de `HarvestStat` pour 10 838 de ses 13 226 lignes.
 - La validation croisée du développement mesure la généralisation spatiale. Aucun pli ne mesure spécifiquement la généralisation temporelle à l'intérieur du développement.
 - Les groupes ne tiennent pas compte de la proximité entre régions voisines. Une région tenue à l'écart peut ressembler à une région voisine présente dans le développement.
 
