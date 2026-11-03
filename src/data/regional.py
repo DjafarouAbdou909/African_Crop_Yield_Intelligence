@@ -84,7 +84,9 @@ def harmoniser_pays(df):
 def reconstruire_niveau(df):
     """Déduit le niveau administratif manquant de la profondeur des identifiants GADM.
 
-    Une ligne qui ne dispose que de L0_GID reste ambiguë, car elle peut désigner une
+    Un nom de niveau 2 renseigné porte le niveau à au moins 2, car il désigne une
+    unité de niveau 2 même lorsque seul l'identifiant de sa région est fourni. Une
+    ligne qui ne dispose que de L0_GID reste ambiguë, car elle peut désigner une
     unité infranationale non rattachée. Une ligne dont le niveau dépasse la profondeur
     de ses identifiants est signalée comme incomplète.
     """
@@ -92,8 +94,9 @@ def reconstruire_niveau(df):
     profondeur = resultat[["L1_GID", "L2_GID", "L3_GID"]].notna().sum(axis=1)
     manquant = resultat["level"].isna()
     deductible = manquant & (profondeur > 0)
+    niveau_nomme = np.where(resultat["admin_2"].notna(), 2, 0)
 
-    resultat.loc[deductible, "level"] = profondeur[deductible]
+    resultat.loc[deductible, "level"] = np.maximum(profondeur, niveau_nomme)[deductible]
     resultat["level"] = resultat["level"].astype("Int64")
     resultat["flag_niveau_ambigu"] = manquant & (profondeur == 0)
     resultat["flag_gid_incomplet"] = (resultat["level"] > profondeur).fillna(False).astype(bool)
@@ -123,6 +126,19 @@ def zone_geographique(df):
     )
 
 
+def signaler_unites_hors_gadm(df):
+    """Signale les lignes dont l'unité administrative n'a pas d'identifiant GADM propre.
+
+    Ces lignes n'ont pas de GDAM_ID. Elles décrivent des unités de niveau 2 créées
+    après la carte GADM, comme les départements nigériens issus du découpage de 2011,
+    et portent l'identifiant de l'unité qui les contenait. Leur zone ne peut donc pas
+    être distinguée de celle de l'unité mère, ni recevoir un contour.
+    """
+    resultat = df.copy()
+    resultat["flag_unite_hors_gadm"] = resultat["GDAM_ID"].isna()
+    return resultat
+
+
 def selectionner_ligne_par_cellule(df):
     """Retient une seule ligne par zone, culture, saison harmonisée et année de récolte.
 
@@ -130,9 +146,11 @@ def selectionner_ligne_par_cellule(df):
     une ligne sans rendement. Le système de production global, ou non précisé, passe
     avant un système détaillé. La source HarvestStat passe avant les autres sources.
     À égalité, la ligne de plus grande surface est retenue. Les autres lignes sont
-    signalées par flag_doublon_cellule et ne sont pas supprimées.
+    signalées par flag_doublon_cellule et ne sont pas supprimées. Les unités hors
+    GADM ne participent pas à la sélection, car leur zone est celle de l'unité mère.
     """
     resultat = df.copy()
+    candidates = ~resultat["flag_unite_hors_gadm"]
     systeme = resultat["crop_production_system"]
     tri = pd.DataFrame({
         "zone": zone_geographique(resultat),
@@ -143,7 +161,7 @@ def selectionner_ligne_par_cellule(df):
         "rang_systeme": (~(systeme.isna() | systeme.isin(SYSTEMES_GLOBAUX))).astype(int),
         "rang_source": (resultat["Source"] != SOURCE_PRIORITAIRE).astype(int),
         "surface": resultat["areaHa"],
-    }, index=resultat.index)
+    }, index=resultat.index)[candidates]
 
     tri = tri.sort_values(
         ["rang_rendement", "rang_systeme", "rang_source", "surface"],
@@ -152,7 +170,7 @@ def selectionner_ligne_par_cellule(df):
         kind="mergesort",
     )
     ecartees = tri.duplicated(subset=["zone", "culture", "saison", "annee"], keep="first")
-    resultat["flag_doublon_cellule"] = ecartees.reindex(resultat.index)
+    resultat["flag_doublon_cellule"] = ecartees.reindex(resultat.index, fill_value=False)
     return resultat
 
 
@@ -169,6 +187,7 @@ def preparer_regional(brut):
     df = harmoniser_pays(df)
     df = harmoniser_saisons(df)
     df = reconstruire_niveau(df)
+    df = signaler_unites_hors_gadm(df)
     df = signaler_hierarchie_incoherente(df)
 
     bornes = bornes_filtre_auteurs(df["yieldTonHa"], df["crop"])
@@ -180,12 +199,13 @@ def preparer_regional(brut):
 def jeu_modelisation_regional(df):
     """Extrait les lignes utilisables comme cible, aux niveaux administratifs 1 et 2.
 
-    Sont exclues les lignes sans rendement, les doublons de cellule et les rendements
-    hors des bornes de plausibilité de leur culture.
+    Sont exclues les lignes sans rendement, les unités hors GADM, les doublons de
+    cellule et les rendements hors des bornes de plausibilité de leur culture.
     """
     retenues = (
         df["level"].isin(NIVEAUX_MODELISATION)
         & df["yieldTonHa"].notna()
+        & ~df["flag_unite_hors_gadm"]
         & ~df["flag_doublon_cellule"]
         & ~df["flag_rendement_hors_bornes"]
     )
