@@ -1,4 +1,9 @@
+affine==3.0.1
 asttokens==3.0.2
+attrs==26.1.0
+certifi==2026.10.18
+charset-normalizer==3.5.2
+click==8.5.0
 comm==0.2.3
 contourpy==1.4.0
 cycler==0.12.1
@@ -6,6 +11,8 @@ debugpy==1.8.22
 et_xmlfile==2.0.0
 executing==2.3.0
 fonttools==4.66.1
+geopandas==1.2.0
+idna==3.20
 ipykernel==7.4.0
 ipython==9.17.1
 ipython_pygments_lexers==1.1.1
@@ -29,12 +36,18 @@ psutil==7.2.2
 ptyprocess==0.7.0
 pure_eval==0.2.4
 Pygments==2.21.0
+pyogrio==0.13.0
 pyparsing==3.3.3
+pyproj==3.8.0
 python-dateutil==2.9.0.post0
 pyzmq==27.2.0
+rasterio==1.5.2
+requests==2.34.2
+shapely==2.2.0
 six==1.17.0
 stack-data==0.6.3
 tornado==6.5.10
 traitlets==5.16.1
 typing_extensions==4.16.0
+urllib3==2.8.0
 wcwidth==0.9.2
