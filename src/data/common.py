@@ -48,10 +48,12 @@ def bornes_filtre_auteurs(rendements, cultures):
 def hors_bornes(rendements, cultures, bornes):
     """Indique les rendements situés hors des bornes de leur culture.
 
-    Un rendement manquant ou une culture sans bornes ne sont jamais signalés.
+    Un rendement nul ou négatif est toujours signalé, y compris pour une culture
+    dépourvue de bornes faute de rendement positif. Un rendement manquant n'est
+    jamais signalé.
     """
     seuils = bornes.reindex(cultures.to_numpy())
-    trop_bas = rendements.to_numpy() < seuils["borne_basse"].to_numpy()
+    trop_bas = (rendements.to_numpy() <= 0) | (rendements.to_numpy() < seuils["borne_basse"].to_numpy())
     trop_haut = rendements.to_numpy() > seuils["borne_haute"].to_numpy()
     return pd.Series(trop_bas | trop_haut, index=rendements.index)
 
