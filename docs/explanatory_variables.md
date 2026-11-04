@@ -5,9 +5,9 @@
 | Projet | African Crop Yield Intelligence |
 | Méthodologie | CRISP-DM, retour en Data Understanding et Data Preparation pour l'acquisition de données externes |
 | Code | `src/features/` et les tests correspondants dans `tests/` |
-| Notebooks de référence | `notebooks/05_explanatory_variables.ipynb`, `06_climate_variables.ipynb`, `07_soil_variables.ipynb` et `08_terrain_variables.ipynb` |
+| Notebooks de référence | `notebooks/05_explanatory_variables.ipynb`, `06_climate_variables.ipynb`, `07_soil_variables.ipynb`, `08_terrain_variables.ipynb` et `09_cropcut_variables.ipynb` |
 | Documents associés | `docs/evaluation_protocol.md` et `docs/data_preparation.md` |
-| Statut | Premier lot acquis et contrôlé, avec la géographie, les variables climatiques de saison, les sols et le relief |
+| Statut | Premier lot acquis et contrôlé pour `regional`, `survey` et `cropcut`, avec la géographie, les variables climatiques de saison, les sols et le relief |
 
 ## 1. Objet du document
 
@@ -270,7 +270,7 @@ Le 3 novembre 2026, le porteur du projet a renoncé à Google Earth Engine. Les 
 
 - La fenêtre de saison va du premier jour du mois de semis au dernier jour du mois de récolte. Elle s'achève l'année de récolte et commence l'année précédente lorsque le mois de semis suit le mois de récolte. Les fenêtres des lignes `HarvestStat` du Lesotho sont décalées d'un an.
 - Dans `survey`, la saison commence par le semis de l'année de début de campagne et s'achève à la récolte qui suit, sauf en Tanzanie, où elle s'achève l'année de début de campagne. `annee_recolte` n'est pas modifiée, car le décalage est constant au sein d'un pays.
-- Le conflit éthiopien est consigné comme anomalie non résolue et fera l'objet d'une analyse de sensibilité lors de la modélisation.
+- Le conflit éthiopien a d'abord été consigné comme anomalie non résolue. Il a ensuite été levé en faveur de la règle par les dates de coupe de `cropcut`, selon la section 14.
 - Une ligne sans mois reçoit, par ordre de priorité, le calendrier `HarvestStat` principal de sa zone, de sa région ou de son pays pour la même culture, puis le calendrier dominant de sa région ou de son pays toutes cultures confondues, et enfin le calendrier GGCMI au centroïde de son lieu. Le niveau retenu est conservé dans `source_calendrier`.
 - Le lieu d'une ligne de `regional` est sa zone. Celui d'une parcelle de `survey` est le voisinage de 5 km de sa grappe lorsque ses coordonnées sont connues, sinon sa zone de repli. La série d'un lieu est la moyenne de ses mailles pondérée par la surface de leur intersection avec le lieu, une maille sans valeur un jour donné étant ignorée ce jour-là.
 - Les indicateurs de chaque fenêtre sont le cumul de pluie, le nombre de jours d'au moins 1 mm, la plus longue séquence sans pluie, le bilan entre la pluie et l'évapotranspiration de référence FAO-56, les degrés-jours au-delà de 10 °C avec une température moyenne plafonnée à 30 °C, les degrés-jours de température maximale au-delà de 30 et de 35 °C, les températures maximale et minimale moyennes, le déficit moyen de pression de vapeur, le rayonnement moyen et l'évapotranspiration cumulée. Un indicateur est manquant dès qu'un jour de sa fenêtre manque.
@@ -292,7 +292,7 @@ Pour les récoltes postérieures à 2000, la pluie couvre 99,3 % des lignes de `
 **Limites**
 
 - GGCMI reste le seul calendrier disponible au Ghana, en Guinée, en Afrique du Nord et en Gambie, soit 4 680 lignes de `regional`, avec une fiabilité mesurée de 55 % à un mois près.
-- Les tests d'alignement de `survey` reposent sur deux à huit vagues par pays, et l'alignement de l'Éthiopie n'est pas établi.
+- Les tests d'alignement de `survey` reposent sur deux à huit vagues par pays. L'alignement de l'Éthiopie est établi par les dates de coupe de `cropcut` et non par ces tests.
 - Les années de récolte choisies pour le Lesotho et la Tanzanie l'ont été au vu de corrélations calculées sur toutes les années, périodes futures comprises. Ce choix porte sur un seul paramètre par pays et ne concerne pas les modèles, mais il constitue un usage limité des périodes de test.
 
 ## 12. Sols
@@ -378,7 +378,37 @@ Pour les récoltes postérieures à 2000, la pluie couvre 99,3 % des lignes de `
 - La pente des pixels de 90 m situés au bord d'une tuile est calculée en prolongeant la tuile, ce qui touche 0,3 % des pixels.
 - La pente moyenne ne distingue pas une zone uniformément inclinée d'une zone mêlant plaines et reliefs escarpés.
 
-## 14. Reproductibilité
+## 14. Variables de cropcut et saison mesurée en Éthiopie
+
+**Constat**
+
+- Aucune combinaison des colonnes de `cropcut` n'identifie une mesure, avec 2 502 doublons de la clé formée par l'exploitant, la parcelle, le champ, la culture et l'année.
+- Les dates de coupe suivent le calendrier éthiopien. 116 mesures sont datées du 30 du deuxième mois et aucune d'un 31. Une fois converties, 90,5 % des 8 548 dates valides tombent d'octobre à décembre de l'année de début de campagne, et 92,1 % avant le 1er janvier de l'année suivante. La vague de 2013 n'a aucune date.
+- Le test climatique de la section 11, appliqué aux rendements mesurés de `cropcut` dans les mêmes grappes, ne distingue aucune hypothèse, avec 0,011 pour la saison de l'année précédente et -0,010 pour celle de la règle. Sur `survey`, il donnait 0,111 et -0,016.
+- Les variables de `cropcut` sont identiques à celles de `survey` pour les 8 235 mesures appariées à une parcelle de même grappe, de même culture et de même vague.
+
+**Analyse**
+
+- Les champs coupés sont ceux que l'enquête recense après les semis de l'année de début de campagne, et les coupes ont lieu pendant la récolte qui suit. La saison mesurée par l'enquête éthiopienne est donc celle de la règle de la section 11.
+- Le signal de `survey` en faveur de la saison précédente n'est pas reproduit par des rendements mesurés. Il est vraisemblablement fortuit.
+- Le calendrier `HarvestStat` place la récolte éthiopienne en janvier, alors que les coupes ont surtout lieu en octobre et en novembre.
+
+**Décisions**
+
+- Le conflit éthiopien est levé en faveur de la règle. L'analyse de sensibilité prévue pour la modélisation devient un simple contrôle facultatif.
+- `id_mesure`, formé de la source et de la position dans le fichier brut, identifie chaque mesure.
+- Chaque mesure reçoit les variables d'une parcelle de `survey` de même grappe, de même culture et de même vague, par le même code. La vague dont l'année `Year` vaut A + 1 commence en A.
+
+**Résultats**
+
+`climat_cropcut.csv.gz`, `sols_cropcut.csv.gz` et `relief_cropcut.csv.gz` contiennent les 11 263 mesures de validation, avec la clé `id_mesure`. 99,27 % d'entre elles reçoivent toutes les variables, les 82 autres n'ayant ni coordonnées ni zone. Aucun calendrier ne provient de GGCMI.
+
+**Limites**
+
+- La fenêtre de saison éthiopienne se prolonge d'un à deux mois après la plupart des récoltes, ce qui affecte surtout l'évapotranspiration cumulée et le bilan hydrique.
+- L'argument fondé sur les dates suppose que la coupe a lieu entre les deux passages de l'enquête, conformément à son déroulement publié.
+
+## 15. Reproductibilité
 
 - Les fichiers externes sont téléchargés dans `data/external`, exclu du dépôt git, et consignés dans `data/external/registre.csv` avec leur adresse, leur date, leur taille et leur empreinte SHA-256.
 - La table de correspondance est vérifiée par l'empreinte MD5 publiée par Zenodo.
@@ -395,3 +425,5 @@ Pour les récoltes postérieures à 2000, la pluie couvre 99,3 % des lignes de `
 - Le relief s'obtient avec la commande `python -m src.features.relief extraire`, qui télécharge chaque tuile de Copernicus DEM et son masque des eaux, les compare à l'empreinte MD5 publiée, écrit un résumé dans `data/interim/relief/tuiles` puis les supprime. Les empreintes vérifiées sont consignées dans `data/external/copernicus/sources.csv`. L'extraction dure quarante minutes environ et reprend après une interruption.
 - La commande `python -m src.features.relief construire` écrit la mosaïque `altitude_1km.tif` et `pente_1km.tif` dans `data/interim/relief`, puis `relief_regional.csv.gz` et `relief_survey.csv.gz` dans `data/processed`, en une minute environ.
 - Le notebook `08_terrain_variables.ipynb` établit les contrôles du relief et s'exécute en moins d'une minute.
+- La commande `python -m src.features.variables_cropcut` écrit `climat_cropcut.csv.gz`, `sols_cropcut.csv.gz` et `relief_cropcut.csv.gz` dans `data/processed` en une minute environ. Elle suppose la préparation relancée par `python -m src.data.prepare`, qui ajoute `id_mesure`.
+- Le notebook `09_cropcut_variables.ipynb` établit les contrôles de cette étape et s'exécute en deux minutes environ.
