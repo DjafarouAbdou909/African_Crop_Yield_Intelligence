@@ -59,10 +59,10 @@ Les composantes connexes placent du même côté un agrégat régional et ses co
 
 | Partition | `regional` | Pays | `survey` | Pays |
 |---|---:|---:|---:|---:|
-| `developpement` | 105 724 | 45 | 82 301 | 12 |
-| `test_temporel` | 13 226 | 22 | 39 112 | 9 |
-| `test_spatial` | 23 817 | 39 | 20 495 | 12 |
-| `test_spatio_temporel` | 3 110 | 17 | 9 230 | 9 |
+| `developpement` | 105 724 | 45 | 82 293 | 12 |
+| `test_temporel` | 13 226 | 22 | 39 093 | 9 |
+| `test_spatial` | 23 817 | 39 | 20 503 | 12 |
+| `test_spatio_temporel` | 3 110 | 17 | 9 249 | 9 |
 
 Aucun groupe n'est présent des deux côtés de la partition. 23 pays de `regional` n'ont aucune donnée à partir de 2017, et 6 pays n'ont aucune région tenue à l'écart. Le Bénin, la Côte d'Ivoire et la Guinée-Bissau ne comptent qu'une vague dans `survey` et ne contribuent qu'à l'évaluation spatiale.
 
@@ -110,7 +110,7 @@ Une saison manquante forme une modalité, car elle désigne une culture à saiso
 - **Sources.** En validation croisée, `FAO_subnational` présente un biais logarithmique de -0,249, contre 0,018 pour `HarvestStat`. La source devra figurer parmi les variables ou dans la ventilation des scores.
 - **Échelle de la parcelle.** L'erreur de la référence est près de deux fois plus élevée dans `survey` que dans `regional`, ce qui reflète le bruit de mesure et l'hétérogénéité entre parcelles voisines.
 - **Biais des enquêtes.** Sur `cropcut`, le biais logarithmique de 0,252 indique que les rendements d'enquête dépassent les mesures directes d'environ 29 %. Ce biais sera rapporté pour chaque modèle et ne sera pas corrigé sans validation spécifique.
-- **Surfaces GPS recopiées.** Les retirer ne modifie pas l'erreur de la référence en validation croisée et la fait passer de 0,828 à 0,835 sur le test temporel. Leur effet devra être réévalué avec les modèles, qui pourront utiliser la surface.
+- **Surfaces GPS recopiées.** Les retirer fait passer l'erreur de la référence de 0,772 à 0,771 en validation croisée et de 0,828 à 0,835 sur le test temporel. Leur effet devra être réévalué avec les modèles, qui pourront utiliser la surface.
 
 ## 8. Règles du protocole
 
