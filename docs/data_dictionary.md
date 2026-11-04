@@ -132,7 +132,7 @@ Les productions peuvent être déclarées par les agriculteurs et les surfaces p
 | `Source1` | Première partie de l'identifiant de source | Texte | Déduit | Exclue (métadonnée) | Signification exacte à confirmer. |
 | `Source2` | Code pays et année de la vague | Texte | Vérifié | Exclue (métadonnée) | L'année du libellé vaut `AgYearStart` ou `AgYearStart` plus un selon la vague. Elle ne constitue pas une source fiable de l'année. |
 | `Source` | Identifiant combiné de la source | Texte | Déduit | À investiguer | Peut renseigner sur la méthode de mesure et l'année. |
-| `GPS_lat` | Latitude | Décimal | Documenté pour le décalage des coordonnées | À investiguer | Décalage possible de 0 à 5 km en zone rurale. |
+| `GPS_lat` | Latitude | Décimal | Documenté pour le décalage des coordonnées | À investiguer | Décalage possible de 0 à 5 km en zone rurale. Une latitude et une longitude toutes deux nulles codent une position absente, pour 518 lignes, et sont remplacées par des valeurs manquantes signalées par `flag_gps_nul`. |
 | `GPS_lon` | Longitude | Décimal | Documenté pour le décalage des coordonnées | À investiguer | Même remarque que pour la latitude. |
 | `L0_GID` | Identifiant GADM de niveau 0 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau national. |
 | `L1_GID` | Identifiant GADM de niveau 1 | Texte | Documenté, article p. 4 | Clé de regroupement | Niveau administratif 1. |

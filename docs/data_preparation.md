@@ -36,7 +36,7 @@ Ce rapport décrit les corrections appliquées aux données GROW-Africa à la su
 | `src/data/cropcut.py` | Corrections propres au fichier `cropcut` et extraction du jeu de validation |
 | `src/data/prepare.py` | Orchestration de l'ensemble et export dans `data/processed` |
 
-Chaque fonction travaille sur une copie de son entrée. La suite de 27 tests unitaires de `tests/` consacrés à la préparation vérifie chaque correction sur des cas construits pour l'occasion.
+Chaque fonction travaille sur une copie de son entrée. La suite de 28 tests unitaires de `tests/` consacrés à la préparation vérifie chaque correction sur des cas construits pour l'occasion.
 
 ## 4. Corrections appliquées
 
@@ -75,6 +75,7 @@ Chaque fonction travaille sur une copie de son entrée. La suite de 27 tests uni
 | Surface supérieure à 1 000 ha, signalée | 1 |
 | Surface GPS strictement égale à la surface déclarée, signalée | 7 403 |
 | Identifiant de ménage tronqué, signalé et remplacé par une valeur manquante | 3 416 |
+| Latitude et longitude nulles, signalées et remplacées par des valeurs manquantes | 518 |
 | Hiérarchie GADM incohérente | 10 |
 | Cible hors des bornes de plausibilité | 737 |
 
@@ -140,6 +141,7 @@ La cible `YieldUsingGPS_ton_ha_` est maintenue sans remplacement. Ce choix a ét
 - **Hiérarchie du Ghana.** 488 lignes conservent un identifiant de niveau 2 rattaché à plusieurs régions. Leur correction nécessite les polygones GADM.
 - **Lignes inexpliquées.** 1 710 lignes de `regional` ne vérifient aucune relation entre production, surface et rendement. Elles restent dans le jeu de modélisation lorsque leur rendement est plausible.
 - **Saisons.** Seule l'équivalence entre Meher et Main est établie. Les autres libellés de saison sont conservés tels quels, faute de preuve de leur équivalence.
+- **Coordonnées nulles.** 518 lignes de `survey`, dont 135 du jeu de modélisation, sont placées au point de latitude et de longitude nulles, situé en mer dans le golfe de Guinée. Elles proviennent des sources `LSMS_TZA2008`, `LSMS_UGA2011`, `LSMS_MWI2019`, `LSMS_MLI2018`, `LSMS_TZA2012` et `LSMS_ETH2011` et n'ont aucun identifiant administratif. Ce point code une position absente. Avant sa correction du 4 novembre 2026, il formait dans chaque pays une grappe fictive qui reliait des ménages sans lien entre eux, et le plus grand groupe de la partition comptait 456 parcelles au lieu de 253. La correction déplace 332 lignes d'une partition à une autre.
 - **Identifiants de ménage.** L'identifiant est manquant pour la vague `ETH2018` de `cropcut` et pour 6 106 lignes du jeu de modélisation de `survey`. La grappe spatiale sert alors de groupe de repli.
 
 ## 8. Reproductibilité

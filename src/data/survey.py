@@ -70,6 +70,21 @@ def signaler_surface_gps_recopiee(df):
     return resultat
 
 
+def invalider_coordonnees_nulles(df):
+    """Remplace par des valeurs manquantes les coordonnées dont latitude et longitude sont nulles.
+
+    Le point de latitude et de longitude nulles se situe en mer, dans le golfe de
+    Guinée, et code une position absente dans plusieurs vagues LSMS. Le conserver
+    réunirait dans une même grappe fictive des ménages sans lien entre eux. Ces
+    lignes sont signalées par flag_gps_nul.
+    """
+    resultat = df.copy()
+    nul = (resultat["GPS_lat"] == 0) & (resultat["GPS_lon"] == 0)
+    resultat.loc[nul, ["GPS_lat", "GPS_lon"]] = np.nan
+    resultat["flag_gps_nul"] = nul
+    return resultat
+
+
 def construire_identifiants(df):
     """Crée un identifiant de ligne, de ménage et de grappe spatiale.
 
@@ -99,6 +114,7 @@ def preparer_survey(brut, bornes):
     df = harmoniser_annee(df)
     df = signaler_valeurs_impossibles(df)
     df = signaler_surface_gps_recopiee(df)
+    df = invalider_coordonnees_nulles(df)
     df = construire_identifiants(df)
     df = signaler_hierarchie_incoherente(df)
     df["flag_rendement_hors_bornes"] = hors_bornes(df[CIBLE], df["Crop"], bornes)

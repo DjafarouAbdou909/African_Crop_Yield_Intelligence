@@ -7,6 +7,7 @@ from src.data.survey import (
     construire_identifiants,
     harmoniser_annee,
     harmoniser_pays,
+    invalider_coordonnees_nulles,
     jeu_modelisation_survey,
     signaler_surface_gps_recopiee,
     signaler_valeurs_impossibles,
@@ -53,6 +54,14 @@ class TestPreparationSurvey(unittest.TestCase):
         resultat = signaler_surface_gps_recopiee(df)
 
         self.assertEqual(resultat["flag_surface_gps_recopiee"].tolist(), [True, False, False])
+
+    def test_coordonnees_nulles_invalidees(self):
+        df = pd.DataFrame([ligne(), ligne(GPS_lat=0.0, GPS_lon=0.0), ligne(GPS_lat=0.0, GPS_lon=38.1)])
+        resultat = invalider_coordonnees_nulles(df)
+
+        self.assertEqual(resultat["flag_gps_nul"].tolist(), [False, True, False])
+        self.assertTrue(resultat.loc[1, ["GPS_lat", "GPS_lon"]].isna().all())
+        self.assertEqual(resultat.loc[2, "GPS_lat"], 0.0)
 
     def test_identifiants(self):
         df = pd.DataFrame([
