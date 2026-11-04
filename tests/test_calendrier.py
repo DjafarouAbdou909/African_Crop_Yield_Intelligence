@@ -67,6 +67,16 @@ class TestCalendrier(unittest.TestCase):
         self.assertTrue(pd.isna(resultat["source_calendrier"].iloc[3]))
         self.assertEqual(resultat["mois_semis"].tolist()[:3], [3.0, 1.0, 1.0])
 
+    def test_calendrier_dominant_toutes_cultures(self):
+        tables = calendriers_harveststat(self.regional)
+        df = pd.DataFrame({"zone": ["Z9", "Z9"], "region": ["R1", "R9"], "pays": ["P", "Q"], "crop": ["Cocoa", "Cocoa"]})
+        resultat = attribuer_calendrier(df, tables, {"zone": "zone", "niveau_1": "region", "pays": "pays"},
+                                        "crop", [np.nan] * 2, [np.nan] * 2)
+
+        self.assertEqual(resultat["source_calendrier"].iloc[0], "niveau_1_dominant")
+        self.assertEqual(resultat[["mois_semis", "mois_recolte"]].iloc[0].tolist(), [1.0, 4.0])
+        self.assertTrue(pd.isna(resultat["source_calendrier"].iloc[1]))
+
 
 @unittest.skipUnless((DOSSIER_GGCMI / FICHIER_GGCMI.format(code="mai")).exists(), "calendrier GGCMI absent")
 class TestGGCMI(unittest.TestCase):

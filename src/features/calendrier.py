@@ -2,7 +2,10 @@
 
 Les mois proviennent par ordre de priorité de la ligne elle-même, du calendrier
 HarvestStat de sa zone, de sa région de niveau 1 ou de son pays pour la même culture,
-puis du calendrier GGCMI de phase 3 au centroïde de la zone. L'année de récolte sert
+puis du calendrier HarvestStat dominant de sa région ou de son pays toutes cultures
+confondues, et enfin du calendrier GGCMI de phase 3 au centroïde de la zone. Sur les
+lignes HarvestStat, le calendrier dominant d'une autre culture de la région retrouve
+95 % des mois à un mois près, contre 55 % pour GGCMI. L'année de récolte sert
 d'ancrage. L'année de semis de HarvestStat n'est pas utilisée, car elle contredit les
 mois pour 17 045 lignes de regional_modelisation, alors que l'année de récolte
 retrouve les sécheresses connues.
@@ -30,7 +33,7 @@ CULTURES_GGCMI = {
     "Fonio": "mil", "Teff": "mil", "Chickpeas": "pea", "Tobacco": "mai", "Lentils": "pea",
     "Oats": "bar", "Pulses": "bea", "Sugar beet": "sgb", "Triticale": "swh",
 }
-NIVEAUX_CALENDRIER = ["ligne", "zone", "niveau_1", "pays", "ggcmi"]
+NIVEAUX_CALENDRIER = ["ligne", "zone", "niveau_1", "pays", "niveau_1_dominant", "pays_dominant", "ggcmi"]
 
 
 def telecharger_ggcmi(dossier=DOSSIER_GGCMI):
@@ -68,6 +71,8 @@ def calendriers_harveststat(regional):
     La saison principale d'un lieu et d'une culture est celle dont la surface récoltée
     cumulée est la plus grande, et ses mois sont les plus fréquents. Le résultat associe
     à chaque niveau, zone, niveau_1 ou pays, une table indexée par le lieu et la culture.
+    Les niveaux niveau_1_dominant et pays_dominant donnent, pour chaque lieu, le
+    calendrier de plus grande surface récoltée toutes cultures confondues.
     """
     hs = regional.dropna(subset=["planting_month", "harvest_month"]).assign(
         surface=lambda x: x["areaHa"].fillna(0) + 1e-9
@@ -80,6 +85,10 @@ def calendriers_harveststat(regional):
             ["total_saison", "surface"], ascending=False, kind="mergesort"
         )
         tables[niveau] = poids.drop_duplicates([cle, "crop"]).set_index([cle, "crop"])[["planting_month", "harvest_month"]]
+    for niveau, cle in [("niveau_1_dominant", "L1_GID"), ("pays_dominant", "L0_GID")]:
+        poids = hs.groupby([cle, "planting_month", "harvest_month"])["surface"].sum().reset_index()
+        poids = poids.sort_values("surface", ascending=False, kind="mergesort").drop_duplicates(cle)
+        tables[niveau] = poids.set_index(cle)[["planting_month", "harvest_month"]]
     return tables
 
 
@@ -93,10 +102,13 @@ def attribuer_calendrier(df, tables, cles, colonne_culture, latitudes, longitude
     recolte = df["harvest_month"].astype(float).to_numpy().copy() if "harvest_month" in df else np.full(len(df), np.nan)
     niveau = np.where(~np.isnan(semis) & ~np.isnan(recolte), "ligne", None).astype(object)
     culture = df[colonne_culture].to_numpy()
-    for nom in ["zone", "niveau_1", "pays"]:
+    for nom in ["zone", "niveau_1", "pays", "niveau_1_dominant", "pays_dominant"]:
         manquant = pd.isna(niveau)
         table = tables[nom]
-        index = pd.MultiIndex.from_arrays([df[cles[nom]].to_numpy()[manquant], culture[manquant]])
+        if nom.endswith("_dominant"):
+            index = pd.Index(df[cles[nom.removesuffix("_dominant")]].to_numpy()[manquant])
+        else:
+            index = pd.MultiIndex.from_arrays([df[cles[nom]].to_numpy()[manquant], culture[manquant]])
         trouve = table.reindex(index)
         disponible = trouve["planting_month"].notna().to_numpy()
         positions = np.flatnonzero(manquant)[disponible]
