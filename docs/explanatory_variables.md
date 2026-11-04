@@ -7,7 +7,7 @@
 | Code | `src/features/` et `tests/test_geographie.py` |
 | Notebook de référence | `notebooks/05_explanatory_variables.ipynb` |
 | Documents associés | `docs/evaluation_protocol.md` et `docs/data_preparation.md` |
-| Statut | Décisions arrêtées, géographie acquise, variables de NASA POWER acquises et contrôlées, précipitations IMERG en cours d'acquisition |
+| Statut | Décisions arrêtées, géographie et climat acquis et contrôlés, variables climatiques de saison construites, sols restant à acquérir |
 
 ## 1. Objet du document
 
@@ -53,7 +53,7 @@ Les mois de semis et de récolte sont renseignés pour toutes les lignes `Harves
 
 **Conséquences pour la suite**
 
-Les fenêtres de saison s'appuient sur ces mois lorsqu'ils existent. Pour les autres lignes et pour `survey`, un calendrier cultural externe par culture et par lieu est nécessaire.
+Les fenêtres de saison s'appuient sur ces mois lorsqu'ils existent. Pour les autres lignes et pour `survey`, un calendrier cultural externe par culture et par lieu est nécessaire. La section 11 établit que l'année de semis publiée n'est pas fiable et qu'un calendrier `HarvestStat` voisin est préférable au calendrier externe.
 
 ## 3. Décision préalable sur l'horizon de prédiction
 
@@ -228,6 +228,7 @@ Le 3 novembre 2026, le porteur du projet a renoncé à Google Earth Engine. Les 
 | Corrélation des rangs des cumuls journaliers | 0,65 à 0,67 | 0,67 | 0,65 à 0,69 | 0,67 à 0,68 | 0,68 |
 
 - En temps universel, les journées de 2 532, 2 501 et 1 817 mm relevées dans `PRECTOTCORR` aux centres des trois mailles les plus extrêmes correspondent à 3,3, 1,3 et 0 mm dans IMERG.
+- Sur l'ensemble des mailles, pics compris, le rapport des cumuls annuels moyens de `PRECTOTCORR` et d'IMERG vaut 0,83 à 0,88 de 2001 à 2006, 0,95 à 1,07 de 2007 à 2019, 1,28 à 1,33 de 2020 à 2022 et 1,14 en 2023. IMERG compte entre 2 et 34 jours au-delà de 200 mm par an, sans tendance.
 - Par rapport à sa moyenne de 2001 à 2019, `GWETROOT` présente sur 800 mailles tirées au hasard des écarts de +0,031, +0,026 et +0,027 en 2020, 2021 et 2022, les plus élevés depuis 1995. Les autres variables ne présentent pas de rupture comparable.
 
 **Analyse**
@@ -240,7 +241,7 @@ Le 3 novembre 2026, le porteur du projet a renoncé à Google Earth Engine. Les 
 **Décisions**
 
 - Les précipitations proviennent d'IMERG, diffusé par NASA POWER sous le nom `IMERG_PRECTOT`, interrogé au centre de chacune des mailles déjà retenues. La source NASA POWER arrêtée par le porteur du projet est conservée et seul le produit change.
-- `PRECTOTCORR` et `GWETROOT` restent dans les fichiers téléchargés mais ne servent à aucune variable explicative. Le stress hydrique sera estimé par un bilan entre les précipitations d'IMERG et l'évapotranspiration de référence calculée à partir des températures, du rayonnement et du vent.
+- `PRECTOTCORR` et `GWETROOT` restent dans les fichiers téléchargés mais ne servent à aucune variable explicative. Le stress hydrique est mesuré par un bilan entre les précipitations d'IMERG et l'évapotranspiration de référence FAO-56, calculée dans chaque maille à partir des températures, du point de rosée, du rayonnement, du vent et de l'altitude.
 - Les saisons antérieures à juin 2000 n'ont pas d'indicateur de précipitations. Elles concernent 44 654 lignes de `regional_modelisation` récoltées avant 2001, contre 101 223 à partir de 2001. Le choix entre restreindre les modèles climatiques aux récoltes postérieures à 2000 et conserver les années antérieures avec des précipitations manquantes sera tranché par validation croisée lors de la modélisation.
 
 **Limites**
@@ -248,10 +249,60 @@ Le 3 novembre 2026, le porteur du projet a renoncé à Google Earth Engine. Les 
 - IMERG est diffusé en temps universel et les autres variables en temps solaire local. L'écart n'excède pas 3 h 30 sur les longitudes couvertes. Il est sans effet sur les cumuls saisonniers mais peut déplacer un épisode pluvieux sur le jour voisin dans le calcul des séquences sèches.
 - La valeur interrogée au centre d'une maille est celle d'un pixel IMERG de 0,1°, et non la moyenne de la maille. La moyenne d'une zone constitue donc un échantillonnage de la zone, d'autant plus bruité que la zone recoupe peu de mailles.
 
-## 11. Reproductibilité
+## 11. Fenêtres de saison et indicateurs climatiques
+
+**Constat**
+
+- L'année de semis publiée par `HarvestStat` contredit les mois de semis et de récolte pour 17 045 des 118 333 lignes qui en disposent, dont 8 499 au Malawi, 3 574 à Madagascar, 1 959 au Soudan, 1 382 au Niger à partir de 2011 et 1 301 en Afrique du Sud. Les erreurs sont de sens opposés selon les pays.
+- L'année de récolte retrouve les sécheresses connues. Le rendement du maïs s'écarte de -1,11 en logarithme de la moyenne de sa zone pour la récolte de 1992 au Malawi et de -0,88 en Afrique du Sud, et la saison 1984 se lit en 1984 au Soudan et au Niger.
+- Les différences annuelles du logarithme du rendement ont été corrélées avec celles du climat de la fenêtre de saison, pour l'année de récolte et pour les années voisines. La fenêtre de l'année de récolte donne la corrélation la plus négative avec la température maximale dans 18 des 24 pays testés, la plus positive avec la pluie dans 17 pays, et les deux à la fois dans 15 pays. Au Lesotho, les deux variables désignent l'année suivante, avec -0,119 pour la température et 0,191 pour la pluie.
+- Dans `survey`, la même démarche appliquée à la pluie, après retrait des effets fixes de zone et de vague, confirme la fin de campagne au Malawi et le début de campagne en Ouganda, au Togo, au Mali et au Sénégal. Elle désigne le début de campagne en Tanzanie, alors que le calendrier annuel `HarvestStat` de septembre à juillet y conduirait à la fin de campagne. Elle désigne aussi le début de campagne en Éthiopie, avec 0,111 contre -0,016, et la fin de campagne au Niger sur 184 cellules seulement. Une analyse exploratoire fondée sur la température, non reprise dans le notebook, ne distinguait aucune hypothèse dans `survey`.
+- Une comparaison exploratoire des écarts de rendement de `survey` et de `regional` dans les mêmes régions, non reprise dans le notebook, désignait déjà le début de campagne en Éthiopie, avec une corrélation de 0,67 contre 0,41, et en Tanzanie.
+- Sur les lignes `HarvestStat`, le calendrier dominant d'une autre culture de la même région retrouve 96 % des mois de semis et de récolte à un mois près, contre 55 % pour le calendrier GGCMI de phase 3 de la même culture. GGCMI place par exemple le semis de l'arachide du Zimbabwe en juin, en saison sèche.
+
+**Analyse**
+
+- L'année de récolte de `HarvestStat` est fiable et son année de semis ne l'est pas. Le Lesotho fait exception, son année de récolte désignant l'année de semis selon deux variables indépendantes.
+- En Éthiopie, le résultat de `survey` signifierait que la vague de 2015 mesure la saison principale de 2014, ce qui contredit le déroulement de l'enquête, dont le passage après récolte a lieu au début de l'année de fin de campagne. Au Niger, l'hypothèse de fin de campagne placerait la saison mesurée après l'enquête elle-même, ce qui est impossible.
+- Les calendriers `HarvestStat` décrivent avant tout la saison des pluies d'une région, commune à la plupart des cultures, ce qui explique la fiabilité du calendrier dominant.
+
+**Décisions**
+
+- La fenêtre de saison va du premier jour du mois de semis au dernier jour du mois de récolte. Elle s'achève l'année de récolte et commence l'année précédente lorsque le mois de semis suit le mois de récolte. Les fenêtres des lignes `HarvestStat` du Lesotho sont décalées d'un an.
+- Dans `survey`, la saison commence par le semis de l'année de début de campagne et s'achève à la récolte qui suit, sauf en Tanzanie, où elle s'achève l'année de début de campagne. `annee_recolte` n'est pas modifiée, car le décalage est constant au sein d'un pays.
+- Le conflit éthiopien est consigné comme anomalie non résolue et fera l'objet d'une analyse de sensibilité lors de la modélisation.
+- Une ligne sans mois reçoit, par ordre de priorité, le calendrier `HarvestStat` principal de sa zone, de sa région ou de son pays pour la même culture, puis le calendrier dominant de sa région ou de son pays toutes cultures confondues, et enfin le calendrier GGCMI au centroïde de son lieu. Le niveau retenu est conservé dans `source_calendrier`.
+- Le lieu d'une ligne de `regional` est sa zone. Celui d'une parcelle de `survey` est le voisinage de 5 km de sa grappe lorsque ses coordonnées sont connues, sinon sa zone de repli. La série d'un lieu est la moyenne de ses mailles pondérée par la surface de leur intersection avec le lieu, une maille sans valeur un jour donné étant ignorée ce jour-là.
+- Les indicateurs de chaque fenêtre sont le cumul de pluie, le nombre de jours d'au moins 1 mm, la plus longue séquence sans pluie, le bilan entre la pluie et l'évapotranspiration de référence FAO-56, les degrés-jours au-delà de 10 °C avec une température moyenne plafonnée à 30 °C, les degrés-jours de température maximale au-delà de 30 et de 35 °C, les températures maximale et minimale moyennes, le déficit moyen de pression de vapeur, le rayonnement moyen et l'évapotranspiration cumulée. Un indicateur est manquant dès qu'un jour de sa fenêtre manque.
+
+**Résultats**
+
+| Élément | `regional` | `survey` |
+|---|---:|---:|
+| Lignes | 145 877 | 151 138 |
+| Mois propres à la ligne | 118 333 | 0 |
+| Calendrier de la même culture | 20 324 | 145 426 |
+| Calendrier dominant toutes cultures | 2 127 | 4 056 |
+| Calendrier GGCMI | 4 680 | 1 571 |
+| Sans calendrier | 413 | 85 |
+| Lignes sans aucun indicateur | 413 et les saisons antérieures à 1981 | 1 170, dont 1 085 sans localisation |
+
+Pour les récoltes postérieures à 2000, la pluie couvre 99,3 % des lignes de `regional` et la température 99,6 %. Pour les récoltes de 1982 à 2000, la température couvre 99,9 % des lignes et la pluie 3,3 %. Dans `survey`, 99,2 % des parcelles reçoivent tous les indicateurs. Les 1 450 saisons de `regional` à moins de 100 mm de pluie relèvent surtout de cultures irriguées, de décrue ou riveraines.
+
+**Limites**
+
+- GGCMI reste le seul calendrier disponible au Ghana, en Guinée, en Afrique du Nord et en Gambie, soit 4 680 lignes de `regional`, avec une fiabilité mesurée de 55 % à un mois près.
+- Les tests d'alignement de `survey` reposent sur deux à huit vagues par pays, et l'alignement de l'Éthiopie n'est pas établi.
+- Les années de récolte choisies pour le Lesotho et la Tanzanie l'ont été au vu de corrélations calculées sur toutes les années, périodes futures comprises. Ce choix porte sur un seul paramètre par pays et ne concerne pas les modèles, mais il constitue un usage limité des périodes de test.
+
+## 12. Reproductibilité
 
 - Les fichiers externes sont téléchargés dans `data/external`, exclu du dépôt git, et consignés dans `data/external/registre.csv` avec leur adresse, leur date, leur taille et leur empreinte SHA-256.
 - La table de correspondance est vérifiée par l'empreinte MD5 publiée par Zenodo.
 - Le notebook de référence télécharge les fichiers manquants, construit les contours et les descripteurs, et s'exécute en moins d'une minute lorsque les fichiers sont présents.
 - Les séries de NASA POWER se téléchargent avec la commande `python -m src.features.climat`. Chaque maille est compressée dans `data/external/power` et consignée dans le registre, avec l'adresse exacte de la requête.
 - Les précipitations IMERG se téléchargent avec la commande `python -m src.features.climat imerg` dans `data/external/imerg`, selon les mêmes règles. Les coordonnées nulles étant désormais ignorées, cette commande interroge 7 362 mailles.
+- Le calendrier GGCMI de phase 3 est téléchargé depuis Zenodo et vérifié par les empreintes MD5 publiées.
+- Les séries retenues sont réunies dans `data/interim/climat`, un tableau par variable indexé par maille et par jour, par la fonction `construire_magasin` de `src/features/climat.py`. L'évapotranspiration de référence y est ajoutée par la fonction `calculer_et0` de `src/features/agregation.py`.
+- La commande `python -m src.features.variables` recalcule les poids des mailles de chaque lieu et écrit `climat_regional.csv.gz` et `climat_survey.csv.gz` dans `data/processed`. La clé de `regional` est le quadruplet `GDAM_ID`, `crop`, `saison` et `harvest_year`, et celle de `survey` est `id_ligne`.
+- Le notebook `06_climate_variables.ipynb` établit tous les contrôles de cette phase et s'exécute en cinq minutes environ lorsque le magasin est construit.
