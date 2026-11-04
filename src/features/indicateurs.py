@@ -65,11 +65,8 @@ def _somme_fenetres(valeurs, debuts, fins):
 def sequence_seche_maximale(pluie, debuts, fins, seuil=SEUIL_JOUR_PLUIE):
     """Retourne la plus longue suite de jours sans pluie de chaque fenêtre."""
     sec = np.nan_to_num(pluie, nan=np.inf) < seuil
-    duree = np.zeros(len(pluie), dtype=int)
-    courant = 0
-    for jour, est_sec in enumerate(sec):
-        courant = courant + 1 if est_sec else 0
-        duree[jour] = courant
+    rang = np.arange(len(pluie))
+    duree = rang - np.maximum.accumulate(np.where(sec, -1, rang))
     resultat = np.empty(len(debuts))
     for rang, (debut, fin) in enumerate(zip(debuts, fins)):
         resultat[rang] = np.minimum(duree[debut:fin + 1], np.arange(1, fin - debut + 2)).max()
