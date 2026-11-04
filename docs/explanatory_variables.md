@@ -23,7 +23,7 @@ Les jeux préparés ne contiennent que la cible, la culture, le lieu, la saison 
 - La version 2.0 de l'archive Zenodo, publiée le 12 août 2025, fournit une table de correspondance entre ces codes et les identifiants GADM officiels. Son archive de données porte la même empreinte MD5 que celle de la version 1.0. Les rendements sont donc identiques d'une version à l'autre.
 - La version 2.0 ne fournit plus les contours, qui doivent être téléchargés depuis le site de GADM sous sa licence propre.
 - Toutes les zones de niveau 1 et de niveau 2 de `regional_modelisation` trouvent une correspondance, à l'exception de 5 zones du Lesotho, soit 22 lignes, dépourvues d'identifiant GADM de niveau 2.
-- Les coordonnées de `survey` sont déplacées de 0 à 5 km pour protéger l'anonymat des ménages, selon la documentation de la base. 13 423 lignes du jeu de modélisation n'ont pas de coordonnées.
+- Les coordonnées de `survey` sont déplacées de 0 à 5 km pour protéger l'anonymat des ménages, selon la documentation de la base. 13 558 lignes du jeu de modélisation n'ont pas de coordonnées, dont 135 dont la position était codée par une latitude et une longitude nulles.
 
 **Conséquences pour la suite**
 
@@ -154,7 +154,7 @@ Les décisions suivantes ont été arrêtées le 3 novembre 2026 sur délégatio
 - Dans ces 45 pays, les 741 codes GADM de niveau 1 et les 6 377 codes GADM de niveau 2 de la table existent dans GADM 4.1 et y portent le même nom. Les 80 codes sans unité GADM appartiennent tous au Lesotho, pour lequel GADM 4.1 ne fournit aucun niveau 2.
 - Les 1 682 zones de `regional_modelisation` reçoivent un contour. 22 lignes du Lesotho reçoivent celui de leur région de niveau 1. 8 zones ghanéennes de `RCeA`, soit 130 lignes, réunissent les deux districts GADM issus de la division d'un même district, et leur contour est l'union des deux.
 - 88 lignes de `regional_modelisation` déclarent une surface récoltée supérieure à la surface de leur zone. À Kigali, d'une superficie de 729 km², `RCeA` attribue à la banane et au manioc des surfaces de 543 000 à 617 000 ha. Au Sénégal, `FAO_subnational` attribue 2,4 millions d'hectares de mil à la région de Kaolack.
-- Les grappes de `survey` tombent toutes à l'intérieur du contour de leur zone, alors qu'une zone tirée au hasard n'en contient que 0,4 %. 950 lignes de `survey` n'ont ni identifiant géographique ni coordonnées.
+- Les grappes de `survey` tombent toutes à l'intérieur du contour de leur zone, alors qu'une zone tirée au hasard n'en contient que 0,4 %. 1 085 lignes de `survey` n'ont ni identifiant géographique ni coordonnées.
 
 **Analyse**
 
