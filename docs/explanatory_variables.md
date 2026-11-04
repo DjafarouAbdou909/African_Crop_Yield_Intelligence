@@ -7,7 +7,7 @@
 | Code | `src/features/` et `tests/test_geographie.py` |
 | Notebook de référence | `notebooks/05_explanatory_variables.ipynb` |
 | Documents associés | `docs/evaluation_protocol.md` et `docs/data_preparation.md` |
-| Statut | Décisions arrêtées, géographie acquise, climat en cours d'acquisition auprès de NASA POWER |
+| Statut | Décisions arrêtées, géographie acquise, variables de NASA POWER acquises et contrôlées, précipitations IMERG en cours d'acquisition |
 
 ## 1. Objet du document
 
@@ -192,10 +192,10 @@ Le 3 novembre 2026, sur délégation du porteur du projet, le climat est acquis 
 |---|---|---|
 | `T2M_MAX` et `T2M_MIN` | Températures maximale et minimale à 2 m | Degrés-jours de croissance et degrés-jours au-delà de 30 et de 35 °C |
 | `T2MDEW` | Point de rosée à 2 m | Déficit de pression de vapeur |
-| `PRECTOTCORR` | Précipitations corrigées par les pluviomètres | Cumul, jours de pluie et plus longue séquence sèche |
+| `PRECTOTCORR` | Précipitations corrigées par les pluviomètres | Abandonné au profit d'IMERG, voir la section 10 |
 | `ALLSKY_SFC_SW_DWN` | Rayonnement solaire incident | Rayonnement cumulé |
 | `WS2M` | Vent à 2 m | Évapotranspiration de référence |
-| `GWETROOT` | Humidité du sol dans la zone racinaire | Stress hydrique |
+| `GWETROOT` | Humidité du sol dans la zone racinaire | Abandonné, voir la section 10 |
 
 7 363 mailles recoupent une zone de `regional`, une zone de `survey` ou le voisinage de 5 km d'une grappe. La valeur d'une zone sera la moyenne de ses mailles pondérée par la surface de leur intersection avec la zone.
 
@@ -207,11 +207,51 @@ Le 3 novembre 2026, sur délégation du porteur du projet, le climat est acquis 
 
 **Décision du porteur du projet**
 
-Le 3 novembre 2026, le porteur du projet a renoncé à Google Earth Engine. Les précipitations de NASA POWER sont donc retenues comme source définitive, et CHIRPS est abandonné. Leur moindre précision constitue une limite du projet, qui devra être rappelée dans l'interprétation des modèles et de l'importance des variables de pluie.
+Le 3 novembre 2026, le porteur du projet a renoncé à Google Earth Engine. Les précipitations de NASA POWER sont donc retenues comme source définitive, et CHIRPS est abandonné. Leur moindre précision constitue une limite du projet, qui devra être rappelée dans l'interprétation des modèles et de l'importance des variables de pluie. Le contrôle du 4 novembre 2026, décrit à la section 10, conduit à retenir le produit IMERG diffusé par NASA POWER plutôt que `PRECTOTCORR`.
 
-## 10. Reproductibilité
+## 10. Contrôle des séries de NASA POWER
+
+**Constat**
+
+- Le téléchargement s'est achevé le 4 novembre 2026, sans échec. Chacune des 7 363 mailles couvre les 15 705 jours du 1er janvier 1981 au 31 décembre 2023, et chaque fichier correspond à son entrée du registre par sa taille et son empreinte SHA-256.
+- Températures, point de rosée, précipitations et vent sont complets. Le rayonnement manque avant 1984, comme prévu, et pour quelques jours isolés de 49 mailles entre 1985 et 1996, soit au plus 0,089 % des jours d'une maille. `GWETROOT` manque entièrement pour 11 mailles situées en mer, sur une côte ou sur le lac Victoria, car cette variable n'est définie que sur les terres émergées.
+- L'une de ces 11 mailles est centrée sur le point de latitude et de longitude nulles, en mer. Elle n'a été téléchargée qu'à cause des 135 parcelles de `survey` dont la position absente était codée par ce point, et elle n'est plus utilisée depuis l'invalidation de ces coordonnées.
+- Les températures extrêmes restent plausibles, avec un minimum de -17,7 °C sur les hauts plateaux du Lesotho et un maximum de 51,7 °C dans le Sahara algérien.
+- `PRECTOTCORR` contient des cumuls journaliers impossibles. 205 mailles comptent au moins un jour au-delà de 500 mm et 542 au-delà de 300 mm. Le maximum atteint 2 581 mm le 21 mars 2022 dans le sud-ouest de l'Angola, et 2 533 mm le 12 octobre 2020 dans le nord de la Mauritanie, dans une maille dont le cumul annuel moyen est de 137 mm.
+- Ces anomalies se concentrent à partir de 2020. Le nombre de jours au-delà de 200 mm, toutes mailles réunies, ne dépasse pas 91 par an de 1981 à 2019, puis atteint 610 en 2020, 427 en 2021, 382 en 2022 et 281 en 2023. Le cumul annuel médian des mailles passe de 594 mm en 2019 à 776 mm en 2020.
+- NASA POWER ne diffuse pas de précipitations non corrigées, car l'API rejette `PRECTOT` comme un doublon de `PRECTOTCORR`. Elle diffuse en revanche le produit satellitaire IMERG à 0,1°, en temps universel, à partir du 1er juin 2000.
+- Sur 43 mailles, soit 40 tirées au hasard et les 3 mailles les plus extrêmes, la comparaison des deux produits de 2001 à 2023 donne les résultats suivants.
+
+| Mesure | 2001 à 2006 | 2007 | 2008 à 2019 | 2020 à 2022 | 2023 |
+|---|---|---|---|---|---|
+| Rapport des précipitations moyennes de `PRECTOTCORR` et d'IMERG, jours au-delà de 200 mm exclus | 0,80 à 0,92 | 1,19 | 0,92 à 1,04 | 1,11 à 1,20 | 0,97 |
+| Corrélation des rangs des cumuls journaliers | 0,65 à 0,67 | 0,67 | 0,65 à 0,69 | 0,67 à 0,68 | 0,68 |
+
+- En temps universel, les journées de 2 532, 2 501 et 1 817 mm relevées dans `PRECTOTCORR` aux centres des trois mailles les plus extrêmes correspondent à 3,3, 1,3 et 0 mm dans IMERG.
+- Par rapport à sa moyenne de 2001 à 2019, `GWETROOT` présente sur 800 mailles tirées au hasard des écarts de +0,031, +0,026 et +0,027 en 2020, 2021 et 2022, les plus élevés depuis 1995. Les autres variables ne présentent pas de rupture comparable.
+
+**Analyse**
+
+- Les cumuls de plusieurs milliers de millimètres en un jour sont physiquement impossibles, et IMERG n'enregistre aucun épisode notable aux mêmes dates dans les trois mailles examinées. Il s'agit d'artefacts du produit.
+- Au-delà de ces pics, l'intensité de `PRECTOTCORR` n'est pas homogène dans le temps par rapport à IMERG, alors que la chronologie des épisodes pluvieux reste aussi bien restituée d'une année à l'autre. L'excès de 11 à 20 % de 2020 à 2022 tombe dans les périodes futures du protocole, qui commencent en 2017 pour `regional` et comprennent les vagues 2021 et 2022 de `survey`, soit 24 423 parcelles. Un modèle entraîné sur les années antérieures y verrait des saisons artificiellement humides et en tirerait des prédictions biaisées.
+- La documentation de NASA POWER ne signale aucun changement de source en 2020, et la cause de la rupture n'est pas identifiée. La comparaison établit l'incohérence de `PRECTOTCORR`, sans démontrer l'exactitude d'IMERG, dont la stabilité sur l'échantillon reste toutefois cohérente avec un produit homogène.
+- `GWETROOT` est calculé par le modèle de surface de MERRA-2 à partir des précipitations corrigées. L'excès de 2020 à 2022 se retrouve dans son humidité record, alors qu'IMERG décrit 2021 et 2022 comme des années plutôt sèches sur l'échantillon.
+
+**Décisions**
+
+- Les précipitations proviennent d'IMERG, diffusé par NASA POWER sous le nom `IMERG_PRECTOT`, interrogé au centre de chacune des mailles déjà retenues. La source NASA POWER arrêtée par le porteur du projet est conservée et seul le produit change.
+- `PRECTOTCORR` et `GWETROOT` restent dans les fichiers téléchargés mais ne servent à aucune variable explicative. Le stress hydrique sera estimé par un bilan entre les précipitations d'IMERG et l'évapotranspiration de référence calculée à partir des températures, du rayonnement et du vent.
+- Les saisons antérieures à juin 2000 n'ont pas d'indicateur de précipitations. Elles concernent 44 654 lignes de `regional_modelisation` récoltées avant 2001, contre 101 223 à partir de 2001. Le choix entre restreindre les modèles climatiques aux récoltes postérieures à 2000 et conserver les années antérieures avec des précipitations manquantes sera tranché par validation croisée lors de la modélisation.
+
+**Limites**
+
+- IMERG est diffusé en temps universel et les autres variables en temps solaire local. L'écart n'excède pas 3 h 30 sur les longitudes couvertes. Il est sans effet sur les cumuls saisonniers mais peut déplacer un épisode pluvieux sur le jour voisin dans le calcul des séquences sèches.
+- La valeur interrogée au centre d'une maille est celle d'un pixel IMERG de 0,1°, et non la moyenne de la maille. La moyenne d'une zone constitue donc un échantillonnage de la zone, d'autant plus bruité que la zone recoupe peu de mailles.
+
+## 11. Reproductibilité
 
 - Les fichiers externes sont téléchargés dans `data/external`, exclu du dépôt git, et consignés dans `data/external/registre.csv` avec leur adresse, leur date, leur taille et leur empreinte SHA-256.
 - La table de correspondance est vérifiée par l'empreinte MD5 publiée par Zenodo.
 - Le notebook de référence télécharge les fichiers manquants, construit les contours et les descripteurs, et s'exécute en moins d'une minute lorsque les fichiers sont présents.
 - Les séries de NASA POWER se téléchargent avec la commande `python -m src.features.climat`. Chaque maille est compressée dans `data/external/power` et consignée dans le registre, avec l'adresse exacte de la requête.
+- Les précipitations IMERG se téléchargent avec la commande `python -m src.features.climat imerg` dans `data/external/imerg`, selon les mêmes règles. Les coordonnées nulles étant désormais ignorées, cette commande interroge 7 362 mailles.
