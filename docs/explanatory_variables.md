@@ -4,10 +4,10 @@
 |---|---|
 | Projet | African Crop Yield Intelligence |
 | Méthodologie | CRISP-DM, retour en Data Understanding et Data Preparation pour l'acquisition de données externes |
-| Code | `src/features/` et `tests/test_geographie.py` |
-| Notebook de référence | `notebooks/05_explanatory_variables.ipynb` |
+| Code | `src/features/` et les tests correspondants dans `tests/` |
+| Notebooks de référence | `notebooks/05_explanatory_variables.ipynb`, `06_climate_variables.ipynb` et `07_soil_variables.ipynb` |
 | Documents associés | `docs/evaluation_protocol.md` et `docs/data_preparation.md` |
-| Statut | Décisions arrêtées, géographie et climat acquis et contrôlés, variables climatiques de saison construites, sols restant à acquérir |
+| Statut | Décisions arrêtées, géographie, climat et sols acquis et contrôlés, variables climatiques de saison et variables de sol construites, relief restant à acquérir |
 
 ## 1. Objet du document
 
@@ -295,7 +295,54 @@ Pour les récoltes postérieures à 2000, la pluie couvre 99,3 % des lignes de `
 - Les tests d'alignement de `survey` reposent sur deux à huit vagues par pays, et l'alignement de l'Éthiopie n'est pas établi.
 - Les années de récolte choisies pour le Lesotho et la Tanzanie l'ont été au vu de corrélations calculées sur toutes les années, périodes futures comprises. Ce choix porte sur un seul paramètre par pays et ne concerne pas les modèles, mais il constitue un usage limité des périodes de test.
 
-## 12. Reproductibilité
+## 12. Sols
+
+**Constat**
+
+- La version à 1 km de SoilGrids 2.0 ne contient pas le pH. Pour les huit autres propriétés retenues, elle est identique pixel à pixel au premier aperçu de la mosaïque à 250 m, fichier que SoilGrids publie aussi pour le pH, avec son empreinte.
+- L'empreinte SHA-256 publiée par ISRIC porte sur le fichier complet et ne peut pas vérifier une lecture à distance par fenêtres. Le serveur limite chaque connexion à 0,4 Mo par seconde environ, mais plusieurs connexions simultanées en multiplient le débit.
+- Les 27 couches, neuf propriétés à trois profondeurs de 0 à 30 cm, ont été téléchargées en entier, soit 4,68 Go, et toutes ont l'empreinte publiée. Les découpages conservés occupent 787 Mo.
+- La version à 1 km n'est pas exactement la moyenne des 16 pixels à 250 m qu'elle recouvre. Le meilleur accord est obtenu en décalant les blocs de 500 à 1 000 m vers l'ouest et de 750 m vers le nord, sans annuler l'écart. À l'échelle de carrés de 5 km, la corrélation avec la moyenne exacte à 250 m est comprise entre 0,94 et 0,99 sur trois sites et trois propriétés.
+- Quatre zones urbaines de `regional`, Accra, Ledzokuku et Tema au Ghana et Dakar au Sénégal, n'ont aucun pixel valide, car SoilGrids exclut les villes et les plans d'eau. Elles portent 68 lignes. Dans `survey`, trois grappes de Dar es Salaam sont dans le même cas.
+- Le pH des zones décroît avec leur pluie de saison, avec une corrélation de rang de -0,61. Le carbone organique et l'azote ont une corrélation de rang de 0,94.
+
+**Analyse**
+
+- Lire le pH dans l'aperçu de sa mosaïque donne exactement la valeur qu'ISRIC aurait publiée à 1 km, ce qui garde les neuf propriétés homogènes.
+- Le téléchargement complet s'écarte de la lecture par fenêtres prévue par la décision 3 de la section 7. Il est justifié par la vérification des empreintes, que la lecture par fenêtres ne permet pas, pour une durée d'une heure environ et sans encombrement durable du disque, puisque les fichiers sources sont supprimés après découpage.
+- L'écart entre les versions à 1 km et à 250 m, et l'incertitude de position de l'ordre de 1 km, restent faibles devant le rayon de 5 km des voisinages, devant la taille des zones et devant l'incertitude propre de SoilGrids en Afrique.
+- Les relations entre propriétés et avec la pluie sont celles qu'attend la science du sol. Elles signalent aussi qu'une part de l'information des sols est déjà portée par le climat.
+
+**Décisions**
+
+- La valeur d'un lieu est la moyenne des pixels dont le centre tombe dans son contour, ou des pixels qu'il touche lorsqu'il est trop petit pour contenir un centre. La projection de SoilGrids conservant les surfaces, cette moyenne est pondérée par la surface.
+- Les lieux sont ceux des variables climatiques. Comme pour le climat, aucun masque des terres cultivées n'est appliqué.
+- Les variables manquantes restent manquantes, et `pixels_sol` et `part_sol_valide` accompagnent chaque lieu.
+- Le limon, que la fermeture de la texture rend redondant, et l'azote, très lié au carbone organique, sont conservés dans les fichiers. Leur usage sera décidé lors de la modélisation.
+
+**Résultats**
+
+| Variable | Contenu | Unité | Médiane des zones de `regional` |
+|---|---|---|---:|
+| `argile_0_30` | Part d'argile | % | 26,7 |
+| `limon_0_30` | Part de limon | % | 23,1 |
+| `sable_0_30` | Part de sable | % | 49,1 |
+| `carbone_organique_0_30` | Carbone organique | g/kg | 14,7 |
+| `azote_0_30` | Azote total | g/kg | 1,17 |
+| `ph_0_30` | pH dans l'eau | Sans unité | 6,08 |
+| `cec_0_30` | Capacité d'échange cationique | cmolc/kg | 13,8 |
+| `densite_apparente_0_30` | Densité apparente | g/cm³ | 1,41 |
+| `elements_grossiers_0_30` | Part volumique des éléments grossiers | % | 11,8 |
+
+`sols_regional.csv.gz` contient les 1 682 zones, avec la clé `GDAM_ID`. `sols_survey.csv.gz` contient les 151 138 lignes, avec la clé `id_ligne`, et 99,28 % d'entre elles reçoivent des variables de sol, les autres étant les 1 085 lignes sans localisation et les trois grappes urbaines. Dans `regional`, 99,95 % des lignes en reçoivent.
+
+**Limites**
+
+- SoilGrids est une prédiction statistique, dont l'incertitude est élevée en Afrique faute de profils mesurés. Ses valeurs sont statiques et ne suivent pas l'évolution des sols de 1981 à 2023.
+- ISRIC ne documente pas le calcul de sa version à 1 km, dont les contrôles montrent qu'elle approche la moyenne des pixels fins sans l'égaler.
+- Les variables de `cropcut` restent à construire pour la validation externe, pour les sols comme pour le climat.
+
+## 13. Reproductibilité
 
 - Les fichiers externes sont téléchargés dans `data/external`, exclu du dépôt git, et consignés dans `data/external/registre.csv` avec leur adresse, leur date, leur taille et leur empreinte SHA-256.
 - La table de correspondance est vérifiée par l'empreinte MD5 publiée par Zenodo.
@@ -306,3 +353,6 @@ Pour les récoltes postérieures à 2000, la pluie couvre 99,3 % des lignes de `
 - Les séries retenues sont réunies dans `data/interim/climat`, un tableau par variable indexé par maille et par jour, par la fonction `construire_magasin` de `src/features/climat.py`. L'évapotranspiration de référence y est ajoutée par la fonction `calculer_et0` de `src/features/agregation.py`.
 - La commande `python -m src.features.variables` recalcule les poids des mailles de chaque lieu et écrit `climat_regional.csv.gz` et `climat_survey.csv.gz` dans `data/processed`. La clé de `regional` est le quadruplet `GDAM_ID`, `crop`, `saison` et `harvest_year`, et celle de `survey` est `id_ligne`.
 - Le notebook `06_climate_variables.ipynb` établit tous les contrôles de cette phase et s'exécute en cinq minutes environ lorsque le magasin est construit.
+- Les couches de SoilGrids s'obtiennent avec la commande `python -m src.features.sols extraire`. Chaque fichier source est téléchargé en entier, comparé à l'empreinte SHA-256 publiée par ISRIC, découpé sur la fenêtre fixe `FENETRE_AFRIQUE` puis supprimé. Les découpages sont écrits dans `data/external/soilgrids` et consignés dans le registre, et les empreintes vérifiées des sources dans `data/external/soilgrids/sources.csv`.
+- La commande `python -m src.features.sols construire` écrit `sols_regional.csv.gz` et `sols_survey.csv.gz` dans `data/processed` en une minute environ.
+- Le notebook `07_soil_variables.ipynb` établit les contrôles des sols et s'exécute en six minutes environ, dont l'essentiel est consacré aux lectures à distance de la version à 250 m.
