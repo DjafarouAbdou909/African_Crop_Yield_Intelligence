@@ -18,12 +18,15 @@ import gzip
 import io
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from multiprocessing import Pool
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import requests
 from shapely.geometry import box
+
+from src.data.load import DOSSIER_INTERMEDIAIRE
 
 from .acquisition import DOSSIER_EXTERNE, REGISTRE, consigner
 from .geographie import PROJECTION_EQUIVALENTE
@@ -113,6 +116,12 @@ def lire_power(chemin):
     return donnees.drop(columns=["YEAR", "DOY"]).set_index(date.rename("date"))
 
 
+DOSSIER_MAGASIN = DOSSIER_INTERMEDIAIRE / "climat"
+VARIABLES_RETENUES = {
+    "power": ["T2M_MAX", "T2M_MIN", "T2MDEW", "ALLSKY_SFC_SW_DWN", "WS2M"],
+    "imerg": ["IMERG_PRECTOT"],
+}
+
 PRODUITS = {
     "power": {"parametres": PARAMETRES_POWER, "debut": DEBUT_POWER, "temps": "LST", "dossier": DOSSIER_POWER},
     "imerg": {"parametres": PARAMETRES_IMERG, "debut": DEBUT_IMERG, "temps": "UTC", "dossier": DOSSIER_IMERG},
@@ -183,6 +192,59 @@ def telecharger_mailles(mailles, produit="power", dossier=None, registre=REGISTR
             if rang % 100 == 0 or rang == len(taches):
                 print(f"{rang} mailles sur {len(taches)}, {len(echecs)} en échec", flush=True)
     return echecs
+
+
+def mailles_telechargees(produit="power", dossier=None):
+    """Retourne les mailles dont la série d'un produit est présente, triées par nom."""
+    dossier = PRODUITS[produit]["dossier"] if dossier is None else dossier
+    noms = sorted(c.name[len(produit) + 1:-len(".csv.gz")] for c in dossier.glob(f"{produit}_*.csv.gz"))
+    centres = [tuple(float(x) for x in nom.split("_")) for nom in noms]
+    return pd.DataFrame({
+        "maille": noms,
+        "latitude": [c[0] for c in centres],
+        "longitude": [c[1] for c in centres],
+    })
+
+
+def _lire_maille(arguments):
+    chemin, variables = arguments
+    return lire_power(chemin)[variables].to_numpy(dtype=np.float32).T
+
+
+def construire_magasin(mailles, produit="power", dossier=None, magasin=DOSSIER_MAGASIN, processus=6):
+    """Réunit les séries d'un produit dans un tableau par variable, indexé par maille et par jour.
+
+    Chaque tableau est écrit au format npy dans le magasin et se relit sans être chargé
+    en mémoire. Le fichier des mailles donne l'ordre des lignes et celui des dates
+    l'ordre des colonnes. Seules les variables retenues comme explicatives sont copiées.
+    """
+    choix = PRODUITS[produit]
+    dossier = choix["dossier"] if dossier is None else dossier
+    variables = VARIABLES_RETENUES[produit]
+    dates = pd.date_range(choix["debut"], FIN_POWER, freq="D")
+    magasin.mkdir(parents=True, exist_ok=True)
+    tableaux = {
+        v: np.lib.format.open_memmap(magasin / f"{produit}_{v}.npy", mode="w+", dtype=np.float32,
+                                     shape=(len(mailles), len(dates)))
+        for v in variables
+    }
+    chemins = [(chemin_maille(m, dossier, produit), variables) for m in mailles["maille"]]
+    with Pool(processus) as pool:
+        for rang, valeurs in enumerate(pool.imap(_lire_maille, chemins, chunksize=20)):
+            for position, variable in enumerate(variables):
+                tableaux[variable][rang] = valeurs[position]
+    for tableau in tableaux.values():
+        tableau.flush()
+    mailles[["maille", "latitude", "longitude"]].to_csv(magasin / f"{produit}_mailles.csv", index=False)
+    pd.Series(dates.strftime("%Y-%m-%d"), name="date").to_csv(magasin / f"{produit}_dates.csv", index=False)
+
+
+def ouvrir_magasin(produit="power", magasin=DOSSIER_MAGASIN):
+    """Retourne les mailles, les dates et les tableaux du magasin d'un produit, lus à la demande."""
+    mailles = pd.read_csv(magasin / f"{produit}_mailles.csv")
+    dates = pd.DatetimeIndex(pd.read_csv(magasin / f"{produit}_dates.csv")["date"])
+    tableaux = {v: np.load(magasin / f"{produit}_{v}.npy", mmap_mode="r") for v in VARIABLES_RETENUES[produit]}
+    return mailles, dates, tableaux
 
 
 def geometries_a_couvrir(zones_regional, zones_survey, survey):

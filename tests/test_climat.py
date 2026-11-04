@@ -5,9 +5,21 @@ from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 from shapely.geometry import box
 
-from src.features.climat import centre_maille, grille_mailles, lire_power, nom_maille, poids_mailles
+from src.features.climat import (
+    DEBUT_IMERG,
+    FIN_POWER,
+    centre_maille,
+    construire_magasin,
+    grille_mailles,
+    lire_power,
+    mailles_telechargees,
+    nom_maille,
+    ouvrir_magasin,
+    poids_mailles,
+)
 
 
 class TestMailles(unittest.TestCase):
@@ -45,6 +57,27 @@ class TestLecturePower(unittest.TestCase):
         self.assertEqual([str(d.date()) for d in serie.index], ["1981-01-01", "1984-02-29"])
         self.assertTrue(np.isnan(serie.iloc[0]["ALLSKY_SFC_SW_DWN"]))
         self.assertEqual(serie.iloc[1]["T2M_MAX"], 31.0)
+
+
+class TestMagasin(unittest.TestCase):
+    def test_magasin_par_maille_et_par_jour(self):
+        dates = pd.date_range(DEBUT_IMERG, FIN_POWER, freq="D")
+        with tempfile.TemporaryDirectory() as dossier:
+            dossier = Path(dossier)
+            for rang, maille in enumerate(["+010.0_+001.250", "-005.5_+030.000"]):
+                corps = "\n".join(f"{d.year},{d.dayofyear},{rang * 1000 + i}" for i, d in enumerate(dates))
+                with gzip.open(dossier / f"imerg_{maille}.csv.gz", "wt", encoding="utf-8") as fichier:
+                    fichier.write(f"-END HEADER-\nYEAR,DOY,IMERG_PRECTOT\n{corps}\n")
+            mailles = mailles_telechargees("imerg", dossier)
+            construire_magasin(mailles, "imerg", dossier, magasin=dossier / "magasin", processus=1)
+            lues, jours, tableaux = ouvrir_magasin("imerg", dossier / "magasin")
+
+            self.assertEqual(mailles["latitude"].tolist(), [10.0, -5.5])
+            self.assertEqual(lues["maille"].tolist(), ["+010.0_+001.250", "-005.5_+030.000"])
+            self.assertEqual(len(jours), len(dates))
+            self.assertEqual(tableaux["IMERG_PRECTOT"].shape, (2, len(dates)))
+            self.assertEqual(tableaux["IMERG_PRECTOT"][0, 5], 5.0)
+            self.assertEqual(tableaux["IMERG_PRECTOT"][1, 5], 1005.0)
 
 
 if __name__ == "__main__":
