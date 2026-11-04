@@ -45,6 +45,17 @@ def signaler_dates_invalides(df):
     return resultat
 
 
+def identifier_mesures(df):
+    """Ajoute un identifiant unique de mesure formé de la source et de la position dans le fichier brut.
+
+    La convention est celle d'id_ligne dans survey. Aucune combinaison des colonnes
+    d'origine n'identifie une mesure, et la vague de 2018 n'a pas d'identifiant d'exploitant.
+    """
+    resultat = df.copy()
+    resultat["id_mesure"] = resultat["Source"] + "_" + resultat.index.astype(str)
+    return resultat
+
+
 def preparer_cropcut(brut, bornes):
     """Applique l'ensemble des corrections au fichier cropcut brut."""
     df = normaliser_textes(brut)
@@ -52,6 +63,7 @@ def preparer_cropcut(brut, bornes):
     df = signaler_mesures_incoherentes(df)
     df = signaler_dates_invalides(df)
     df["annee_recolte"] = df["Year"].astype("Int64")
+    df = identifier_mesures(df)
     df["id_grappe"] = "Ethiopia_" + identifiant_grappe(df["GPS_lat"], df["GPS_lon"])
     df["flag_rendement_hors_bornes"] = hors_bornes(df[CIBLE], df["Crop"], bornes)
     return df

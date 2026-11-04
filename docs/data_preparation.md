@@ -36,7 +36,7 @@ Ce rapport décrit les corrections appliquées aux données GROW-Africa à la su
 | `src/data/cropcut.py` | Corrections propres au fichier `cropcut` et extraction du jeu de validation |
 | `src/data/prepare.py` | Orchestration de l'ensemble et export dans `data/processed` |
 
-Chaque fonction travaille sur une copie de son entrée. La suite de 28 tests unitaires de `tests/` consacrés à la préparation vérifie chaque correction sur des cas construits pour l'occasion.
+Chaque fonction travaille sur une copie de son entrée. La suite de 29 tests unitaires de `tests/` consacrés à la préparation vérifie chaque correction sur des cas construits pour l'occasion.
 
 ## 4. Corrections appliquées
 
@@ -89,6 +89,8 @@ Des identifiants de ligne, de ménage et de grappe spatiale sont créés pour pe
 | Poids sec supérieur au poids frais, signalé | 80 |
 | Date de mesure impossible dans le calendrier éthiopien, signalée | 19 |
 | Cible hors des bornes de plausibilité | 2 |
+
+Un identifiant de mesure `id_mesure` est formé de la source et de la position dans le fichier brut, selon la convention d'`id_ligne` dans `survey`. Aucune combinaison des colonnes d'origine n'identifie une mesure, et la vague de 2018 n'a pas d'identifiant d'exploitant. Cet identifiant a été ajouté le 4 novembre 2026, sans modifier les autres jeux.
 
 ## 5. Jeux produits
 

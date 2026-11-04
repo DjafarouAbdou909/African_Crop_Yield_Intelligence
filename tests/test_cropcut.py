@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from src.data.cropcut import (
+    identifier_mesures,
     jeu_validation_cropcut,
     reconstruire_menage,
     signaler_dates_invalides,
@@ -36,6 +37,11 @@ class TestPreparationCropcut(unittest.TestCase):
         df["flag_poids_incoherent"] = [False, True, False]
         df["flag_rendement_hors_bornes"] = [False, False, True]
         self.assertEqual(jeu_validation_cropcut(df).index.tolist(), [0])
+
+    def test_identifiant_de_mesure(self):
+        df = pd.DataFrame({"Source": ["ETH2011", "ETH2018", "ETH2018"]}, index=[0, 7, 8])
+        identifiants = identifier_mesures(df)["id_mesure"]
+        self.assertEqual(identifiants.tolist(), ["ETH2011_0", "ETH2018_7", "ETH2018_8"])
 
 
 if __name__ == "__main__":
