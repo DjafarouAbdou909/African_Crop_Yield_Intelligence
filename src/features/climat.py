@@ -3,7 +3,11 @@
 NASA POWER diffuse sans compte des séries journalières issues de la réanalyse
 MERRA-2 et, pour le rayonnement, du produit CERES. Chaque requête renvoie la série
 complète d'une maille de 0,5 degré de latitude sur 0,625 degré de longitude. Les
-mailles interrogées sont celles qui recoupent une zone de regional ou de survey, ou le
+précipitations proviennent du produit satellitaire IMERG, que NASA POWER diffuse au
+pas journalier en temps universel à partir de juin 2000. Elles ne proviennent pas de
+PRECTOTCORR, dont l'intensité n'est pas homogène dans le temps, avec des cumuls
+journaliers aberrants et un excès de 11 à 20 % par rapport à IMERG de 2020 à 2022.
+IMERG est interrogé au centre de chaque maille. Les mailles interrogées sont celles qui recoupent une zone de regional ou de survey, ou le
 voisinage de 5 km d'une grappe. La valeur d'une zone est la moyenne des mailles
 pondérée par la surface de leur intersection avec la zone.
 
@@ -32,6 +36,9 @@ VALEUR_MANQUANTE_POWER = -999.0
 PAS_LATITUDE = 0.5
 PAS_LONGITUDE = 0.625
 DOSSIER_POWER = DOSSIER_EXTERNE / "power"
+PARAMETRES_IMERG = ["IMERG_PRECTOT"]
+DEBUT_IMERG = "20000601"
+DOSSIER_IMERG = DOSSIER_EXTERNE / "imerg"
 RAYON_GRAPPE_DEGRES = 0.05
 
 
@@ -91,9 +98,9 @@ def poids_mailles(zones, mailles, colonne_zone="zone"):
     return intersection.drop(columns="surface").rename(columns={colonne_zone: "zone"})
 
 
-def chemin_maille(maille, dossier=DOSSIER_POWER):
+def chemin_maille(maille, dossier=DOSSIER_POWER, prefixe="power"):
     """Retourne le chemin du fichier compressé d'une maille."""
-    return dossier / f"power_{maille}.csv.gz"
+    return dossier / f"{prefixe}_{maille}.csv.gz"
 
 
 def lire_power(chemin):
@@ -106,26 +113,36 @@ def lire_power(chemin):
     return donnees.drop(columns=["YEAR", "DOY"]).set_index(date.rename("date"))
 
 
-def telecharger_maille(latitude, longitude, dossier=DOSSIER_POWER, registre=REGISTRE, tentatives=6):
+PRODUITS = {
+    "power": {"parametres": PARAMETRES_POWER, "debut": DEBUT_POWER, "temps": "LST", "dossier": DOSSIER_POWER},
+    "imerg": {"parametres": PARAMETRES_IMERG, "debut": DEBUT_IMERG, "temps": "UTC", "dossier": DOSSIER_IMERG},
+}
+
+
+def telecharger_maille(latitude, longitude, produit="power", dossier=None, registre=REGISTRE, tentatives=6):
     """Télécharge la série d'une maille si elle est absente, la compresse et la consigne.
 
-    Une réponse incomplète ou refusée est retentée avec une attente croissante. Le
-    fichier n'est écrit que si la réponse contient l'en-tête et l'ensemble des jours.
+    Le produit vaut power pour les six variables issues de MERRA-2 et de CERES, ou
+    imerg pour les précipitations. IMERG n'est diffusé qu'en temps universel. Une
+    réponse incomplète ou refusée est retentée avec une attente croissante. Le fichier
+    n'est écrit que si la réponse contient l'en-tête et l'ensemble des jours.
     """
-    chemin = chemin_maille(nom_maille(latitude, longitude), dossier)
+    choix = PRODUITS[produit]
+    dossier = choix["dossier"] if dossier is None else dossier
+    chemin = chemin_maille(nom_maille(latitude, longitude), dossier, produit)
     if chemin.exists():
         return chemin
     parametres = {
-        "parameters": ",".join(PARAMETRES_POWER),
+        "parameters": ",".join(choix["parametres"]),
         "community": "AG",
         "latitude": latitude,
         "longitude": longitude,
-        "start": DEBUT_POWER,
+        "start": choix["debut"],
         "end": FIN_POWER,
         "format": "CSV",
-        "time-standard": "LST",
+        "time-standard": choix["temps"],
     }
-    jours = (pd.Timestamp(FIN_POWER) - pd.Timestamp(DEBUT_POWER)).days + 1
+    jours = (pd.Timestamp(FIN_POWER) - pd.Timestamp(choix["debut"])).days + 1
     for tentative in range(tentatives):
         try:
             reponse = requests.get(URL_POWER, params=parametres, timeout=120)
@@ -145,15 +162,19 @@ def telecharger_maille(latitude, longitude, dossier=DOSSIER_POWER, registre=REGI
     raise RuntimeError(f"Série POWER indisponible pour la maille {nom_maille(latitude, longitude)}")
 
 
-def telecharger_mailles(mailles, dossier=DOSSIER_POWER, registre=REGISTRE, paralleles=3):
+def telecharger_mailles(mailles, produit="power", dossier=None, registre=REGISTRE, paralleles=3):
     """Télécharge les séries manquantes de plusieurs mailles et retourne les mailles en échec."""
+    dossier = PRODUITS[produit]["dossier"] if dossier is None else dossier
     manquantes = [
         (lat, lon) for lat, lon in zip(mailles["latitude"], mailles["longitude"])
-        if not chemin_maille(nom_maille(lat, lon), dossier).exists()
+        if not chemin_maille(nom_maille(lat, lon), dossier, produit).exists()
     ]
     echecs = []
     with ThreadPoolExecutor(max_workers=paralleles) as executeur:
-        taches = {executeur.submit(telecharger_maille, lat, lon, dossier, registre): (lat, lon) for lat, lon in manquantes}
+        taches = {
+            executeur.submit(telecharger_maille, lat, lon, produit, dossier, registre): (lat, lon)
+            for lat, lon in manquantes
+        }
         for rang, tache in enumerate(as_completed(taches), start=1):
             try:
                 tache.result()
@@ -169,16 +190,22 @@ def geometries_a_couvrir(zones_regional, zones_survey, survey):
 
     Le voisinage est un disque de 0,05 degré, qui dépasse 5 km dans toutes les
     directions aux latitudes des grappes de survey, comprises entre 18 degrés sud et
-    21 degrés nord. Il ne sert qu'à choisir les mailles à télécharger.
+    21 degrés nord. Il ne sert qu'à choisir les mailles à télécharger. Les
+    coordonnées nulles, qui codent une position manquante, sont ignorées.
     """
     grappes = survey.dropna(subset=["GPS_lat", "GPS_lon"]).drop_duplicates(["GPS_lat", "GPS_lon"])
+    grappes = grappes[(grappes["GPS_lat"] != 0) | (grappes["GPS_lon"] != 0)]
     voisinages = gpd.GeoSeries(gpd.points_from_xy(grappes["GPS_lon"], grappes["GPS_lat"]), crs="EPSG:4326")
     voisinages = voisinages.buffer(RAYON_GRAPPE_DEGRES)
     return pd.concat([zones_regional.geometry, zones_survey.geometry, voisinages], ignore_index=True)
 
 
 if __name__ == "__main__":
+    import sys
+
     from src.data.load import DOSSIER_TRAITE
+
+    produit = sys.argv[1] if len(sys.argv) > 1 else "power"
 
     geometries = geometries_a_couvrir(
         gpd.read_file(DOSSIER_TRAITE / "zones_regional.gpkg"),
@@ -187,5 +214,5 @@ if __name__ == "__main__":
     )
     mailles = grille_mailles(gpd.GeoSeries(geometries, crs="EPSG:4326"))
     print(f"{len(mailles)} mailles à couvrir", flush=True)
-    echecs = telecharger_mailles(mailles)
+    echecs = telecharger_mailles(mailles, produit)
     print("Mailles en échec :", echecs)
