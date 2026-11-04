@@ -1,7 +1,8 @@
 """Expériences de sélection des modèles, sur le seul développement.
 
 Chaque expérience modifie un élément du modèle complet, la fonction de perte, une
-famille de variables, les lignes d'entraînement ou la complexité des arbres. Les
+famille de variables, les lignes d'entraînement, la complexité des arbres ou la grille
+des nombres d'arbres. Les
 ensembles de test ne sont jamais utilisés.
 
 Trois schémas de validation sont employés.
@@ -52,7 +53,8 @@ ITERATIONS = 2000
 PAS = 100
 ANNEE_COUPURE_INTERNE_REGIONAL = 2012
 SCHEMAS = ["croisee", "temporelle", "spatio_temporelle"]
-VARIANTES_TEMPORELLES = ["complet", "sans_climat", "sans_sols_relief", "sans_pays", "sans_annee", "sans_source"]
+VARIANTES_TEMPORELLES = ["complet", "sans_climat", "sans_sols_relief", "sans_pays", "sans_annee", "sans_source",
+                         "complet_fin", "sans_climat_fin"]
 
 
 def _sans(liste, retirees):
@@ -89,6 +91,8 @@ def experiences_survey():
         "sans_annee": dict(categorielles=cat, numeriques=_sans(num, ["annee_recolte"])),
         "feuilles_31": dict(categorielles=cat, numeriques=num, parametres={"num_leaves": 31}),
         "feuilles_min_200": dict(categorielles=cat, numeriques=num, parametres={"min_data_in_leaf": 200}),
+        "complet_fin": dict(categorielles=cat, numeriques=num, iterations=400, pas=20),
+        "sans_climat_fin": dict(categorielles=cat, numeriques=_sans(num, VARIABLES_CLIMAT), iterations=400, pas=20),
     }
 
 
@@ -137,7 +141,8 @@ def _executer(jeu, schema, nom, definition, dossier):
     parametres = {**PARAMETRES, **definition.get("parametres", {})}
     predictions, _ = predictions_hors_echantillon(developpement, cible, definition["categorielles"],
                                                   definition["numeriques"], decoupages(jeu, schema, developpement, masque),
-                                                  parametres, ITERATIONS, PAS)
+                                                  parametres, definition.get("iterations", ITERATIONS),
+                                                  definition.get("pas", PAS))
     predictions.columns = [str(c) for c in predictions.columns]
     predictions.to_csv(dossier / f"{jeu}_{schema}_{nom}.csv.gz", index_label="index")
     return f"{schema} {nom}"
