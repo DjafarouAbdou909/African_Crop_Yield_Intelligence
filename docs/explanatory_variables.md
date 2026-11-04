@@ -5,9 +5,9 @@
 | Projet | African Crop Yield Intelligence |
 | Méthodologie | CRISP-DM, retour en Data Understanding et Data Preparation pour l'acquisition de données externes |
 | Code | `src/features/` et les tests correspondants dans `tests/` |
-| Notebooks de référence | `notebooks/05_explanatory_variables.ipynb`, `06_climate_variables.ipynb` et `07_soil_variables.ipynb` |
+| Notebooks de référence | `notebooks/05_explanatory_variables.ipynb`, `06_climate_variables.ipynb`, `07_soil_variables.ipynb` et `08_terrain_variables.ipynb` |
 | Documents associés | `docs/evaluation_protocol.md` et `docs/data_preparation.md` |
-| Statut | Décisions arrêtées, géographie, climat et sols acquis et contrôlés, variables climatiques de saison et variables de sol construites, relief restant à acquérir |
+| Statut | Premier lot acquis et contrôlé, avec la géographie, les variables climatiques de saison, les sols et le relief |
 
 ## 1. Objet du document
 
@@ -342,7 +342,43 @@ Pour les récoltes postérieures à 2000, la pluie couvre 99,3 % des lignes de `
 - ISRIC ne documente pas le calcul de sa version à 1 km, dont les contrôles montrent qu'elle approche la moyenne des pixels fins sans l'égaler.
 - Les variables de `cropcut` restent à construire pour la validation externe, pour les sols comme pour le climat.
 
-## 13. Reproductibilité
+## 13. Relief
+
+**Constat**
+
+- Copernicus DEM GLO-90 se télécharge sans compte, en tuiles d'un degré accompagnées d'un masque des eaux, et l'empreinte MD5 de chaque fichier est publiée. Les 2 408 tuiles qui recoupent un lieu du projet et leurs masques, soit 4 816 fichiers et 10,86 Go, ont tous l'empreinte publiée.
+- L'altitude moyenne de la mosaïque à 1 km s'écarte de 2 à 32 m de celle de sept villes de contrôle. Sur les 1 682 zones de `regional`, sa corrélation avec l'altitude des mailles de MERRA-2 atteint 0,992, avec un écart absolu médian de 14 m. Les plus grands écarts, jusqu'à 719 m en Érythrée, concernent des hauts plateaux que MERRA-2 abaisse en les lissant.
+- Dans la cuvette congolaise, quasi plane, la pente médiane atteint 1,4 degré, contre 0,5 degré dans la plaine sahélienne du Niger.
+- La pente médiane des zones dépasse 8 degrés au Lesotho, au Rwanda, au Burundi et à Madagascar, et reste inférieure à 0,5 degré au Soudan du Sud et en Namibie. La corrélation de rang entre altitude et pente des zones vaut 0,55.
+
+**Analyse**
+
+- La version à 90 m a été préférée à la version à 30 m mentionnée à la section 4.2. Elle est neuf fois plus légère et suffit à l'échelle des lieux du projet, dont le plus petit est un voisinage de 5 km.
+- Copernicus DEM est un modèle numérique de surface. Sous la forêt dense, la hauteur variable de la canopée crée une pente apparente d'environ un degré.
+- L'altitude et la pente portent des informations distinctes, ce que confirme leur corrélation modérée.
+
+**Décisions**
+
+- La pente est calculée à 90 m par la méthode de Horn, avec un pas est-ouest corrigé de la latitude, après exclusion de la mer, des lacs et des rivières. L'altitude et la pente sont moyennées sur la grille à 1 km des sols, chaque pixel de 90 m étant pondéré par sa surface, puis sur chaque lieu selon les règles des sols.
+- Les tuiles sont supprimées après traitement. Un résumé par tuile est conservé, ce qui permet de reprendre une extraction et de reconstruire la mosaïque sans nouveau téléchargement.
+- L'altitude de Copernicus DEM sert de variable explicative. Celle de MERRA-2 reste utilisée pour le calcul de l'évapotranspiration, qui doit rester cohérent avec les variables météorologiques de la même maille.
+
+**Résultats**
+
+| Variable | Contenu | Médiane des zones de `regional` | Médiane des grappes de `survey` |
+|---|---|---:|---:|
+| `altitude_moyenne` | Altitude moyenne en mètres | 387 | 610 |
+| `pente_moyenne` | Pente moyenne en degrés | 2,3 | 2,0 |
+
+`relief_regional.csv.gz` contient les 1 682 zones, toutes renseignées, avec la clé `GDAM_ID`. `relief_survey.csv.gz` contient les 151 138 lignes, avec la clé `id_ligne`, et 99,28 % d'entre elles sont renseignées, les autres étant les 1 085 lignes sans localisation.
+
+**Limites**
+
+- La pente des zones de forêt dense est surestimée d'un degré environ, ce qui concerne surtout le bassin du Congo et la côte guinéenne.
+- La pente des pixels de 90 m situés au bord d'une tuile est calculée en prolongeant la tuile, ce qui touche 0,3 % des pixels.
+- La pente moyenne ne distingue pas une zone uniformément inclinée d'une zone mêlant plaines et reliefs escarpés.
+
+## 14. Reproductibilité
 
 - Les fichiers externes sont téléchargés dans `data/external`, exclu du dépôt git, et consignés dans `data/external/registre.csv` avec leur adresse, leur date, leur taille et leur empreinte SHA-256.
 - La table de correspondance est vérifiée par l'empreinte MD5 publiée par Zenodo.
@@ -356,3 +392,6 @@ Pour les récoltes postérieures à 2000, la pluie couvre 99,3 % des lignes de `
 - Les couches de SoilGrids s'obtiennent avec la commande `python -m src.features.sols extraire`. Chaque fichier source est téléchargé en entier, comparé à l'empreinte SHA-256 publiée par ISRIC, découpé sur la fenêtre fixe `FENETRE_AFRIQUE` puis supprimé. Les découpages sont écrits dans `data/external/soilgrids` et consignés dans le registre, et les empreintes vérifiées des sources dans `data/external/soilgrids/sources.csv`.
 - La commande `python -m src.features.sols construire` écrit `sols_regional.csv.gz` et `sols_survey.csv.gz` dans `data/processed` en une minute environ.
 - Le notebook `07_soil_variables.ipynb` établit les contrôles des sols et s'exécute en six minutes environ, dont l'essentiel est consacré aux lectures à distance de la version à 250 m.
+- Le relief s'obtient avec la commande `python -m src.features.relief extraire`, qui télécharge chaque tuile de Copernicus DEM et son masque des eaux, les compare à l'empreinte MD5 publiée, écrit un résumé dans `data/interim/relief/tuiles` puis les supprime. Les empreintes vérifiées sont consignées dans `data/external/copernicus/sources.csv`. L'extraction dure quarante minutes environ et reprend après une interruption.
+- La commande `python -m src.features.relief construire` écrit la mosaïque `altitude_1km.tif` et `pente_1km.tif` dans `data/interim/relief`, puis `relief_regional.csv.gz` et `relief_survey.csv.gz` dans `data/processed`, en une minute environ.
+- Le notebook `08_terrain_variables.ipynb` établit les contrôles du relief et s'exécute en moins d'une minute.
