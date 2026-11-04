@@ -42,14 +42,21 @@ def poids_regional(zones_regional, mailles):
     return poids_mailles(zones_regional, geometries_mailles(mailles)).rename(columns={"zone": "lieu"})
 
 
-def poids_survey(survey, zones_survey, mailles):
-    """Retourne les poids des mailles de chaque lieu de survey, grappe ou zone de repli."""
-    cellules = geometries_mailles(mailles)
+def geometries_lieux_survey(survey, zones_survey):
+    """Retourne le contour de chaque lieu de survey, voisinage de grappe ou zone de repli.
+
+    La colonne zone porte le nom du lieu, préfixé par grappe ou par zone.
+    """
     grappes = survey.dropna(subset=["GPS_lat", "GPS_lon", "id_grappe"]).drop_duplicates("id_grappe")
     voisinages = gpd.GeoDataFrame(
         {"zone": "grappe:" + grappes["id_grappe"].to_numpy()},
         geometry=voisinages_grappes(grappes["GPS_lat"], grappes["GPS_lon"]).to_numpy(), crs="EPSG:4326",
     )
     zones = zones_survey[["zone", "geometry"]].assign(zone=lambda x: "zone:" + x["zone"])
-    lieux = pd.concat([voisinages, zones], ignore_index=True)
-    return poids_mailles(gpd.GeoDataFrame(lieux, crs="EPSG:4326"), cellules).rename(columns={"zone": "lieu"})
+    return gpd.GeoDataFrame(pd.concat([voisinages, zones], ignore_index=True), crs="EPSG:4326")
+
+
+def poids_survey(survey, zones_survey, mailles):
+    """Retourne les poids des mailles de chaque lieu de survey, grappe ou zone de repli."""
+    return poids_mailles(geometries_lieux_survey(survey, zones_survey), geometries_mailles(mailles)).rename(
+        columns={"zone": "lieu"})
