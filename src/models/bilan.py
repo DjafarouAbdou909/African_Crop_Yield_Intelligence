@@ -66,3 +66,41 @@ def courbe_paliers(jeu, schema, developpement, cible, nom="complet", dossier=DOS
     """Retourne l'erreur d'une variante pour chaque nombre d'arbres dans un schéma."""
     predictions = lire_experience(jeu, schema, nom, dossier)
     return erreur_par_palier(developpement.loc[predictions.index, cible], predictions)
+
+
+def part_expliquee_climat(developpement, variables, cible="yieldTonHa", serie=("GDAM_ID", "crop", "saison"),
+                          annee="harvest_year", depuis=2001, annees_minimum=10, strates=None):
+    """Mesure la part de la variance annuelle du rendement qu'expliquent les variables climatiques.
+
+    Le logarithme du rendement et chaque variable sont débarrassés, série par série, de
+    leur moyenne et de leur tendance linéaire. La part expliquée est le coefficient de
+    détermination d'une régression linéaire des écarts du rendement sur les écarts des
+    variables et sur leurs carrés. Calculée sur les données ajustées, elle majore la
+    part réellement prévisible. strates associe un nom à un masque des lignes.
+    """
+    donnees = developpement[developpement[annee] >= depuis].dropna(subset=list(variables)).copy()
+    donnees["serie"] = donnees[list(serie)].astype(str).agg("|".join, axis=1)
+    donnees = donnees[donnees["serie"].map(donnees["serie"].value_counts()) >= annees_minimum]
+    colonnes = {"rendement": np.log(donnees[cible])}
+    for variable in variables:
+        colonnes[variable] = np.log1p(donnees[variable]) if variable == "pluie_cumul" else donnees[variable]
+    valeurs = pd.DataFrame(colonnes)
+    temps = donnees[annee] - donnees.groupby("serie")[annee].transform("mean")
+    pente = (valeurs.mul(temps, axis=0).groupby(donnees["serie"]).transform("sum")
+             .div((temps ** 2).groupby(donnees["serie"]).transform("sum").replace(0, np.nan), axis=0).fillna(0))
+    residus = valeurs - valeurs.groupby(donnees["serie"]).transform("mean") - pente.mul(temps, axis=0)
+    explicatives = residus[list(variables)].to_numpy()
+    explicatives = np.column_stack([np.ones(len(residus)), explicatives, explicatives ** 2])
+    expliquee = residus["rendement"].to_numpy()
+    strates = {"ensemble": np.ones(len(donnees), bool)} if strates is None else {
+        nom: np.asarray(masque(donnees)) for nom, masque in strates.items()}
+    lignes = {}
+    for nom, masque in strates.items():
+        if masque.sum() < 200:
+            continue
+        coefficients, *_ = np.linalg.lstsq(explicatives[masque], expliquee[masque], rcond=None)
+        ajuste = explicatives[masque] @ coefficients
+        lignes[nom] = {"lignes": int(masque.sum()), "series": donnees.loc[masque, "serie"].nunique(),
+                       "part_expliquee": 1 - np.var(expliquee[masque] - ajuste) / np.var(expliquee[masque]),
+                       "ecart_type_anomalie": np.std(expliquee[masque])}
+    return pd.DataFrame(lignes).T
