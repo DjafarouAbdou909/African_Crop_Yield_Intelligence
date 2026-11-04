@@ -16,6 +16,7 @@ Exécution depuis la racine du projet avec la commande python -m src.features.cl
 
 import gzip
 import io
+import re
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import Pool
@@ -206,9 +207,19 @@ def mailles_telechargees(produit="power", dossier=None):
     })
 
 
+def altitude_power(chemin):
+    """Retourne l'altitude moyenne de la maille, en mètres, inscrite dans l'en-tête de NASA POWER."""
+    with gzip.open(chemin, "rt", encoding="utf-8") as fichier:
+        for ligne in fichier:
+            trouve = re.search(r"elevation from MERRA-2.*= *(-?[\d.]+) meters", ligne)
+            if trouve or "-END HEADER-" in ligne:
+                return float(trouve.group(1)) if trouve else np.nan
+    return np.nan
+
+
 def _lire_maille(arguments):
     chemin, variables = arguments
-    return lire_power(chemin)[variables].to_numpy(dtype=np.float32).T
+    return altitude_power(chemin), lire_power(chemin)[variables].to_numpy(dtype=np.float32).T
 
 
 def construire_magasin(mailles, produit="power", dossier=None, magasin=DOSSIER_MAGASIN, processus=6):
@@ -217,6 +228,7 @@ def construire_magasin(mailles, produit="power", dossier=None, magasin=DOSSIER_M
     Chaque tableau est écrit au format npy dans le magasin et se relit sans être chargé
     en mémoire. Le fichier des mailles donne l'ordre des lignes et celui des dates
     l'ordre des colonnes. Seules les variables retenues comme explicatives sont copiées.
+    L'altitude de chaque maille, fournie par NASA POWER pour MERRA-2, accompagne les mailles.
     """
     choix = PRODUITS[produit]
     dossier = choix["dossier"] if dossier is None else dossier
@@ -229,13 +241,16 @@ def construire_magasin(mailles, produit="power", dossier=None, magasin=DOSSIER_M
         for v in variables
     }
     chemins = [(chemin_maille(m, dossier, produit), variables) for m in mailles["maille"]]
+    altitudes = np.full(len(mailles), np.nan)
     with Pool(processus) as pool:
-        for rang, valeurs in enumerate(pool.imap(_lire_maille, chemins, chunksize=20)):
+        for rang, (altitude, valeurs) in enumerate(pool.imap(_lire_maille, chemins, chunksize=20)):
+            altitudes[rang] = altitude
             for position, variable in enumerate(variables):
                 tableaux[variable][rang] = valeurs[position]
     for tableau in tableaux.values():
         tableau.flush()
-    mailles[["maille", "latitude", "longitude"]].to_csv(magasin / f"{produit}_mailles.csv", index=False)
+    mailles = mailles[["maille", "latitude", "longitude"]].assign(altitude=altitudes)
+    mailles.to_csv(magasin / f"{produit}_mailles.csv", index=False)
     pd.Series(dates.strftime("%Y-%m-%d"), name="date").to_csv(magasin / f"{produit}_dates.csv", index=False)
 
 
