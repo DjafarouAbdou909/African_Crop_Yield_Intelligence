@@ -48,21 +48,51 @@ Main steps:
 
 ## Model Performance
 
-Mean absolute error on the log yield (`mae_log`) on the test sets, against the hierarchical baseline.
+### Metrics
 
-| Test set | `regional` model | Baseline | `survey` model | Baseline |
-|---|---:|---:|---:|---:|
-| Future years, known places | 0.310 | 0.398 | 0.765 | 0.828 |
-| New places, past years | 0.321 | 0.389 | 0.716 | 0.756 |
-| New places, future years | 0.334 | 0.404 | 0.767 | 0.822 |
-| `cropcut` direct measurements | | | 0.669 | 0.676 |
+Both models predict a continuous yield in tonnes per hectare, so they are evaluated with regression metrics, not accuracy.
 
-Key findings and limitations are detailed in `docs/evaluation.md`:
+| Metric | Role |
+|---|---|
+| `mae_log` | Main metric. Mean absolute error on the natural log of the yield, a relative error comparable across crops |
+| Typical relative error | `exp(mae_log) - 1`, the readable form of the main metric |
+| MAE and RMSE (t/ha) | Errors in physical units, dominated by high-yield crops |
+| Log bias | Systematic over- or under-estimation |
+| R² | Share of the yield variance explained |
+| Country macro average | Same weight for every country |
+| Skill score | Share of the baseline `mae_log` removed by the model |
+| Interval coverage | Share of observed yields inside the prediction interval |
 
+The baseline is a hierarchical geometric mean of past yields (crop and place, then broader levels), with no explanatory variable.
+
+### Results on the test sets
+
+The models were selected on the development set only, frozen in a commit, then evaluated once on the test sets.
+
+| Model | Test set | `mae_log` | Baseline | Skill | Typical relative error | MAE (t/ha) | R² |
+|---|---|---:|---:|---:|---:|---:|---:|
+| `regional` | Future years, known places | 0.310 | 0.398 | 22% | 36% | 0.91 | 0.77 |
+| `regional` | New places, past years | 0.321 | 0.389 | 17% | 38% | 1.15 | 0.06* |
+| `regional` | New places, future years | 0.334 | 0.404 | 17% | 40% | 1.12 | 0.76 |
+| `survey` | Future waves, known places | 0.765 | 0.828 | 8% | 115% | 1.08 | 0.24 |
+| `survey` | New places, past waves | 0.716 | 0.756 | 5% | 105% | 1.05 | 0.22 |
+| `survey` | New places, future waves | 0.767 | 0.822 | 7% | 115% | 1.17 | 0.27 |
+| `survey` | `cropcut` direct measurements, held-out clusters | 0.669 | 0.676 | 1% | 95% | 0.65 | |
+
+\* Six tobacco yields recorded in kilograms instead of tonnes distort this value. Without them, R² is 0.81 and MAE 0.90 t/ha, while `mae_log` only moves from 0.321 to 0.319.
+
+80% prediction intervals (conformal, calibrated by crop on the development set) cover 85% of `regional` test yields, with an upper to lower bound ratio of about 3, and 77 to 82% of `survey` test yields, with a ratio of about 10.
+
+### Key findings and limitations
+
+Details are in `docs/modeling.md` and `docs/evaluation.md`.
+
+- The `regional` model is reliable for analysis. The `survey` model only brings a modest gain, because neighbouring plots differ widely for reasons the available variables do not capture.
 - Season climate explains about 1.7% of the detrended year-to-year variation of sub-national yields, which bounds what any model can gain from it.
+- The grouped spatial cross-validation of the protocol hides the value of climate, since the model learns each country and year shock from neighbouring regions of the same year. Two internal temporal validations were added on the development set.
 - Survey yields are farmer-reported and exceed crop-cut measurements by about 40% for the model predictions.
-- Fifteen tobacco yields of `regional` are unit errors (kilograms recorded as tonnes) that the authors' plausibility filter did not catch.
-- 80% prediction intervals cover 85% of `regional` test yields and 77 to 82% of `survey` test yields.
+- Tree models do not extrapolate the yield trend beyond 2016, the last development year of `regional`.
+- Fifteen tobacco yields of `regional` are unit errors that the authors' plausibility filter did not catch. Their correction in the preparation is pending.
 
 ## Installation and Setup
 
