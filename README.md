@@ -1,5 +1,12 @@
 # African Crop Yield Intelligence
 
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![LightGBM](https://img.shields.io/badge/LightGBM-4.7.0-9ACD32)
+![CRISP-DM](https://img.shields.io/badge/Method-CRISP--DM-informational)
+![MAE log](https://img.shields.io/badge/Regional%20MAE%20log-0.310-success)
+![Skill](https://img.shields.io/badge/Skill%20vs%20baseline-%2B22%25-success)
+![Tests](https://img.shields.io/badge/Tests-100%20passing-brightgreen)
+
 ## Overview and Objectives
 
 **African Crop Yield Intelligence** is a Machine Learning project focused on predicting agricultural crop yields across Africa.
