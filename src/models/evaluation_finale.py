@@ -60,7 +60,9 @@ def evaluer(jeu, dossier=DOSSIER_MODELES):
 
     Retourne une table avec la partition, la cible, la prédiction du modèle et celle de
     la référence. Pour survey, les mesures de cropcut sont ajoutées, la partition
-    distinguant les grappes tenues à l'écart.
+    distinguant les grappes tenues à l'écart. L'index reprend celui de la table
+    d'origine, que la colonne origine désigne, car les index de survey et de cropcut
+    se recouvrent.
     """
     cible, niveaux = JEUX[jeu][0], JEUX[jeu][1]
     table = charger_table(jeu)
@@ -70,6 +72,7 @@ def evaluer(jeu, dossier=DOSSIER_MODELES):
     tests["prediction"] = predire(modele, description, tests)
     tests["reference"] = reference_hierarchique(developpement, tests, cible, niveaux)[0]
     tests["reel"] = tests[cible]
+    tests["origine"] = jeu
     morceaux = [tests]
     if jeu == "survey":
         cropcut = table_cropcut(table)
@@ -77,6 +80,7 @@ def evaluer(jeu, dossier=DOSSIER_MODELES):
         cropcut["reference"] = reference_hierarchique(developpement, cropcut, cible, NIVEAUX_SURVEY)[0]
         cropcut["reel"] = cropcut[CIBLE_CROPCUT]
         cropcut["partition"] = np.where(cropcut["grappe_tenue_a_l_ecart"], VALIDATION_EXTERNE, "cropcut_grappes_vues")
+        cropcut["origine"] = "cropcut"
         morceaux.append(cropcut)
     resultat = pd.concat(morceaux, ignore_index=False)
     resultat.to_csv(dossier / f"{jeu}_evaluation.csv.gz", index_label="index")
