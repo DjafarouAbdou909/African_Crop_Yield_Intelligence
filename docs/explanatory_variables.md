@@ -144,7 +144,7 @@ Les décisions suivantes ont été arrêtées le 3 novembre 2026 sur délégatio
 1. Le scénario principal est l'estimation en fin de saison.
 2. La modélisation de `regional` est restreinte aux années de récolte postérieures ou égales à 1981.
 3. Le premier lot est celui de la section 5.1, et la végétation est reportée au second lot. Les sols proviennent de SoilGrids 2.0 dans sa version agrégée à 1 km, plutôt que d'iSDAsoil à 30 m. Cette version se lit à distance par fenêtres, sans téléchargement complet, et son serveur publie les empreintes de ses fichiers.
-4. L'extraction est réalisée localement, aucun compte Google Earth Engine n'étant configuré sur le poste. Les bibliothèques geopandas, pyogrio, shapely, pyproj, rasterio et requests ont été ajoutées à `requiremnts.txt` avec leur version exacte.
+4. L'extraction est réalisée localement, aucun compte Google Earth Engine n'étant configuré sur le poste. Les bibliothèques geopandas, pyogrio, shapely, pyproj, rasterio et requests ont été ajoutées à `requirements.txt` avec leur version exacte.
 
 ## 8. Géographie
 

@@ -105,7 +105,7 @@ Details are in `docs/modeling.md` and `docs/evaluation.md`.
 
 ```bash
 python3.12 -m venv venv
-venv/bin/pip install -r requiremnts.txt
+venv/bin/pip install -r requirements.txt
 ```
 
 The GROW-Africa files are expected in `data/raw/`. External data are downloaded to `data/external/` and recorded in `data/external/registre.csv` with their SHA-256 checksum. The `data/` directory is not versioned.
