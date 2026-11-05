@@ -4,8 +4,8 @@
 |---|---|
 | Projet | African Crop Yield Intelligence |
 | Méthodologie | CRISP-DM, phase 5 Evaluation |
-| Code | `src/models/evaluation_finale.py` |
-| Notebook de référence | `notebooks/11_evaluation.ipynb` |
+| Code | `src/models/evaluation_finale.py`, `incertitude.py` et `interpretation.py` |
+| Notebooks de référence | `notebooks/11_evaluation.ipynb` et `notebooks/12_uncertainty_interpretation.ipynb` |
 | Documents associés | `docs/modeling.md` et `docs/evaluation_protocol.md` |
 | Statut | Modèles évalués une seule fois sur les ensembles de test et retenus |
 
@@ -75,14 +75,43 @@ Signaler dans la préparation les rendements supérieurs à 100 fois la médiane
 
 Dans le modèle final de `regional`, les variables climatiques portent 20,5 % du gain des divisions, les sols 15,0 % et le relief 3,4 %. Dans celui de `survey`, les sols en portent 16,5 % et le relief 6,5 %. Le gain mesure l'usage d'une variable par les arbres et non sa contribution à la qualité des prédictions, que mesurent les ablations de `docs/modeling.md`.
 
-## 7. Limites
+## 7. Incertitude des prédictions
+
+**Constat**
+
+- Les intervalles de prédiction suivent la prédiction conforme par culture, calibrée sur les erreurs hors échantillon des trois validations internes du développement.
+- Dans `regional`, les intervalles à 80 % et à 90 % couvrent 84,5 à 85,2 % et 92,8 à 92,9 % des rendements de test. Le rapport médian entre leurs bornes haute et basse vaut 3,0 et 4,9.
+- Dans `survey`, ils couvrent 76,9 à 81,5 % et 88,1 à 90,8 %, avec un rapport médian de 9,8 et 18,4. La couverture tombe à 69,5 % et 81,4 % au Nigeria. Sur les grappes de `cropcut` tenues à l'écart, elle vaut 80,9 % et 90,9 %.
+
+**Analyse**
+
+Les intervalles de `regional` sont légèrement prudents. Ceux de `survey` couvrent un peu moins que prévu sur les vagues futures et dans quelques pays, et leur largeur traduit la variation des rendements de parcelle que les variables disponibles n'expliquent pas.
+
+## 8. Facteurs des prédictions
+
+**Constat**
+
+- Selon les contributions de Shapley, la culture porte 55,4 % de la contribution absolue moyenne dans `regional`, le pays 13,5 %, le climat 9,6 %, les sols 7,6 % et l'année 5,4 %. Dans `survey`, la culture en porte 38,3 %, l'année 18,7 %, le pays 18,5 % et les sols 10,7 %.
+- Pour le maïs de `regional`, la contribution de la pluie de saison croît de -0,043 sous 450 mm à environ 0,025 au-delà de 950 mm. Celle de la température maximale moyenne décroît de 0,031 vers 26 °C à -0,032 au-delà de 33,5 °C.
+- La contribution de l'année croît de -0,082 vers 1990 à 0,105 en 2017, puis reste stable.
+
+**Analyse**
+
+- Les effets de la pluie et de la chaleur ont le sens attendu, mais restent modestes devant la variation des rendements.
+- Les arbres de décision n'extrapolent pas au-delà des années d'entraînement. Le modèle reproduit le niveau de 2016 pour les années suivantes, sans prolonger la tendance.
+- Les contributions décrivent le fonctionnement du modèle et non des effets causaux.
+
+## 9. Limites
 
 - Le climat n'explique qu'une faible part de la variation annuelle des rendements, ce qui limite l'anticipation d'une année exceptionnelle.
 - Les rendements de `survey` sont des déclarations, plus élevées que les mesures par coupe.
 - Les erreurs d'unité et les rendements suspects de `regional` affectent l'entraînement et l'évaluation.
 - Les ensembles de test temporels de `regional` ne couvrent que 22 pays, et celui de `survey` neuf pays.
+- Le modèle ne prolonge pas la tendance des rendements au-delà de 2016.
+- La couverture des intervalles de `survey` reste inférieure au niveau nominal dans quelques pays.
 
-## 8. Reproductibilité
+## 10. Reproductibilité
 
 - La commande `python -m src.models.evaluation_finale` entraîne les modèles retenus, les écrit dans `data/interim/modeles` avec leurs modalités, et écrit les prédictions des ensembles de test, en deux minutes environ.
 - Le notebook `11_evaluation.ipynb` relit ces prédictions et s'exécute en moins d'une minute.
+- Le notebook `12_uncertainty_interpretation.ipynb` calibre les intervalles, mesure leur couverture et calcule les contributions de Shapley sur des échantillons à graine fixe, en cinq minutes environ.
