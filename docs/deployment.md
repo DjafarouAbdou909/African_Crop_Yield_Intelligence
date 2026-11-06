@@ -4,7 +4,7 @@
 |---|---|
 | Projet | African Crop Yield Intelligence |
 | Méthodologie | CRISP-DM, phase 6 Deployment |
-| Code | `src/models/prediction.py` |
+| Code | `src/models/prediction.py` et `app/` |
 | Documents associés | `docs/modeling.md` et `docs/evaluation.md` |
 | Statut | Modèles livrés avec leurs prédictions et leurs intervalles |
 
@@ -61,7 +61,32 @@ Les erreurs sont exprimées en `mae_log`. Une erreur de 0,31 correspond à une e
 - Les intervalles de `survey` couvrent moins que leur niveau nominal dans quelques pays, dont le Nigeria.
 - Le modèle de `regional` n'a appris que sur les 45 pays de GROW-Africa et celui de `survey` sur ses 12 pays. Un pays absent de l'entraînement est prédit sans son effet propre.
 
-## 7. Reproduction et mise à jour
+## 7. Application de démonstration
+
+**Contenu**
+
+L'application Streamlit de `app/app.py` présente le modèle de `regional` en quatre pages.
+
+| Page | Contenu |
+|---|---|
+| Prédiction | Rendement prédit d'une région, d'une culture, d'une saison et d'une année, intervalles à 80 et 90 %, rendement observé, contributions de Shapley et conditions de la saison |
+| Série d'une région | Rendements observés et prédits année par année, avec l'intervalle à 80 % et la distinction entre années d'entraînement et années de test |
+| Performance | Scores de test des deux modèles, couverture des intervalles et limites |
+| À propos | Données, méthode et usage prévu |
+
+**Ressources**
+
+L'application ne relit que `app/ressources`, soit 17,6 Mo produits par `python -m app.preparer`. Ces ressources réunissent le modèle de `regional`, sa description, les demi-largeurs de ses intervalles, la table des variables des 142 247 lignes retenues et les scores de test. Les prédictions de l'application coïncident avec `predictions_regional.csv.gz` à 10 puissance -15 près.
+
+**Lancement local**
+
+La commande `streamlit run app/app.py --server.address localhost` ouvre l'application à l'adresse `http://localhost:8501`, sans l'exposer au réseau local. La collecte de statistiques d'usage de Streamlit est désactivée par `.streamlit/config.toml`.
+
+**Hébergement**
+
+Streamlit Community Cloud peut héberger l'application depuis le dépôt GitHub, avec `app/app.py` comme fichier principal et Python 3.12. Il lit les dépendances minimales de `app/requirements.txt`, sans la chaîne géospatiale. Les ressources doivent alors être versionnées.
+
+## 8. Reproduction et mise à jour
 
 Les commandes suivantes s'exécutent depuis la racine du projet, dans l'ordre.
 
@@ -77,5 +102,6 @@ Les commandes suivantes s'exécutent depuis la racine du projet, dans l'ordre.
 | Expériences | `python -m src.models.experiences regional` puis `survey` | Deux heures environ |
 | Évaluation | `python -m src.models.evaluation_finale` | Deux minutes |
 | Prédictions | `python -m src.models.prediction regional`, `survey` et `cropcut` | Quelques minutes |
+| Application | `python -m app.preparer` puis `streamlit run app/app.py --server.address localhost` | Une minute |
 
 Pour une saison nouvelle, la fin des séries `FIN_POWER` de `src/features/climat.py` est repoussée, les séries sont téléchargées à nouveau, puis les étapes suivantes sont relancées. Un réentraînement intégrant les années récentes doit suivre le protocole d'évaluation, en redéfinissant la période future.

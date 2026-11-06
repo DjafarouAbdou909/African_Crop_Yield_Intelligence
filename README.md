@@ -127,9 +127,21 @@ python -m src.models.prediction regional        # predictions with intervals, al
 python -m unittest discover -s tests -t .       # test suite
 ```
 
+### Demo application
+
+A Streamlit application presents the `regional` model: predicted yield with 80% and 90% intervals, Shapley contributions, yearly series against observations, and test performance.
+
+```bash
+python -m app.preparer                              # export the model and features to app/ressources
+streamlit run app/app.py --server.address localhost # open http://localhost:8501
+```
+
+It only needs `app/requirements.txt` and `app/ressources`, so it can be deployed on Streamlit Community Cloud with `app/app.py` as entry point.
+
 ## Project Structure
 
 ```
+app/             Streamlit demo application and its exported resources
 data/            raw, external, interim and processed data (not versioned)
 docs/            phase reports, data dictionary and model card
 notebooks/       one notebook per CRISP-DM step, 01 to 12
