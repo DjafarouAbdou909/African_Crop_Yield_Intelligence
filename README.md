@@ -5,7 +5,7 @@
 ![CRISP-DM](https://img.shields.io/badge/Method-CRISP--DM-informational)
 ![MAE log](https://img.shields.io/badge/Regional%20MAE%20log-0.310-success)
 ![Skill](https://img.shields.io/badge/Skill%20vs%20baseline-%2B22%25-success)
-![Tests](https://img.shields.io/badge/Tests-101%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-106%20passing-brightgreen)
 
 ## Overview and Objectives
 
@@ -100,6 +100,14 @@ Details are in `docs/modeling.md` and `docs/evaluation.md`.
 - Survey yields are farmer-reported and exceed crop-cut measurements by about 40% for the model predictions.
 - Tree models do not extrapolate the yield trend beyond 2016, the last development year of `regional`.
 - Fifteen tobacco yields of `regional` are unit errors that the authors' plausibility filter did not catch. Their correction in the preparation is pending.
+
+## Research: conformal coverage under distribution shift
+
+A preregistered study (`docs/research_conformal_shift.md`, results in `docs/research_conformal_shift_results.md`, notebook `13_conformal_shift_study`) asks whether conformal prediction intervals keep their nominal coverage per country when the model predicts new regions or future years. The plan, the method choice and the single test evaluation were committed in that order.
+
+- Intervals calibrated on average can be badly overconfident for one country: Sudan is covered 34% of the time at a nominal 80% on the internal benchmark.
+- Country-stratified, hierarchical and difficulty-normalized conformal methods do not fix this under temporal shift. One hypothesis out of four is confirmed, three are refuted.
+- The failure comes from a growing bias of the model on recent years, not from larger dispersion, so widening intervals cannot fix it. Shift detection, or adaptive conformal inference, is the natural next step.
 
 ## Installation and Setup
 
