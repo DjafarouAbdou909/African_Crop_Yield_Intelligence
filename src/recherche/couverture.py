@@ -236,3 +236,22 @@ def evaluation_finale(jeu, dossier=None):
                                "lignes": int(masque.sum()),
                                **metriques_couverture(jeu, evaluation[masque], demi[masque], niveau)})
     return pd.DataFrame(lignes)
+
+
+def ecarts_au_m0(jeu, detail, banc, niveau=0.8):
+    """Retourne l'écart de couverture marginale de chaque méthode à M0, avec son intervalle bootstrap.
+
+    Le bootstrap tire les groupes du protocole, dont les lignes ne sont pas indépendantes.
+    """
+    from src.models.bilan import intervalle_bootstrap
+
+    lignes = []
+    for condition in CONDITIONS:
+        groupes = banc.loc[banc["role"] == condition, "groupe"]
+        reference = detail[(condition, "M0", niveau)]
+        for methode in METHODES[1:]:
+            ecart = detail[(condition, methode, niveau)] - reference
+            bas, haut = intervalle_bootstrap(ecart, groupes)
+            lignes.append({"jeu": jeu, "condition": condition, "methode": methode, "ecart": ecart.mean(),
+                           "ic_bas": bas, "ic_haut": haut})
+    return pd.DataFrame(lignes)
