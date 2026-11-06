@@ -193,3 +193,46 @@ def decider(resultats, niveau=0.8, tolerance=0.01, egalite=0.01):
 # méthode dont la couverture marginale minimale est la plus élevée, et l'échec est rapporté.
 METHODES_RETENUES = {"regional": "M0", "survey": "M4"}
 CRITERE_REMPLI = {"regional": False, "survey": True}
+
+
+def calibration_finale(jeu):
+    """Retourne les erreurs hors échantillon des trois validations internes, avec les variables des lignes."""
+    cible = JEUX[jeu][0]
+    table, (_, _, _, palier) = _table_et_configuration(jeu)
+    developpement = table[table["partition"] == DEVELOPPEMENT]
+    morceaux = []
+    for schema in ["croisee", "temporelle", "spatio_temporelle"]:
+        prediction = lire_experience(jeu, schema, VARIANTES_RETENUES[jeu])[palier]
+        lignes = developpement.loc[prediction.index]
+        morceaux.append(lignes.assign(schema=schema, erreur=np.abs(np.log(prediction) - np.log(lignes[cible]))))
+    return pd.concat(morceaux)
+
+
+def evaluation_finale(jeu, dossier=None):
+    """Évalue une seule fois les cinq méthodes sur les ensembles de test, selon la section 9 du plan.
+
+    Les erreurs de test sont celles des modèles retenus, écrites par
+    src/models/evaluation_finale.py. Pour survey, les grappes de cropcut tenues à l'écart
+    sont ajoutées.
+    """
+    from src.models.evaluation_finale import TESTS, VALIDATION_EXTERNE
+    from src.models.experiences import DOSSIER_MODELES
+
+    dossier = DOSSIER_MODELES if dossier is None else dossier
+    evaluation = pd.read_csv(dossier / f"{jeu}_evaluation.csv.gz", low_memory=False)
+    partitions = TESTS + ([VALIDATION_EXTERNE] if jeu == "survey" else [])
+    evaluation = evaluation[evaluation["partition"].isin(partitions)].reset_index(drop=True)
+    evaluation["erreur"] = np.abs(np.log(evaluation["prediction"]) - np.log(evaluation["reel"]))
+    calibration = calibration_finale(jeu)
+    lignes = []
+    normalisees = _normalisee(jeu, calibration, evaluation, NIVEAUX)
+    for methode in METHODES:
+        for niveau in NIVEAUX:
+            demi = (normalisees[niveau] if methode == "M4"
+                    else demi_largeurs(jeu, methode, calibration, evaluation, niveau))
+            for partition in partitions:
+                masque = (evaluation["partition"] == partition).to_numpy()
+                lignes.append({"jeu": jeu, "partition": partition, "methode": methode, "niveau": niveau,
+                               "lignes": int(masque.sum()),
+                               **metriques_couverture(jeu, evaluation[masque], demi[masque], niveau)})
+    return pd.DataFrame(lignes)
