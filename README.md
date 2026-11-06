@@ -5,7 +5,7 @@
 ![CRISP-DM](https://img.shields.io/badge/Method-CRISP--DM-informational)
 ![MAE log](https://img.shields.io/badge/Regional%20MAE%20log-0.310-success)
 ![Skill](https://img.shields.io/badge/Skill%20vs%20baseline-%2B22%25-success)
-![Tests](https://img.shields.io/badge/Tests-100%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-101%20passing-brightgreen)
 
 ## Overview and Objectives
 
