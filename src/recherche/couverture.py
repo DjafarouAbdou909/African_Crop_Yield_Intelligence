@@ -185,3 +185,11 @@ def decider(resultats, niveau=0.8, tolerance=0.01, egalite=0.01):
     candidats = ecart[admissibles]
     proches = candidats[candidats <= candidats.min() + egalite].index
     return largeur[proches].idxmin(), True
+
+
+# Choix issus de la règle de décision de la section 8 du plan, appliquée au banc d'essai
+# interne et figés avant l'évaluation finale. Pour regional, aucune méthode n'atteint la
+# couverture marginale requise dans les trois conditions. La règle de repli retient la
+# méthode dont la couverture marginale minimale est la plus élevée, et l'échec est rapporté.
+METHODES_RETENUES = {"regional": "M0", "survey": "M4"}
+CRITERE_REMPLI = {"regional": False, "survey": True}
