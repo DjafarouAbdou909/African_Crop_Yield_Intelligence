@@ -13,6 +13,7 @@ import lightgbm as lgb
 import numpy as np
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 RACINE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RACINE))
@@ -234,6 +235,15 @@ def page_a_propos():
 
 
 st.set_page_config(page_title="Rendements agricoles en Afrique", page_icon="🌾", layout="wide")
+# Streamlit déclare ses pages en anglais, ce qui conduit les navigateurs à « traduire » le
+# texte français et à le déformer. La page est donc déclarée en français et exclue de la
+# traduction automatique.
+components.html(
+    "<script>const racine = window.parent.document.documentElement;"
+    "racine.setAttribute('lang', 'fr'); racine.setAttribute('translate', 'no');"
+    "racine.classList.add('notranslate');</script>",
+    height=0,
+)
 st.title("African Crop Yield Intelligence")
 page = st.sidebar.radio("Navigation", ["Prédiction", "Série d'une région", "Performance", "À propos"])
 st.sidebar.caption("Modèle régional LightGBM, entraîné sur GROW-Africa de 1981 à 2016.")
