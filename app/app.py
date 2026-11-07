@@ -91,19 +91,33 @@ def predire(lignes):
     return resultat
 
 
+def rang_initial(options, parametre, defaut=None):
+    """Retourne la position du choix initial, lu dans l'adresse de la page, puis dans la valeur par défaut."""
+    for valeur in [st.query_params.get(parametre), defaut]:
+        if valeur in options:
+            return options.index(valeur)
+    return 0
+
+
 def selection_serie(table, cle):
-    """Affiche les listes de choix du pays, de la région, de la culture et de la saison."""
+    """Affiche les listes de choix du pays, de la région, de la culture et de la saison.
+
+    Les choix initiaux peuvent être donnés dans l'adresse, par les paramètres pays, region,
+    culture et saison, ce qui permet de partager le lien d'une série.
+    """
     colonnes = st.columns(4)
-    pays = colonnes[0].selectbox("Pays", sorted(table["country"].unique()), key=f"{cle}_pays",
-                                 index=sorted(table["country"].unique()).index("Malawi"))
+    liste = sorted(table["country"].unique())
+    pays = colonnes[0].selectbox("Pays", liste, key=f"{cle}_pays", index=rang_initial(liste, "pays", "Malawi"))
     sous = table[table["country"] == pays]
-    region = colonnes[1].selectbox("Région", sorted(sous["region"].unique()), key=f"{cle}_region")
+    liste = sorted(sous["region"].unique())
+    region = colonnes[1].selectbox("Région", liste, key=f"{cle}_region", index=rang_initial(liste, "region"))
     sous = sous[sous["region"] == region]
-    cultures = sorted(sous["crop"].unique())
-    culture = colonnes[2].selectbox("Culture", cultures, key=f"{cle}_culture",
-                                    index=cultures.index("Maize") if "Maize" in cultures else 0)
+    liste = sorted(sous["crop"].unique())
+    culture = colonnes[2].selectbox("Culture", liste, key=f"{cle}_culture",
+                                    index=rang_initial(liste, "culture", "Maize"))
     sous = sous[sous["crop"] == culture]
-    saison = colonnes[3].selectbox("Saison", sorted(sous["saison"].unique()), key=f"{cle}_saison")
+    liste = sorted(sous["saison"].unique())
+    saison = colonnes[3].selectbox("Saison", liste, key=f"{cle}_saison", index=rang_initial(liste, "saison"))
     return sous[sous["saison"] == saison].sort_values("harvest_year")
 
 
@@ -170,7 +184,7 @@ def page_serie(table):
     predite = base.mark_line(color="#1f77b4").encode(y="prediction:Q")
     observee = base.mark_point(filled=True, size=60).encode(
         y="yieldTonHa:Q", color=alt.Color("ensemble:N", title="Ligne observée",
-                                          scale=alt.Scale(range=["#7f7f7f", "#d62728"])),
+                                          scale=alt.Scale(domain=["entraînement", "test"], range=["#7f7f7f", "#d62728"])),
         tooltip=["harvest_year", alt.Tooltip("yieldTonHa:Q", format=".2f", title="observé"),
                  alt.Tooltip("prediction:Q", format=".2f", title="prédit")])
     st.altair_chart((bande + predite + observee).properties(height=420), width="stretch")
@@ -245,7 +259,10 @@ components.html(
     height=0,
 )
 st.title("African Crop Yield Intelligence")
-page = st.sidebar.radio("Navigation", ["Prédiction", "Série d'une région", "Performance", "À propos"])
+PAGES = {"prediction": "Prédiction", "serie": "Série d'une région", "performance": "Performance",
+         "a-propos": "À propos"}
+page = st.sidebar.radio("Navigation", list(PAGES.values()),
+                        index=rang_initial(list(PAGES), "page"))
 st.sidebar.caption("Modèle régional LightGBM, entraîné sur GROW-Africa de 1981 à 2016.")
 if page == "Prédiction":
     page_prediction(charger_variables())

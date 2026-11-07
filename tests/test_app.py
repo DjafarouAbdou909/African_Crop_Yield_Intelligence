@@ -18,6 +18,17 @@ class TestApplication(unittest.TestCase):
             application.sidebar.radio[0].set_value(page).run()
             self.assertFalse(application.exception, page)
 
+    def test_parametres_de_l_adresse(self):
+        from streamlit.testing.v1 import AppTest
+
+        application = AppTest.from_file(str(RACINE / "app" / "app.py"), default_timeout=180)
+        for cle, valeur in {"page": "serie", "pays": "Malawi", "region": "Lilongwe", "culture": "Maize"}.items():
+            application.query_params[cle] = valeur
+        application.run()
+        self.assertFalse(application.exception)
+        self.assertEqual(application.sidebar.radio[0].value, "Série d'une région")
+        self.assertEqual([s.value for s in application.selectbox][:3], ["Malawi", "Lilongwe", "Maize"])
+
 
 if __name__ == "__main__":
     unittest.main()
