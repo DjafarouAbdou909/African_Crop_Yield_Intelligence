@@ -5,7 +5,7 @@
 ![CRISP-DM](https://img.shields.io/badge/Method-CRISP--DM-informational)
 ![MAE log](https://img.shields.io/badge/Regional%20MAE%20log-0.310-success)
 ![Skill](https://img.shields.io/badge/Skill%20vs%20baseline-%2B22%25-success)
-![Tests](https://img.shields.io/badge/Tests-106%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-111%20passing-brightgreen)
 
 ## Overview and Objectives
 
@@ -108,6 +108,14 @@ A preregistered study (`docs/research_conformal_shift.md`, results in `docs/rese
 - Intervals calibrated on average can be badly overconfident for one country: Sudan is covered 34% of the time at a nominal 80% on the internal benchmark.
 - Country-stratified, hierarchical and difficulty-normalized conformal methods do not fix this under temporal shift. One hypothesis out of four is confirmed, three are refuted.
 - The failure comes from a growing bias of the model on recent years, not from larger dispersion, so widening intervals cannot fix it. Shift detection, or adaptive conformal inference, is the natural next step.
+
+## Research: validation by geographic blocks
+
+Following an expert review of the project, a second preregistered study (`docs/research_spatial_blocks.md`, results in `docs/research_spatial_blocks_results.md`, notebook `14_spatial_blocks_study`) holds out whole countries and whole geographic blocks instead of single regions.
+
+- The `regional` error rises from 0.358 to 0.504–0.545, and the gain over the baseline is no longer significant.
+- The model beats the baseline by 11% within 250 km of the training data, but does worse beyond 1,000 km.
+- The spatial scores of the project therefore hold for regions near the training data, not for distant regions or countries absent from the database.
 
 ## Installation and Setup
 
