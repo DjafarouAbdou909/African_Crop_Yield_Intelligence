@@ -127,7 +127,7 @@ Une saison manquante forme une modalité, car elle désigne une culture à saiso
 - Les plis de `regional` comptent de 17 347 à 25 647 lignes, car un groupe correspond à une région entière. Cette inégalité est le prix de l'étanchéité.
 - Le test temporel de `regional` ne couvre que 22 pays et provient de `HarvestStat` pour 10 838 de ses 13 226 lignes.
 - La validation croisée du développement mesure la généralisation spatiale. Aucun pli ne mesure spécifiquement la généralisation temporelle à l'intérieur du développement. Cette limite fausse l'évaluation du climat, et `docs/modeling.md` la lève par deux validations temporelles internes au développement, sans modifier les ensembles de test.
-- Les groupes ne tiennent pas compte de la proximité entre régions voisines. Une région tenue à l'écart peut ressembler à une région voisine présente dans le développement.
+- Les groupes ne tiennent pas compte de la proximité entre régions voisines. Une région tenue à l'écart peut ressembler à une région voisine présente dans le développement. L'étude de `docs/research_spatial_blocks_results.md` mesure cet effet. Lorsque des blocs géographiques ou des pays entiers sont tenus à l'écart, l'erreur de `regional` passe de 0,358 à 0,504 à 0,545, et le gain sur la référence n'est plus significatif.
 
 ## 10. Reproductibilité
 

@@ -107,6 +107,7 @@ Les intervalles de `regional` sont légèrement prudents. Ceux de `survey` couvr
 - Les rendements de `survey` sont des déclarations, plus élevées que les mesures par coupe.
 - Les erreurs d'unité et les rendements suspects de `regional` affectent l'entraînement et l'évaluation.
 - Les ensembles de test temporels de `regional` ne couvrent que 22 pays, et celui de `survey` neuf pays.
+- Le test spatial évalue des régions proches de régions d'entraînement. Selon `docs/research_spatial_blocks_results.md`, le modèle n'apporte plus de gain significatif sur la référence pour une région éloignée de plus de 500 km des données d'entraînement ou pour un pays absent de la base.
 - Le modèle ne prolonge pas la tendance des rendements au-delà de 2016.
 - La couverture des intervalles de `survey` reste inférieure au niveau nominal dans quelques pays.
 

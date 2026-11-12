@@ -60,6 +60,7 @@ Les erreurs sont exprimées en `mae_log`. Une erreur de 0,31 correspond à une e
 - Les rendements de `regional` contiennent quinze erreurs d'unité de tabac et d'autres valeurs suspectes, selon `docs/evaluation.md`.
 - Les intervalles de `survey` couvrent moins que leur niveau nominal dans quelques pays, dont le Nigeria.
 - Le modèle de `regional` n'a appris que sur les 45 pays de GROW-Africa et celui de `survey` sur ses 12 pays. Un pays absent de l'entraînement est prédit sans son effet propre.
+- Le modèle de `regional` ne doit pas être utilisé pour une région éloignée de plus de 500 km des régions de la base ni pour un pays absent de la base. Dans ces cas, il ne fait pas mieux que la moyenne de la culture, selon `docs/research_spatial_blocks_results.md`.
 
 ## 7. Application de démonstration
 
