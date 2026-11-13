@@ -67,7 +67,7 @@ Deux schémas internes au développement complètent la validation croisée, san
 
 **Analyse**
 
-- Dans `regional`, le climat améliore la prédiction des années futures de 0,003, sans que l'écart soit significatif. La source l'améliore autant, significativement en schéma temporel. Les sols et le relief l'améliorent de 0,007 en schéma temporel et la dégradent de 0,006 en schéma spatio-temporel.
+- Dans `regional`, le climat améliore la prédiction des années futures de 0,003, sans que l'écart soit significatif. Cet apport ne résiste pas à une évaluation sur quatre fenêtres successives, où le climat n'aide dans aucune fenêtre et dégrade significativement le modèle dans trois, selon `docs/research_rolling_windows_results.md`. La source améliore le modèle autant que le climat, significativement en schéma temporel. Les sols et le relief l'améliorent de 0,007 en schéma temporel et la dégradent de 0,006 en schéma spatio-temporel.
 - Dans `survey`, le climat dégrade significativement la prédiction des vagues futures. Il ne varie que d'une zone et d'une vague à l'autre, et chaque pays ne compte que deux à sept vagues. Le modèle s'en sert pour reconnaître les vagues plutôt que pour apprendre une réponse au climat.
 
 ## 5. Questions tranchées
@@ -104,6 +104,7 @@ Le nombre d'arbres minimise la moyenne non pondérée des erreurs des trois sch�
 ## 8. Limites
 
 - Le climat explique au plus 1,7 % de la variation annuelle des rendements de `regional`.
+- La conservation du climat dans le modèle de `regional` reposait sur une seule coupure temporelle. L'étude de `docs/research_rolling_windows_results.md` ne confirme pas son apport, et une prochaine itération devrait comparer les deux variantes sur plusieurs fenêtres.
 - La validation temporelle interne de `survey` repose sur sept pays et une vague chacun.
 - Les intervalles de confiance ignorent la corrélation entre groupes voisins et entre années d'un même pays.
 - Les scores de ce document ont servi à la sélection et sont donc légèrement optimistes. Les ensembles de test en donneront une mesure indépendante.
