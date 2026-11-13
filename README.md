@@ -5,7 +5,7 @@
 ![CRISP-DM](https://img.shields.io/badge/Method-CRISP--DM-informational)
 ![MAE log](https://img.shields.io/badge/Regional%20MAE%20log-0.310-success)
 ![Skill](https://img.shields.io/badge/Skill%20vs%20baseline-%2B22%25-success)
-![Tests](https://img.shields.io/badge/Tests-113%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-116%20passing-brightgreen)
 
 ## Overview and Objectives
 
@@ -123,6 +123,13 @@ Following the same review, a third preregistered study (`docs/research_rolling_w
 
 - The model beats the baseline significantly in every window, with a skill of 7.8% to 14.6%.
 - The climate variables never improve the model, and degrade it significantly in three windows. Their small gain measured with a single 2012 cut flips sign when one more year is added to training.
+
+## Research: climate contribution by agroclimatic zone
+
+Following the same review, a fourth preregistered study (`docs/research_climate_zones.md`, results in `docs/research_climate_zones_results.md`, notebook `16_climate_zones_study`) splits the climate contribution by crop and by UNEP aridity class.
+
+- The share of year-to-year yield variation explained by climate rises with aridity, from 0.9% in humid zones to 6.3% in arid zones, and is highest for groundnut and millet.
+- Yet the climate variables do not improve the prediction of future years in any zone or for any crop: the signal exists where agronomy expects it, but the model does not exploit it.
 
 ## Installation and Setup
 
