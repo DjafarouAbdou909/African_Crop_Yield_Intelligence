@@ -5,7 +5,7 @@
 ![CRISP-DM](https://img.shields.io/badge/Method-CRISP--DM-informational)
 ![MAE log](https://img.shields.io/badge/Regional%20MAE%20log-0.310-success)
 ![Skill](https://img.shields.io/badge/Skill%20vs%20baseline-%2B22%25-success)
-![Tests](https://img.shields.io/badge/Tests-111%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-113%20passing-brightgreen)
 
 ## Overview and Objectives
 
@@ -116,6 +116,13 @@ Following an expert review of the project, a second preregistered study (`docs/r
 - The `regional` error rises from 0.358 to 0.504–0.545, and the gain over the baseline is no longer significant.
 - The model beats the baseline by 11% within 250 km of the training data, but does worse beyond 1,000 km.
 - The spatial scores of the project therefore hold for regions near the training data, not for distant regions or countries absent from the database.
+
+## Research: temporal stability over rolling windows
+
+Following the same review, a third preregistered study (`docs/research_rolling_windows.md`, results in `docs/research_rolling_windows_results.md`, notebook `15_rolling_windows_study`) evaluates the `regional` model on four successive windows from 2004 to 2016, each predicted by a model trained only on earlier years.
+
+- The model beats the baseline significantly in every window, with a skill of 7.8% to 14.6%.
+- The climate variables never improve the model, and degrade it significantly in three windows. Their small gain measured with a single 2012 cut flips sign when one more year is added to training.
 
 ## Installation and Setup
 
