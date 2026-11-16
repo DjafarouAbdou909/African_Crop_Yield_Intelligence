@@ -35,7 +35,7 @@ TIRAGES = 2000
 GRAINE = 0
 
 # Choix gelés avant l'évaluation finale, d'après la validation croisée sur la calibration.
-METHODE_RETENUE = {"modele": None, "reference": None}
+METHODE_RETENUE = {"modele": "C2", "reference": "C3"}
 
 
 # Partie A, comparaison des deux mesures.
