@@ -131,6 +131,13 @@ Following the same review, a fourth preregistered study (`docs/research_climate_
 - The share of year-to-year yield variation explained by climate rises with aridity, from 0.9% in humid zones to 6.3% in arid zones, and is highest for groundnut and millet.
 - Yet the climate variables do not improve the prediction of future years in any zone or for any crop: the signal exists where agronomy expects it, but the model does not exploit it.
 
+## Research: reported yields versus crop cut measurements
+
+Following the same review, a fifth preregistered study (`docs/research_cropcut_gap.md`, results in `docs/research_cropcut_gap_results.md`, notebook `17_cropcut_gap_study`) asks why the `survey` model barely beats the baseline on the Ethiopian crop cut measurements, and whether a correction learned on seen clusters helps on unseen ones.
+
+- On the same clusters, crops and years, household-reported yields exceed crop cut measurements by about 30%, and by about 63% on the smallest plots, while the gap is not significant on the largest ones. This reproduces Desiere and Jolliffe (2018): the model's bias comes from its target, reported yield.
+- A per-crop correction, chosen by cross-validation and frozen before the single final evaluation, lowers the error on held-out clusters from 0.669 to 0.625 and the log bias from 0.333 to 0.083. It does not give the model a significant edge over an equally corrected baseline, and it is only validated in Ethiopia. The retained model is unchanged.
+
 ## Installation and Setup
 
 ```bash
