@@ -210,7 +210,8 @@ def calibration(dossier=DOSSIER_RECHERCHE):
     """Calcule la partie A et les prédictions hors pli, puis choisit les corrections sans lire la mesure finale."""
     dossier.mkdir(parents=True, exist_ok=True)
     table, cropcut = donnees_etude()
-    vues = cropcut[~cropcut["grappe_tenue_a_l_ecart"]].copy()
+    # Une mesure sans coordonnées n'a ni grappe ni groupe, donc ni pli. Elle est écartée.
+    vues = cropcut[~cropcut["grappe_tenue_a_l_ecart"] & cropcut["groupe"].notna()].copy()
     survey = table[(table["partition"] == DEVELOPPEMENT) & (table["Country"] == "Ethiopia")]
     cellules = cellules_appariees(survey, vues)
     cellules.to_csv(dossier / "cropcut_cellules.csv.gz", index=False)
