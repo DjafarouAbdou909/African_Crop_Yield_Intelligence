@@ -47,7 +47,8 @@ UNITES = {
 }
 PARTITIONS = {
     "developpement": "Entraînement. Le modèle a vu cette ligne, et la prédiction n'est pas une mesure de performance.",
-    "test_temporel": "Test temporel. Année future d'une région connue, jamais vue à l'entraînement.",
+    "test_temporel": "Test temporel. Année postérieure à l'entraînement, d'une région connue, estimée avec le climat "
+                     "observé de sa saison.",
     "test_spatial": "Test spatial. Région jamais vue à l'entraînement.",
     "test_spatio_temporel": "Test spatio-temporel. Région et année jamais vues à l'entraînement.",
 }
@@ -125,6 +126,8 @@ def page_prediction(table):
     st.header("Prédire un rendement régional")
     st.write("Choisissez une région, une culture, une saison et une année de récolte. Le modèle prédit le rendement "
              "à partir de la culture, du lieu, de l'année, du climat de la saison, du sol et du relief.")
+    st.caption("Estimation en fin de saison. Le modèle utilise le climat observé jusqu'à la récolte, et ne prévoit pas "
+               "le rendement d'une saison en cours.")
     serie = selection_serie(table, "prediction")
     annee = st.select_slider("Année de récolte", options=serie["harvest_year"].tolist(),
                              value=serie["harvest_year"].iloc[-1])
