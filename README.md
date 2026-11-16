@@ -13,6 +13,8 @@
 
 The project aims to investigate the ability of machine learning models to generalize to regions and time periods not observed during training. It also focuses on model explainability and the quantification of prediction uncertainty.
 
+**Scope: end-of-season estimation, not forecasting.** The `regional` model uses the climate of the whole season, up to harvest, so it estimates a yield once the season is over. The `survey` model uses no climate and gives the usual reported yield of a place, with no information on the current season. Neither model is an early-warning forecast. In this README, "future years" means harvest years after the training period, estimated with their observed season climate. `docs/estimation_et_prevision.md` details the difference and what a forecast would require.
+
 ## Data and Pipeline
 
 ### Data Source
