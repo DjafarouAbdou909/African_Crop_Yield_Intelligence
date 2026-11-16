@@ -54,6 +54,10 @@ Sur les 2 297 mesures de `cropcut` des grappes tenues à l'écart, le modèle de
 
 Le modèle apprend le rendement déclaré par les enquêtes, qui dépasse la mesure par coupe d'environ 40 % pour ses prédictions. Il ne remplace pas une mesure directe, et son biais ne sera pas corrigé sans validation spécifique.
 
+**Étude complémentaire**
+
+L'étude préenregistrée de `docs/research_cropcut_gap_results.md` a fourni cette validation. Sur les mêmes grappes, cultures et années, le rendement déclaré dépasse la mesure par coupe d'environ 30 %, et d'environ 63 % sur les petites parcelles. Une correction par culture, apprise sur les grappes vues, ramène l'erreur des grappes tenues à l'écart de 0,669 à 0,625 et le biais de 0,333 à 0,083, sans donner au modèle d'avance significative sur une référence corrigée. Les prédictions de `survey` restent des rendements déclarés, et la correction n'est validée qu'en Éthiopie. Le modèle retenu n'est pas modifié.
+
 ## 5. Rendements aberrants
 
 **Constat**
