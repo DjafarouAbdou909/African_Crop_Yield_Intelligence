@@ -31,7 +31,7 @@ Les fichiers de `data` sont exclus du dépôt git et se reproduisent par les com
 | `regional` | Rendement d'une culture et d'une saison dans une région de niveau 1 ou 2, en fin de saison | Estimer un rendement régional manquant ou récent, comparer des régions, explorer l'effet du climat de la saison |
 | `survey` | Rendement déclaré d'une parcelle d'enquête, en fin de saison | Situer une parcelle par rapport aux parcelles comparables, étudier les facteurs de lieu |
 
-Conformément à `01_business_understanding.ipynb`, ces modèles servent l'analyse et la recherche. Ils ne constituent pas un outil de décision opérationnelle. Le modèle de `survey` prédit un rendement déclaré, supérieur d'environ 40 % aux mesures par coupe, et ne remplace pas une mesure directe.
+Conformément à `01_business_understanding.ipynb`, ces modèles servent l'analyse et la recherche. Ils ne constituent pas un outil de décision opérationnelle. Ce sont des modèles d'estimation en fin de saison, et non des modèles de prévision ou d'alerte précoce, selon `docs/estimation_et_prevision.md`. Le modèle de `survey` prédit un rendement déclaré, supérieur d'environ 40 % aux mesures par coupe, et ne remplace pas une mesure directe.
 
 ## 4. Entrées
 
