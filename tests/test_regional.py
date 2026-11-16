@@ -12,6 +12,7 @@ from src.data.regional import (
     reconstruire_niveau,
     remplacer_codes_speciaux,
     selectionner_ligne_par_cellule,
+    signaler_erreurs_unite,
     signaler_unites_hors_gadm,
 )
 
@@ -123,14 +124,31 @@ class TestSelectionLigneParCellule(unittest.TestCase):
         self.assertEqual(resultat["flag_unite_hors_gadm"].tolist(), [False, True])
         self.assertEqual(resultat["flag_doublon_cellule"].tolist(), [False, False])
 
-    def test_jeu_modelisation_filtre_niveau_unites_doublons_et_bornes(self):
-        df = pd.DataFrame([ligne(level=0), ligne(), ligne(), ligne(yieldTonHa=np.nan), ligne(GDAM_ID=np.nan)])
+    def test_jeu_modelisation_filtre_niveau_unites_doublons_bornes_et_unites(self):
+        df = pd.DataFrame([ligne(level=0), ligne(), ligne(), ligne(yieldTonHa=np.nan), ligne(GDAM_ID=np.nan),
+                           ligne()])
         df["level"] = df["level"].astype("Int64")
         df = signaler_unites_hors_gadm(df)
-        df["flag_doublon_cellule"] = [False, False, True, False, False]
+        df["flag_doublon_cellule"] = [False, False, True, False, False, False]
         df["flag_rendement_hors_bornes"] = False
+        df["flag_erreur_unite_probable"] = [False, False, False, False, False, True]
 
         self.assertEqual(jeu_modelisation_regional(df).index.tolist(), [1])
+
+
+class TestErreursUnite(unittest.TestCase):
+    def test_signale_au_dela_de_cent_fois_la_mediane_de_la_culture(self):
+        df = pd.DataFrame([
+            ligne(crop="Tobacco", yieldTonHa=1.0), ligne(crop="Tobacco", yieldTonHa=1.0),
+            ligne(crop="Tobacco", yieldTonHa=1.0), ligne(crop="Tobacco", yieldTonHa=0.0), ligne(crop="Tobacco", yieldTonHa=np.nan),
+            ligne(crop="Tobacco", yieldTonHa=900.0), ligne(crop="Tobacco", yieldTonHa=90.0),
+            ligne(crop="Maize", yieldTonHa=90.0), ligne(crop="Maize", yieldTonHa=1.0),
+        ])
+        resultat = signaler_erreurs_unite(df)
+
+        self.assertEqual(resultat["flag_erreur_unite_probable"].tolist(),
+                         [False, False, False, False, False, True, False, False, False])
+        self.assertEqual(resultat.loc[5, "yieldTonHa"], 900.0)
 
 
 if __name__ == "__main__":

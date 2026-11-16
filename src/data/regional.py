@@ -26,6 +26,7 @@ SYSTEMES_GLOBAUX = {"All (PS)"}
 SOURCE_PRIORITAIRE = "HarvestStat"
 SAISONS_EQUIVALENTES = {"Meher": "Main"}
 NIVEAUX_MODELISATION = [1, 2]
+SEUIL_ERREUR_UNITE = 100
 
 
 def remplacer_codes_speciaux(df):
@@ -139,6 +140,22 @@ def signaler_unites_hors_gadm(df):
     return resultat
 
 
+def signaler_erreurs_unite(df, seuil=SEUIL_ERREUR_UNITE):
+    """Signale les rendements supérieurs à seuil fois la médiane de leur culture.
+
+    Un tel rendement résulte très probablement d'une erreur d'unité, comme une
+    production exprimée en kilogrammes au lieu de tonnes. Le filtre des auteurs ne
+    l'écarte pas lorsque plus de 2 % des valeurs de la culture sont corrompues, car
+    le 98e percentile est alors lui-même corrompu. La médiane ne porte que sur les
+    rendements strictement positifs. Les lignes signalées ne sont pas corrigées.
+    """
+    resultat = df.copy()
+    positifs = resultat["yieldTonHa"].where(resultat["yieldTonHa"] > 0)
+    medianes = positifs.groupby(resultat["crop"]).transform("median")
+    resultat["flag_erreur_unite_probable"] = resultat["yieldTonHa"] > seuil * medianes
+    return resultat
+
+
 def selectionner_ligne_par_cellule(df):
     """Retient une seule ligne par zone, culture, saison harmonisée et année de récolte.
 
@@ -192,6 +209,7 @@ def preparer_regional(brut):
 
     bornes = bornes_filtre_auteurs(df["yieldTonHa"], df["crop"])
     df["flag_rendement_hors_bornes"] = hors_bornes(df["yieldTonHa"], df["crop"], bornes)
+    df = signaler_erreurs_unite(df)
     df = selectionner_ligne_par_cellule(df)
     return df, bornes
 
@@ -200,7 +218,8 @@ def jeu_modelisation_regional(df):
     """Extrait les lignes utilisables comme cible, aux niveaux administratifs 1 et 2.
 
     Sont exclues les lignes sans rendement, les unités hors GADM, les doublons de
-    cellule et les rendements hors des bornes de plausibilité de leur culture.
+    cellule, les rendements hors des bornes de plausibilité de leur culture et les
+    erreurs d'unité probables.
     """
     retenues = (
         df["level"].isin(NIVEAUX_MODELISATION)
@@ -208,5 +227,6 @@ def jeu_modelisation_regional(df):
         & ~df["flag_unite_hors_gadm"]
         & ~df["flag_doublon_cellule"]
         & ~df["flag_rendement_hors_bornes"]
+        & ~df["flag_erreur_unite_probable"]
     )
     return df[retenues].copy()
